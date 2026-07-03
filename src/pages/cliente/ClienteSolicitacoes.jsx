@@ -43,15 +43,15 @@ export default function ClienteSolicitacoes() {
     } catch { toast({ title: "Erro", variant: "destructive" }); } finally { setSaving(false); }
   };
 
-  const statusColor = { Novo: "bg-blue-100 text-blue-700", "Em Análise": "bg-amber-100 text-amber-700", "Em Andamento": "bg-purple-100 text-purple-700", Concluído: "bg-emerald-100 text-emerald-700", Cancelado: "bg-red-100 text-red-700" };
+  const statusColor = { Novo: "bg-blue-100 text-blue-700", "Em Análise": "bg-amber-100 text-amber-700", "Em Andamento": "bg-purple-100 text-purple-700", Concluído: "bg-blue-100 text-blue-700", Cancelado: "bg-red-100 text-red-700" };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-heading font-bold text-2xl text-slate-900">Minhas Solicitações</h1>
-        {client && <Button onClick={() => setDialogOpen(true)} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="w-4 h-4 mr-1" /> Nova</Button>}
+        {client && <Button onClick={() => setDialogOpen(true)} className="bg-blue-700 hover:bg-blue-800"><Plus className="w-4 h-4 mr-1" /> Nova</Button>}
       </div>
 
       {requests.length === 0 ? (
@@ -87,7 +87,7 @@ export default function ClienteSolicitacoes() {
             </div>
             <div className="flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saving} className="bg-emerald-700 hover:bg-emerald-800">{saving ? "Enviando..." : "Enviar"}</Button>
+              <Button type="submit" disabled={saving} className="bg-blue-700 hover:bg-blue-800">{saving ? "Enviando..." : "Enviar"}</Button>
             </div>
           </form>
         </DialogContent>

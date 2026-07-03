@@ -19,7 +19,7 @@ export default function Beneficios() {
       <section className="py-24 bg-gradient-to-br from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl">
-            <p className="text-emerald-600 font-semibold text-sm uppercase tracking-wider mb-3">Benefícios</p>
+            <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-3">Benefícios</p>
             <h1 className="font-heading font-bold text-4xl sm:text-5xl text-slate-900 mb-4 leading-tight">
               Por que escolher a Proced Contabilidade?
             </h1>
@@ -41,10 +41,10 @@ export default function Beneficios() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-slate-50 rounded-2xl p-7 border border-slate-100 hover:border-emerald-100 transition-colors"
+                className="bg-slate-50 rounded-2xl p-7 border border-slate-100 hover:border-blue-100 transition-colors"
               >
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-4">
-                  <b.icon className="w-6 h-6 text-emerald-600" />
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
+                  <b.icon className="w-6 h-6 text-blue-600" />
                 </div>
                 <h3 className="font-heading font-semibold text-lg text-slate-900 mb-2">{b.title}</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">{b.desc}</p>
@@ -55,22 +55,22 @@ export default function Beneficios() {
       </section>
 
       {/* MEI Section */}
-      <section className="py-20 bg-gradient-to-br from-emerald-700 to-emerald-900 text-white">
+      <section className="py-20 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
               <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-6">
-                <FileCheck className="w-8 h-8 text-emerald-200" />
+                <FileCheck className="w-8 h-8 text-blue-200" />
               </div>
-              <p className="text-emerald-300 font-semibold text-sm uppercase tracking-wider mb-3">MEI</p>
+              <p className="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-3">MEI</p>
               <h2 className="font-heading font-bold text-3xl sm:text-4xl mb-4">
                 Mantenha seu MEI regularizado
               </h2>
-              <p className="text-emerald-100 text-lg mb-8">
+              <p className="text-blue-100 text-lg mb-8">
                 Evite juros e multas e mantenha sua empresa sempre em dia com o governo.
               </p>
               <Link to="/falar-conosco">
-                <Button size="lg" className="bg-white text-emerald-800 hover:bg-emerald-50 px-8 h-13 text-base font-semibold">
+                <Button size="lg" className="bg-white text-blue-800 hover:bg-blue-50 px-8 h-13 text-base font-semibold">
                   Regularizar meu MEI
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

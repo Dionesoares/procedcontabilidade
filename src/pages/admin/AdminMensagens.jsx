@@ -49,7 +49,7 @@ export default function AdminMensagens() {
     } catch {} finally { setSending(false); }
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>
@@ -66,7 +66,7 @@ export default function AdminMensagens() {
           <Input value={newMsg.subject} onChange={e => setNewMsg({...newMsg, subject: e.target.value})} placeholder="Assunto" />
         </div>
         <Textarea value={newMsg.content} onChange={e => setNewMsg({...newMsg, content: e.target.value})} rows={2} placeholder="Mensagem..." />
-        <Button type="submit" disabled={sending} size="sm" className="bg-emerald-700 hover:bg-emerald-800"><Send className="w-3 h-3 mr-1" /> Enviar</Button>
+        <Button type="submit" disabled={sending} size="sm" className="bg-blue-700 hover:bg-blue-800"><Send className="w-3 h-3 mr-1" /> Enviar</Button>
       </form>
 
       {messages.length === 0 ? (
@@ -74,10 +74,10 @@ export default function AdminMensagens() {
       ) : (
         <div className="space-y-3">
           {messages.map(m => (
-            <div key={m.id} className={`bg-white rounded-xl border p-4 ${m.sender_type === "client" && !m.is_read ? "border-emerald-200 bg-emerald-50/30" : "border-slate-200"}`}>
+            <div key={m.id} className={`bg-white rounded-xl border p-4 ${m.sender_type === "client" && !m.is_read ? "border-blue-200 bg-blue-50/30" : "border-slate-200"}`}>
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${m.sender_type === "admin" ? "bg-blue-100 text-blue-700" : "bg-emerald-100 text-emerald-700"}`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${m.sender_type === "admin" ? "bg-blue-100 text-blue-700" : "bg-blue-100 text-blue-700"}`}>
                     {m.sender_type === "admin" ? "Admin" : "Cliente"}
                   </span>
                   <span className="text-sm text-slate-700 ml-2 font-medium">{m.sender_name || clientName(m.client_id)}</span>
@@ -91,11 +91,11 @@ export default function AdminMensagens() {
                   {replyTo?.id === m.id ? (
                     <div className="flex gap-2">
                       <Input value={replyContent} onChange={e => setReplyContent(e.target.value)} placeholder="Responder..." className="flex-1" />
-                      <Button size="sm" onClick={sendReply} disabled={sending} className="bg-emerald-700 hover:bg-emerald-800">Enviar</Button>
+                      <Button size="sm" onClick={sendReply} disabled={sending} className="bg-blue-700 hover:bg-blue-800">Enviar</Button>
                       <Button size="sm" variant="outline" onClick={() => setReplyTo(null)}>Cancelar</Button>
                     </div>
                   ) : (
-                    <button onClick={() => { setReplyTo(m); setReplyContent(""); }} className="text-xs text-emerald-600 hover:underline">Responder</button>
+                    <button onClick={() => { setReplyTo(m); setReplyContent(""); }} className="text-xs text-blue-600 hover:underline">Responder</button>
                   )}
                 </div>
               )}

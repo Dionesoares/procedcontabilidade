@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { FileText, Inbox, MessageSquare, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
+import GovLinks from "@/components/dashboard/GovLinks";
 
 export default function ClienteDashboard() {
   const [stats, setStats] = useState({ docs: 0, requests: 0, messages: 0, unread: 0 });
@@ -30,12 +31,12 @@ export default function ClienteDashboard() {
 
   const cards = [
     { icon: FileText, label: "Documentos", value: stats.docs, color: "bg-purple-50 text-purple-600" },
-    { icon: Inbox, label: "Solicitações", value: stats.requests, color: "bg-emerald-50 text-emerald-600" },
+    { icon: Inbox, label: "Solicitações", value: stats.requests, color: "bg-blue-50 text-blue-600" },
     { icon: MessageSquare, label: "Mensagens", value: stats.messages, color: "bg-blue-50 text-blue-600" },
     { icon: TrendingUp, label: "Não Lidas", value: stats.unread, color: "bg-amber-50 text-amber-600" },
   ];
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>
@@ -45,6 +46,7 @@ export default function ClienteDashboard() {
       ) : (
         <p className="text-slate-500 mb-6">Seu perfil de cliente ainda não foi vinculado. Contate a administração.</p>
       )}
+      <GovLinks />
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {cards.map((c, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-white rounded-xl border border-slate-200 p-5">

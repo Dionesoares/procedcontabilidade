@@ -50,15 +50,15 @@ export default function AdminTarefas() {
   };
 
   const priorityColor = { Baixa: "bg-slate-100 text-slate-600", Média: "bg-blue-100 text-blue-700", Alta: "bg-amber-100 text-amber-700", Urgente: "bg-red-100 text-red-700" };
-  const statusColor = { Pendente: "bg-amber-100 text-amber-700", "Em Andamento": "bg-blue-100 text-blue-700", Concluída: "bg-emerald-100 text-emerald-700" };
+  const statusColor = { Pendente: "bg-amber-100 text-amber-700", "Em Andamento": "bg-blue-100 text-blue-700", Concluída: "bg-blue-100 text-blue-700" };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-heading font-bold text-2xl text-slate-900">Tarefas</h1>
-        <Button onClick={openNew} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="w-4 h-4 mr-1" /> Nova</Button>
+        <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800"><Plus className="w-4 h-4 mr-1" /> Nova</Button>
       </div>
 
       {tasks.length === 0 ? (
@@ -86,7 +86,7 @@ export default function AdminTarefas() {
                   <td className="px-4 py-3"><span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColor[t.status] || ""}`}>{t.status}</span></td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => openEdit(t)} className="p-1.5 text-slate-400 hover:text-emerald-600"><Edit className="w-4 h-4" /></button>
+                      <button onClick={() => openEdit(t)} className="p-1.5 text-slate-400 hover:text-blue-600"><Edit className="w-4 h-4" /></button>
                       <button onClick={() => handleDelete(t.id)} className="p-1.5 text-slate-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
@@ -138,7 +138,7 @@ export default function AdminTarefas() {
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Descrição</label><Textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={3} /></div>
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saving} className="bg-emerald-700 hover:bg-emerald-800">{saving ? "Salvando..." : "Salvar"}</Button>
+              <Button type="submit" disabled={saving} className="bg-blue-700 hover:bg-blue-800">{saving ? "Salvando..." : "Salvar"}</Button>
             </div>
           </form>
         </DialogContent>

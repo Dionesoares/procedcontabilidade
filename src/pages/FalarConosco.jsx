@@ -42,8 +42,8 @@ export default function FalarConosco() {
       <section className="py-24 bg-gradient-to-br from-slate-50 to-white min-h-[80vh]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-5">
-              <MessageSquare className="w-8 h-8 text-emerald-600" />
+            <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-5">
+              <MessageSquare className="w-8 h-8 text-blue-600" />
             </div>
             <h1 className="font-heading font-bold text-4xl text-slate-900 mb-3">Falar com Especialista</h1>
             <p className="text-slate-500 text-lg">Preencha o formulário e entraremos em contato rapidamente.</p>
@@ -85,7 +85,7 @@ export default function FalarConosco() {
               <label className="text-sm font-medium text-slate-700 mb-1.5 block">Mensagem</label>
               <Textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={4} placeholder="Conte-nos sobre sua necessidade..." />
             </div>
-            <Button type="submit" disabled={loading} className="w-full bg-emerald-700 hover:bg-emerald-800 h-12 text-base">
+            <Button type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 h-12 text-base">
               {loading ? "Enviando..." : "Enviar Solicitação"}
               <Send className="w-4 h-4 ml-2" />
             </Button>

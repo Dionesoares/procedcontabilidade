@@ -54,9 +54,9 @@ export default function AdminClientes() {
     c.cpf_cnpj?.includes(search)
   );
 
-  const statusColor = { Ativo: "bg-emerald-100 text-emerald-700", Inativo: "bg-slate-100 text-slate-600", Pendente: "bg-amber-100 text-amber-700" };
+  const statusColor = { Ativo: "bg-blue-100 text-blue-700", Inativo: "bg-slate-100 text-slate-600", Pendente: "bg-amber-100 text-amber-700" };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>
@@ -67,7 +67,7 @@ export default function AdminClientes() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
           </div>
-          <Button onClick={openNew} className="bg-emerald-700 hover:bg-emerald-800 shrink-0">
+          <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800 shrink-0">
             <Plus className="w-4 h-4 mr-1" /> Novo
           </Button>
         </div>
@@ -101,7 +101,7 @@ export default function AdminClientes() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(c)} className="p-1.5 text-slate-400 hover:text-emerald-600 rounded"><Edit className="w-4 h-4" /></button>
+                        <button onClick={() => openEdit(c)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Edit className="w-4 h-4" /></button>
                         <button onClick={() => handleDelete(c.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
@@ -146,7 +146,7 @@ export default function AdminClientes() {
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Observações</label><Textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} rows={2} /></div>
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saving} className="bg-emerald-700 hover:bg-emerald-800">{saving ? "Salvando..." : "Salvar"}</Button>
+              <Button type="submit" disabled={saving} className="bg-blue-700 hover:bg-blue-800">{saving ? "Salvando..." : "Salvar"}</Button>
             </div>
           </form>
         </DialogContent>

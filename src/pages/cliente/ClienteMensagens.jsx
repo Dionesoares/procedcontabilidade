@@ -37,7 +37,7 @@ export default function ClienteMensagens() {
     } catch {} finally { setSending(false); }
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>
@@ -48,7 +48,7 @@ export default function ClienteMensagens() {
           <h3 className="font-semibold text-slate-700 text-sm">Enviar Mensagem</h3>
           <Input value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} placeholder="Assunto" />
           <Textarea value={form.content} onChange={e => setForm({...form, content: e.target.value})} rows={3} placeholder="Sua mensagem..." />
-          <Button type="submit" disabled={sending} size="sm" className="bg-emerald-700 hover:bg-emerald-800"><Send className="w-3 h-3 mr-1" /> Enviar</Button>
+          <Button type="submit" disabled={sending} size="sm" className="bg-blue-700 hover:bg-blue-800"><Send className="w-3 h-3 mr-1" /> Enviar</Button>
         </form>
       ) : (
         <p className="text-slate-400 mb-6">Perfil não vinculado. Contate a administração.</p>
@@ -59,9 +59,9 @@ export default function ClienteMensagens() {
       ) : (
         <div className="space-y-3">
           {messages.map(m => (
-            <div key={m.id} className={`rounded-xl border p-4 ${m.sender_type === "admin" ? "bg-emerald-50/50 border-emerald-100" : "bg-white border-slate-200"}`}>
+            <div key={m.id} className={`rounded-xl border p-4 ${m.sender_type === "admin" ? "bg-blue-50/50 border-blue-100" : "bg-white border-slate-200"}`}>
               <div className="flex items-center gap-2 mb-2">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${m.sender_type === "admin" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"}`}>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${m.sender_type === "admin" ? "bg-blue-100 text-blue-700" : "bg-blue-100 text-blue-700"}`}>
                   {m.sender_type === "admin" ? "Proced" : "Você"}
                 </span>
               </div>

@@ -18,9 +18,9 @@ export default function AdminSolicitacoes() {
     try { await base44.entities.ServiceRequest.update(id, { status }); toast({ title: "Status atualizado!" }); load(); } catch {}
   };
 
-  const statusColor = { Novo: "bg-blue-100 text-blue-700", "Em Análise": "bg-amber-100 text-amber-700", "Em Andamento": "bg-purple-100 text-purple-700", Concluído: "bg-emerald-100 text-emerald-700", Cancelado: "bg-red-100 text-red-700" };
+  const statusColor = { Novo: "bg-blue-100 text-blue-700", "Em Análise": "bg-amber-100 text-amber-700", "Em Andamento": "bg-purple-100 text-purple-700", Concluído: "bg-blue-100 text-blue-700", Cancelado: "bg-red-100 text-red-700" };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>

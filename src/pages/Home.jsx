@@ -1,8 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Building2, Shield, TrendingUp, Users, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Building2, Shield, TrendingUp, Users, CheckCircle2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const WHATSAPP_LINK = "https://wa.me/5563992544417";
 
 const stats = [
   { value: "500+", label: "Empresas Atendidas" },
@@ -23,9 +25,9 @@ export default function Home() {
     <div>
       {/* Hero */}
       <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-emerald-50/30 to-white" />
-        <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-emerald-100/40 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-200/20 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/30 to-white" />
+        <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-200/20 rounded-full blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="max-w-3xl">
@@ -34,7 +36,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-8">
                 <CheckCircle2 className="w-4 h-4" />
                 Contabilidade Digital & Estratégica
               </div>
@@ -53,7 +55,7 @@ export default function Home() {
                 }}>
                   inteligentes
                 </span>{" "}
-                <span className="text-emerald-600" style={{
+                <span className="text-blue-600" style={{
                   textShadow: "2px 2px 0px rgba(16, 185, 129, 0.2), 4px 4px 0px rgba(16, 185, 129, 0.1)"
                 }}>
                   para sua empresa
@@ -71,12 +73,12 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/falar-conosco">
-                  <Button size="lg" className="bg-emerald-700 hover:bg-emerald-800 text-white px-8 h-13 text-base shadow-lg shadow-emerald-200">
+                <a href={WHATSAPP_LINK} target="_blank" rel="noopener">
+                  <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white px-8 h-13 text-base shadow-lg shadow-blue-200">
+                    <MessageCircle className="w-4 h-4 mr-2" />
                     Falar com especialista
-                    <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
-                </Link>
+                </a>
                 <Link to="/servicos">
                   <Button size="lg" variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 h-13 text-base">
                     Abrir minha empresa
@@ -101,7 +103,7 @@ export default function Home() {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <div className="text-3xl sm:text-4xl font-heading font-black text-emerald-700">{s.value}</div>
+                <div className="text-3xl sm:text-4xl font-heading font-black text-blue-700">{s.value}</div>
                 <div className="text-sm text-slate-500 mt-1">{s.label}</div>
               </motion.div>
             ))}
@@ -129,10 +131,10 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group bg-white rounded-2xl p-6 border border-slate-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-50 transition-all duration-300"
+                className="group bg-white rounded-2xl p-6 border border-slate-100 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-4 group-hover:bg-emerald-100 transition-colors">
-                  <f.icon className="w-6 h-6 text-emerald-600" />
+                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4 group-hover:bg-blue-100 transition-colors">
+                  <f.icon className="w-6 h-6 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-1">{f.title}</h3>
                 <p className="text-sm text-slate-500">{f.desc}</p>
@@ -142,7 +144,7 @@ export default function Home() {
 
           <div className="text-center mt-12">
             <Link to="/servicos">
-              <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+              <Button variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
                 Ver todos os serviços
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -152,20 +154,20 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-gradient-to-br from-emerald-700 to-emerald-900 text-white">
+      <section className="py-24 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-heading font-bold text-3xl sm:text-4xl mb-4">
             Pronto para simplificar sua contabilidade?
           </h2>
-          <p className="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
             Fale com um de nossos especialistas e descubra como podemos ajudar sua empresa a crescer.
           </p>
-          <Link to="/falar-conosco">
-            <Button size="lg" className="bg-white text-emerald-800 hover:bg-emerald-50 px-8 h-13 text-base font-semibold">
+          <a href={WHATSAPP_LINK} target="_blank" rel="noopener">
+            <Button size="lg" className="bg-white text-blue-800 hover:bg-blue-50 px-8 h-13 text-base font-semibold">
+              <MessageCircle className="w-4 h-4 mr-2" />
               Falar com especialista
-              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
-          </Link>
+          </a>
         </div>
       </section>
     </div>

@@ -38,7 +38,7 @@ export default function Contato() {
       <section className="py-24 bg-gradient-to-br from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mb-14">
-            <p className="text-emerald-600 font-semibold text-sm uppercase tracking-wider mb-3">Contato</p>
+            <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-3">Contato</p>
             <h1 className="font-heading font-bold text-4xl sm:text-5xl text-slate-900 mb-4">Entre em Contato</h1>
             <p className="text-lg text-slate-500">Estamos prontos para ajudar sua empresa.</p>
           </motion.div>
@@ -54,8 +54,8 @@ export default function Contato() {
                   transition={{ delay: i * 0.1 }}
                   className="flex items-start gap-4"
                 >
-                  <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-                    <item.icon className="w-5 h-5 text-emerald-600" />
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                    <item.icon className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
                     <p className="text-sm text-slate-400">{item.label}</p>
@@ -91,7 +91,7 @@ export default function Contato() {
                   <label className="text-sm font-medium text-slate-700 mb-1.5 block">Mensagem</label>
                   <Textarea value={form.message} onChange={e => setForm({...form, message: e.target.value})} required rows={4} placeholder="Como podemos ajudar?" />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full bg-emerald-700 hover:bg-emerald-800 h-11">
+                <Button type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 h-11">
                   {loading ? "Enviando..." : "Enviar Mensagem"}
                   <Send className="w-4 h-4 ml-2" />
                 </Button>

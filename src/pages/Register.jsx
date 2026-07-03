@@ -43,15 +43,15 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-emerald-50/20 to-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/20 to-white px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
               <Calculator className="w-5 h-5 text-white" />
             </div>
             <span className="font-heading font-bold text-xl text-slate-900">
-              Proced<span className="text-emerald-600">Contabilidade</span>
+              Proced<span className="text-blue-600">Contabilidade</span>
             </span>
           </Link>
           <h1 className="font-heading font-bold text-2xl text-slate-900 mb-1">
@@ -79,7 +79,7 @@ export default function Register() {
                 <label className="text-sm font-medium text-slate-700 mb-1.5 block">Confirmar Senha</label>
                 <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required placeholder="••••••••" />
               </div>
-              <Button type="submit" disabled={loading} className="w-full bg-emerald-700 hover:bg-emerald-800 h-11">
+              <Button type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 h-11">
                 {loading ? "Criando..." : "Criar Conta"}
               </Button>
             </form>
@@ -89,15 +89,15 @@ export default function Register() {
                 <label className="text-sm font-medium text-slate-700 mb-1.5 block">Código de Verificação</label>
                 <Input value={otpCode} onChange={e => setOtpCode(e.target.value)} required placeholder="000000" className="text-center text-lg tracking-widest" />
               </div>
-              <Button type="submit" disabled={loading} className="w-full bg-emerald-700 hover:bg-emerald-800 h-11">
+              <Button type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 h-11">
                 {loading ? "Verificando..." : "Verificar"}
               </Button>
-              <button type="button" onClick={handleResend} className="w-full text-sm text-emerald-600 hover:underline">Reenviar código</button>
+              <button type="button" onClick={handleResend} className="w-full text-sm text-blue-600 hover:underline">Reenviar código</button>
             </form>
           )}
 
           <div className="text-center mt-5">
-            <Link to="/login" className="text-sm text-emerald-600 hover:underline">Já tenho uma conta</Link>
+            <Link to="/login" className="text-sm text-blue-600 hover:underline">Já tenho uma conta</Link>
           </div>
         </div>
 

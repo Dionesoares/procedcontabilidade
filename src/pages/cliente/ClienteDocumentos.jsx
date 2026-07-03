@@ -19,11 +19,12 @@ export default function ClienteDocumentos() {
     load();
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>
       <h1 className="font-heading font-bold text-2xl text-slate-900 mb-6">Meus Documentos</h1>
+      <p className="text-sm text-slate-500 mb-4">Baixe aqui os documentos em PDF enviados pelo seu contador.</p>
       {docs.length === 0 ? (
         <div className="text-center py-16 text-slate-400">Nenhum documento disponível.</div>
       ) : (
@@ -35,9 +36,9 @@ export default function ClienteDocumentos() {
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">{d.title}</h3>
               <p className="text-xs text-slate-500 mb-2">{d.category || "Sem categoria"}</p>
-              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${d.status === "Aprovado" ? "bg-emerald-100 text-emerald-700" : d.status === "Enviado" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{d.status}</span>
+              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${d.status === "Aprovado" ? "bg-blue-100 text-blue-700" : d.status === "Enviado" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{d.status}</span>
               {d.file_url && (
-                <a href={d.file_url} target="_blank" rel="noopener" className="flex items-center gap-1 mt-3 text-xs text-emerald-600 hover:underline">
+                <a href={d.file_url} target="_blank" rel="noopener" className="flex items-center gap-1 mt-3 text-xs text-blue-600 hover:underline">
                   <Download className="w-3 h-3" /> Baixar
                 </a>
               )}

@@ -19,7 +19,7 @@ const adminLinks = [
 
 const clientLinks = [
   { label: "Meu Painel", path: "/cliente", icon: LayoutDashboard },
-  { label: "Documentos", path: "/cliente/documentos", icon: FileText },
+  { label: "Meus Documentos", path: "/cliente/documentos", icon: FileText },
   { label: "Solicitações", path: "/cliente/solicitacoes", icon: Inbox },
   { label: "Mensagens", path: "/cliente/mensagens", icon: MessageSquare },
 ];
@@ -44,11 +44,11 @@ export default function DashboardLayout({ user, isAdmin }) {
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
         <div className="p-5 border-b border-slate-100 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
               <Calculator className="w-4 h-4 text-white" />
             </div>
             <span className="font-heading font-bold text-sm text-slate-900">
-              Proced<span className="text-emerald-600">Contabilidade</span>
+              Proced<span className="text-blue-600">Contabilidade</span>
             </span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 text-slate-400">
@@ -72,11 +72,11 @@ export default function DashboardLayout({ user, isAdmin }) {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   active
-                    ? "bg-emerald-50 text-emerald-700"
+                    ? "bg-blue-50 text-blue-700"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
-                <link.icon className={`w-4 h-4 ${active ? "text-emerald-600" : "text-slate-400"}`} />
+                <link.icon className={`w-4 h-4 ${active ? "text-blue-600" : "text-slate-400"}`} />
                 {link.label}
               </Link>
             );

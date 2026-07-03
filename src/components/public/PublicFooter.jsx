@@ -1,6 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Calculator, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+
+const LOGO_URL = "https://media.base44.com/images/public/6a47fd721adb1f32b231e32a/ea78984bf_gbTp9.jpg";
+const WHATSAPP_LINK = "https://wa.me/5563992544417";
 
 export default function PublicFooter() {
   return (
@@ -9,11 +12,9 @@ export default function PublicFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
-                <Calculator className="w-4 h-4 text-white" />
-              </div>
+              <img src={LOGO_URL} alt="Proced Contabilidade" className="w-9 h-9 object-contain" />
               <span className="font-heading font-bold text-white">
-                Proced<span className="text-emerald-400">Contabilidade</span>
+                Proced<span className="text-blue-400">Contabilidade</span>
               </span>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
@@ -30,7 +31,7 @@ export default function PublicFooter() {
                 { label: "Serviços", path: "/servicos" },
                 { label: "Benefícios", path: "/beneficios" },
               ].map((l) => (
-                <Link key={l.path} to={l.path} className="block text-sm text-slate-400 hover:text-emerald-400 transition-colors">
+                <Link key={l.path} to={l.path} className="block text-sm text-slate-400 hover:text-blue-400 transition-colors">
                   {l.label}
                 </Link>
               ))}
@@ -51,15 +52,15 @@ export default function PublicFooter() {
             <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Contato</h4>
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <Mail className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>contato@procedcontabilidade.com</span>
+                <Mail className="w-4 h-4 text-blue-500 shrink-0" />
+                <span>procedcontab@gmail.com</span>
               </div>
+              <a href={WHATSAPP_LINK} target="_blank" rel="noopener" className="flex items-center gap-2 text-sm text-slate-400 hover:text-blue-400">
+                <MessageCircle className="w-4 h-4 text-blue-500 shrink-0" />
+                <span>(63) 99254-4417 - WhatsApp</span>
+              </a>
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <Phone className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>(11) 99999-9999</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-slate-400">
-                <MapPin className="w-4 h-4 text-emerald-500 shrink-0" />
+                <MapPin className="w-4 h-4 text-blue-500 shrink-0" />
                 <span>São Paulo, SP</span>
               </div>
             </div>

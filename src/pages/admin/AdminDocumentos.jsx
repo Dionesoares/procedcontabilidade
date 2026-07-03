@@ -55,13 +55,13 @@ export default function AdminDocumentos() {
     try { await base44.entities.Document.delete(id); load(); } catch {}
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-heading font-bold text-2xl text-slate-900">Documentos</h1>
-        <Button onClick={openNew} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="w-4 h-4 mr-1" /> Novo</Button>
+        <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800"><Plus className="w-4 h-4 mr-1" /> Novo</Button>
       </div>
 
       {docs.length === 0 ? (
@@ -75,14 +75,14 @@ export default function AdminDocumentos() {
                   <FileText className="w-5 h-5 text-purple-600" />
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => openEdit(d)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="w-4 h-4" /></button>
+                  <button onClick={() => openEdit(d)} className="p-1 text-slate-400 hover:text-blue-600"><Edit className="w-4 h-4" /></button>
                   <button onClick={() => handleDelete(d.id)} className="p-1 text-slate-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">{d.title}</h3>
               <p className="text-xs text-slate-500 mb-2">{clientName(d.client_id)} • {d.category || "Sem categoria"}</p>
-              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${d.status === "Aprovado" ? "bg-emerald-100 text-emerald-700" : d.status === "Enviado" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{d.status}</span>
-              {d.file_url && <a href={d.file_url} target="_blank" rel="noopener" className="block mt-3 text-xs text-emerald-600 hover:underline">Baixar arquivo →</a>}
+              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${d.status === "Aprovado" ? "bg-blue-100 text-blue-700" : d.status === "Enviado" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>{d.status}</span>
+              {d.file_url && <a href={d.file_url} target="_blank" rel="noopener" className="block mt-3 text-xs text-blue-600 hover:underline">Baixar arquivo →</a>}
             </div>
           ))}
         </div>
@@ -118,12 +118,12 @@ export default function AdminDocumentos() {
             </div>
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Descrição</label><Textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={2} /></div>
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Arquivo</label>
-              <Input type="file" onChange={e => setFile(e.target.files[0])} />
+              <label className="text-sm font-medium text-slate-700 mb-1 block">Arquivo (PDF)</label>
+              <Input type="file" accept=".pdf,application/pdf" onChange={e => setFile(e.target.files[0])} />
             </div>
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saving} className="bg-emerald-700 hover:bg-emerald-800">{saving ? "Salvando..." : "Salvar"}</Button>
+              <Button type="submit" disabled={saving} className="bg-blue-700 hover:bg-blue-800">{saving ? "Salvando..." : "Salvar"}</Button>
             </div>
           </form>
         </DialogContent>

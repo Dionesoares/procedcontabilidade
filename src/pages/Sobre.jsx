@@ -22,7 +22,7 @@ export default function Sobre() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <p className="text-emerald-600 font-semibold text-sm uppercase tracking-wider mb-3">Sobre nós</p>
+              <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-3">Sobre nós</p>
               <h1 className="font-heading font-bold text-4xl sm:text-5xl text-slate-900 mb-6 leading-tight">
                 Sobre a Proced Contabilidade
               </h1>
@@ -47,8 +47,8 @@ export default function Sobre() {
                 transition={{ delay: i * 0.15 }}
                 className="bg-slate-50 rounded-2xl p-8 border border-slate-100"
               >
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-5">
-                  <v.icon className="w-6 h-6 text-emerald-600" />
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-5">
+                  <v.icon className="w-6 h-6 text-blue-600" />
                 </div>
                 <h3 className="font-heading font-bold text-xl text-slate-900 mb-3">{v.title}</h3>
                 <p className="text-slate-500 leading-relaxed">{v.desc}</p>
@@ -59,7 +59,7 @@ export default function Sobre() {
       </section>
 
       {/* Differentials */}
-      <section className="py-20 bg-emerald-50/50">
+      <section className="py-20 bg-blue-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <h2 className="font-heading font-bold text-3xl text-slate-900 mb-3">Nossos Diferenciais</h2>
@@ -75,8 +75,8 @@ export default function Sobre() {
                 transition={{ delay: i * 0.15 }}
                 className="text-center"
               >
-                <div className="w-16 h-16 rounded-2xl bg-white border border-emerald-100 flex items-center justify-center mx-auto mb-5 shadow-sm">
-                  <d.icon className="w-7 h-7 text-emerald-600" />
+                <div className="w-16 h-16 rounded-2xl bg-white border border-blue-100 flex items-center justify-center mx-auto mb-5 shadow-sm">
+                  <d.icon className="w-7 h-7 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">{d.title}</h3>
                 <p className="text-sm text-slate-500">{d.desc}</p>

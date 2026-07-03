@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Calculator } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const LOGO_URL = "https://media.base44.com/images/public/6a47fd721adb1f32b231e32a/ea78984bf_gbTp9.jpg";
 
 const navLinks = [
   { label: "Início", path: "/" },
@@ -20,11 +22,9 @@ export default function PublicNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center">
-              <Calculator className="w-5 h-5 text-white" />
-            </div>
+            <img src={LOGO_URL} alt="Proced Contabilidade" className="w-10 h-10 object-contain" />
             <span className="font-heading font-bold text-lg text-slate-900 tracking-tight">
-              Proced<span className="text-emerald-600">Contabilidade</span>
+              Proced<span className="text-blue-600">Contabilidade</span>
             </span>
           </Link>
 
@@ -33,7 +33,7 @@ export default function PublicNavbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className="px-3 py-2 text-sm font-medium text-slate-600 hover:text-emerald-700 transition-colors rounded-lg hover:bg-emerald-50"
+                className="px-3 py-2 text-sm font-medium text-slate-600 hover:text-blue-700 transition-colors rounded-lg hover:bg-blue-50"
               >
                 {link.label}
               </Link>
@@ -42,8 +42,13 @@ export default function PublicNavbar() {
 
           <div className="hidden lg:flex items-center gap-3">
             <Link to="/login">
-              <Button variant="outline" size="sm" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+              <Button variant="outline" size="sm" className="border-blue-200 text-blue-700 hover:bg-blue-50">
                 Área do Cliente
+              </Button>
+            </Link>
+            <Link to="/login">
+              <Button size="sm" className="bg-blue-700 hover:bg-blue-800">
+                Contador
               </Button>
             </Link>
           </div>
@@ -65,15 +70,20 @@ export default function PublicNavbar() {
                 key={link.path}
                 to={link.path}
                 onClick={() => setOpen(false)}
-                className="block px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                className="block px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
               >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-3 border-t border-slate-100">
+            <div className="pt-3 border-t border-slate-100 space-y-2">
               <Link to="/login" onClick={() => setOpen(false)}>
-                <Button className="w-full bg-emerald-700 hover:bg-emerald-800" size="sm">
+                <Button variant="outline" className="w-full border-blue-200 text-blue-700" size="sm">
                   Área do Cliente
+                </Button>
+              </Link>
+              <Link to="/login" onClick={() => setOpen(false)}>
+                <Button className="w-full bg-blue-700 hover:bg-blue-800" size="sm">
+                  Contador
                 </Button>
               </Link>
             </div>
