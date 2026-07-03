@@ -1,0 +1,42 @@
+{
+  "name": "ContactSubmission",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nome"
+    },
+    "email": {
+      "type": "string",
+      "title": "Email"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Telefone"
+    },
+    "message": {
+      "type": "string",
+      "title": "Mensagem"
+    },
+    "service_interest": {
+      "type": "string",
+      "title": "Servi\u00e7o de Interesse"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Novo",
+        "Em An\u00e1lise",
+        "Respondido",
+        "Arquivado"
+      ],
+      "default": "Novo",
+      "title": "Status"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "message"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "title": "T\u00edtulo"
+    },
+    "description": {
+      "type": "string",
+      "title": "Descri\u00e7\u00e3o"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Data de Vencimento"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "M\u00e9dia",
+        "Alta",
+        "Urgente"
+      ],
+      "default": "M\u00e9dia",
+      "title": "Prioridade"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Em Andamento",
+        "Conclu\u00edda"
+      ],
+      "default": "Pendente",
+      "title": "Status"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Fiscal",
+        "Cont\u00e1bil",
+        "Trabalhista",
+        "Societ\u00e1rio",
+        "MEI",
+        "Outros"
+      ],
+      "title": "Categoria"
+    }
+  },
+  "required": [
+    "title",
+    "client_id"
+  ]
+}

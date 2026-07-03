@@ -1,0 +1,40 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "subject": {
+      "type": "string",
+      "title": "Assunto"
+    },
+    "content": {
+      "type": "string",
+      "title": "Mensagem"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    },
+    "sender_type": {
+      "type": "string",
+      "enum": [
+        "client",
+        "admin"
+      ],
+      "title": "Tipo de Remetente"
+    },
+    "sender_name": {
+      "type": "string",
+      "title": "Nome do Remetente"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "title": "Lida"
+    }
+  },
+  "required": [
+    "content",
+    "client_id",
+    "sender_type"
+  ]
+}

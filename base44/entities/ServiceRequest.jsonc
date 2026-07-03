@@ -1,0 +1,55 @@
+{
+  "name": "ServiceRequest",
+  "type": "object",
+  "properties": {
+    "service_type": {
+      "type": "string",
+      "enum": [
+        "Abertura de Empresa",
+        "Contabilidade Completa",
+        "Regulariza\u00e7\u00e3o de MEI",
+        "Planejamento Tribut\u00e1rio",
+        "Departamento Pessoal",
+        "Consultoria Cont\u00e1bil",
+        "Outro"
+      ],
+      "title": "Tipo de Servi\u00e7o"
+    },
+    "description": {
+      "type": "string",
+      "title": "Descri\u00e7\u00e3o"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Novo",
+        "Em An\u00e1lise",
+        "Em Andamento",
+        "Conclu\u00eddo",
+        "Cancelado"
+      ],
+      "default": "Novo",
+      "title": "Status"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nome do Cliente"
+    },
+    "client_email": {
+      "type": "string",
+      "title": "Email do Cliente"
+    },
+    "client_phone": {
+      "type": "string",
+      "title": "Telefone"
+    }
+  },
+  "required": [
+    "service_type",
+    "client_name"
+  ]
+}

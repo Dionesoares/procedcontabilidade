@@ -6,13 +6,22 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
-// Add page imports here
+
+import PublicLayout from '@/components/public/PublicLayout';
+import Home from '@/pages/Home';
+import Sobre from '@/pages/Sobre';
+import Servicos from '@/pages/Servicos';
+import Beneficios from '@/pages/Beneficios';
+import Contato from '@/pages/Contato';
+import FalarConosco from '@/pages/FalarConosco';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import { AdminRouter, ClienteRouter } from '@/pages/DashboardRouter';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoadingPublicSettings) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -20,29 +29,34 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
-  }
-
-  // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      {/* Public pages */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/sobre" element={<Sobre />} />
+        <Route path="/servicos" element={<Servicos />} />
+        <Route path="/beneficios" element={<Beneficios />} />
+        <Route path="/contato" element={<Contato />} />
+        <Route path="/falar-conosco" element={<FalarConosco />} />
+      </Route>
+
+      {/* Auth pages */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* Admin dashboard */}
+      <Route path="/admin/*" element={<AdminRouter />} />
+
+      {/* Client dashboard */}
+      <Route path="/cliente/*" element={<ClienteRouter />} />
+
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>

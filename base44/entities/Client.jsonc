@@ -1,0 +1,65 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nome"
+    },
+    "email": {
+      "type": "string",
+      "title": "Email"
+    },
+    "phone": {
+      "type": "string",
+      "title": "Telefone"
+    },
+    "cpf_cnpj": {
+      "type": "string",
+      "title": "CPF/CNPJ"
+    },
+    "company_name": {
+      "type": "string",
+      "title": "Raz\u00e3o Social"
+    },
+    "company_type": {
+      "type": "string",
+      "enum": [
+        "MEI",
+        "ME",
+        "EPP",
+        "LTDA",
+        "SA",
+        "Outro"
+      ],
+      "title": "Tipo de Empresa"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "Inativo",
+        "Pendente"
+      ],
+      "default": "Pendente",
+      "title": "Status"
+    },
+    "address": {
+      "type": "string",
+      "title": "Endere\u00e7o"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Observa\u00e7\u00f5es"
+    },
+    "user_id": {
+      "type": "string",
+      "title": "User ID"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "cpf_cnpj"
+  ]
+}
