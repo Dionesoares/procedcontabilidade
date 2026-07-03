@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { FileText, Inbox, MessageSquare, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import GovLinks from "@/components/dashboard/GovLinks";
+import { getMyClient } from "@/lib/clientLookup";
 
 export default function ClienteDashboard() {
   const [stats, setStats] = useState({ docs: 0, requests: 0, messages: 0, unread: 0 });
@@ -13,8 +14,7 @@ export default function ClienteDashboard() {
     const load = async () => {
       try {
         const user = await base44.auth.me();
-        const clients = await base44.entities.Client.filter({ user_id: user.id });
-        const cl = clients[0];
+        const cl = await getMyClient(user);
         setClient(cl);
         if (cl) {
           const [docs, reqs, msgs] = await Promise.all([

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { FileText, Download } from "lucide-react";
+import { getMyClient } from "@/lib/clientLookup";
 
 export default function ClienteDocumentos() {
   const [docs, setDocs] = useState([]);
@@ -10,9 +11,9 @@ export default function ClienteDocumentos() {
     const load = async () => {
       try {
         const user = await base44.auth.me();
-        const clients = await base44.entities.Client.filter({ user_id: user.id });
-        if (clients[0]) {
-          setDocs(await base44.entities.Document.filter({ client_id: clients[0].id }, "-created_date"));
+        const cl = await getMyClient(user);
+        if (cl) {
+          setDocs(await base44.entities.Document.filter({ client_id: cl.id }, "-created_date"));
         }
       } catch {} finally { setLoading(false); }
     };

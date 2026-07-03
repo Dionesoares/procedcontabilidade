@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { getMyClient } from "@/lib/clientLookup";
 
 export default function ClienteMensagens() {
   const { toast } = useToast();
@@ -17,8 +18,7 @@ export default function ClienteMensagens() {
   const load = async () => {
     try {
       const user = await base44.auth.me();
-      const clients = await base44.entities.Client.filter({ user_id: user.id });
-      const cl = clients[0];
+      const cl = await getMyClient(user);
       setClient(cl);
       if (cl) setMessages(await base44.entities.Message.filter({ client_id: cl.id }, "-created_date"));
     } catch {} finally { setLoading(false); }

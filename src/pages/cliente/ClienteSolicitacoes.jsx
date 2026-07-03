@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { getMyClient } from "@/lib/clientLookup";
 
 const serviceTypes = ["Abertura de Empresa", "Contabilidade Completa", "Regularização de MEI", "Planejamento Tributário", "Departamento Pessoal", "Consultoria Contábil", "Outro"];
 
@@ -23,8 +24,7 @@ export default function ClienteSolicitacoes() {
     const load = async () => {
       try {
         const user = await base44.auth.me();
-        const clients = await base44.entities.Client.filter({ user_id: user.id });
-        const cl = clients[0];
+        const cl = await getMyClient(user);
         setClient(cl);
         if (cl) setRequests(await base44.entities.ServiceRequest.filter({ client_id: cl.id }, "-created_date"));
       } catch {} finally { setLoading(false); }
