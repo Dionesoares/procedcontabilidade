@@ -22,7 +22,7 @@ export default function Register() {
       await base44.auth.register({ email, password });
       setStep("otp");
     } catch (err) {
-      setError("Erro ao criar conta. Tente novamente.");
+      setError(err?.response?.data?.message || err?.message || "Erro ao criar conta. Tente novamente.");
     } finally { setLoading(false); }
   };
 
