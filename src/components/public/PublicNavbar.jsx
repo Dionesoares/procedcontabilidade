@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a47fd721adb1f32b231e32a/ea78984bf_gbTp9.jpg";
-
 const navLinks = [
   { label: "Início", path: "/" },
   { label: "Sobre", path: "/sobre" },
@@ -22,8 +20,10 @@ export default function PublicNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
-            <img src={LOGO_URL} alt="Proced Contabilidade" className="w-10 h-10 object-contain" />
-            <span className="font-heading font-bold text-lg text-slate-900 tracking-tight">
+            <span
+              className="font-heading font-black text-lg text-slate-900 tracking-tight"
+              style={{ textShadow: "1px 1px 0px rgba(37, 99, 235, 0.25), 2px 2px 0px rgba(37, 99, 235, 0.12)" }}
+            >
               Proced<span className="text-blue-600">Contabilidade</span>
             </span>
           </Link>
@@ -48,7 +48,7 @@ export default function PublicNavbar() {
             </Link>
             <Link to="/login">
               <Button size="sm" className="bg-blue-700 hover:bg-blue-800">
-                Contador
+                Administrador
               </Button>
             </Link>
           </div>
@@ -83,7 +83,7 @@ export default function PublicNavbar() {
               </Link>
               <Link to="/login" onClick={() => setOpen(false)}>
                 <Button className="w-full bg-blue-700 hover:bg-blue-800" size="sm">
-                  Contador
+                  Administrador
                 </Button>
               </Link>
             </div>

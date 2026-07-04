@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 
-const LOGO_URL = "https://media.base44.com/images/public/6a47fd721adb1f32b231e32a/ea78984bf_gbTp9.jpg";
 const WHATSAPP_LINK = "https://wa.me/5563992544417";
 
 export default function PublicFooter() {
@@ -12,8 +11,10 @@ export default function PublicFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img src={LOGO_URL} alt="Proced Contabilidade" className="w-9 h-9 object-contain" />
-              <span className="font-heading font-bold text-white">
+              <span
+                className="font-heading font-black text-white"
+                style={{ textShadow: "1px 1px 0px rgba(96, 165, 250, 0.35), 2px 2px 0px rgba(96, 165, 250, 0.18)" }}
+              >
                 Proced<span className="text-blue-400">Contabilidade</span>
               </span>
             </div>

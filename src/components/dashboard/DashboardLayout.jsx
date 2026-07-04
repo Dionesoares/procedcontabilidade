@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Users, FileText, ListTodo, MessageSquare, Inbox,
-  LogOut, Menu, X, Calculator, ChevronRight, FolderOpen, Settings
+  LogOut, Menu, X, ChevronRight, FolderOpen, Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -44,10 +44,10 @@ export default function DashboardLayout({ user, isAdmin }) {
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
         <div className="p-5 border-b border-slate-100 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
-              <Calculator className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-heading font-bold text-sm text-slate-900">
+            <span
+              className="font-heading font-black text-sm text-slate-900"
+              style={{ textShadow: "1px 1px 0px rgba(37, 99, 235, 0.25), 2px 2px 0px rgba(37, 99, 235, 0.12)" }}
+            >
               Proced<span className="text-blue-600">Contabilidade</span>
             </span>
           </Link>
@@ -105,7 +105,7 @@ export default function DashboardLayout({ user, isAdmin }) {
             <Menu className="w-5 h-5" />
           </button>
           <div className="text-sm text-slate-500 flex items-center gap-1">
-            {isAdmin ? "Admin" : "Cliente"}
+            {isAdmin ? "Administrador" : "Cliente"}
             <ChevronRight className="w-3 h-3" />
             <span className="text-slate-700 font-medium">
               {links.find(l => l.path === location.pathname)?.label || "Painel"}
