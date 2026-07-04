@@ -8,9 +8,9 @@ import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 
 const info = [
-  { icon: Mail, label: "Email", value: "contato@procedcontabilidade.com" },
-  { icon: Phone, label: "Telefone", value: "(11) 99999-9999" },
-  { icon: MapPin, label: "Endereço", value: "São Paulo, SP" },
+  { icon: Mail, label: "Email", value: "procedcontab@gmail.com" },
+  { icon: Phone, label: "Telefone", value: "(63)992544417" },
+  { icon: MapPin, label: "Endereço", value: "Palmas, TO" },
   { icon: Clock, label: "Horário", value: "Seg-Sex: 8h às 18h" },
 ];
 
