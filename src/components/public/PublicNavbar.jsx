@@ -46,7 +46,7 @@ export default function PublicNavbar() {
                 Área do Cliente
               </Button>
             </Link>
-            <Link to="/login">
+            <Link to="/login?tipo=admin">
               <Button size="sm" className="bg-blue-700 hover:bg-blue-800">
                 Administrador
               </Button>
@@ -81,7 +81,7 @@ export default function PublicNavbar() {
                   Área do Cliente
                 </Button>
               </Link>
-              <Link to="/login" onClick={() => setOpen(false)}>
+              <Link to="/login?tipo=admin" onClick={() => setOpen(false)}>
                 <Button className="w-full bg-blue-700 hover:bg-blue-800" size="sm">
                   Administrador
                 </Button>

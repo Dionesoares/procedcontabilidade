@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { base44 } from "@/api/base44Client";
 
 export default function Login() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAdminLogin = urlParams.get("tipo") === "admin";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,8 +40,8 @@ export default function Login() {
               Proced<span className="text-blue-600">Contabilidade</span>
             </span>
           </Link>
-          <h1 className="font-heading font-bold text-2xl text-slate-900 mb-1">Área do Cliente</h1>
-          <p className="text-slate-500 text-sm">Acesse sua conta para gerenciar seus serviços.</p>
+          <h1 className="font-heading font-bold text-2xl text-slate-900 mb-1">{isAdminLogin ? "Área do Administrador" : "Área do Cliente"}</h1>
+          <p className="text-slate-500 text-sm">{isAdminLogin ? "Acesse o painel administrativo." : "Acesse sua conta para gerenciar seus serviços."}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm space-y-5">
@@ -66,8 +68,9 @@ export default function Login() {
           <Button type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 h-11">
             {loading ? "Entrando..." : "Entrar"}
           </Button>
-          <div className="text-center">
-            <Link to="/register" className="text-sm text-blue-600 hover:underline">Criar uma conta</Link>
+          <div className="text-center space-y-1">
+            <Link to="/register" className="text-sm text-blue-600 hover:underline block">Criar uma conta</Link>
+            <Link to="/forgot-password" className="text-sm text-slate-400 hover:text-slate-600 block">Esqueci minha senha</Link>
           </div>
         </form>
 
