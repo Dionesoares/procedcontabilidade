@@ -85,7 +85,7 @@ export default function Contato() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-slate-700 mb-1.5 block">Telefone</label>
-                  <Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="(11) 99999-9999" />
+                  <Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="(63) 992544417" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-slate-700 mb-1.5 block">Mensagem</label>
