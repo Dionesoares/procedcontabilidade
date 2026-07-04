@@ -16,6 +16,8 @@ import Contato from '@/pages/Contato';
 import FalarConosco from '@/pages/FalarConosco';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 import { AdminRouter, ClienteRouter } from '@/pages/DashboardRouter';
 
 const AuthenticatedApp = () => {
@@ -44,6 +46,8 @@ const AuthenticatedApp = () => {
       {/* Auth pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Admin dashboard */}
       <Route path="/admin/*" element={<AdminRouter />} />
