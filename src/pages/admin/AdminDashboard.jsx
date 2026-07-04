@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, FileText, ListTodo, Inbox, TrendingUp, AlertCircle } from "lucide-react";
+import { Users, FileText, ListTodo, Inbox, TrendingUp, AlertCircle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import GovLinks from "@/components/dashboard/GovLinks";
 
 export default function AdminDashboard() {
@@ -43,7 +45,14 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="font-heading font-bold text-2xl text-slate-900 mb-4">Painel Administrativo</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+        <h1 className="font-heading font-bold text-2xl text-slate-900">Área do Administrador</h1>
+        <Link to="/admin/clientes">
+          <Button className="bg-blue-700 hover:bg-blue-800">
+            <Plus className="w-4 h-4 mr-1" /> Cadastrar Novo Cliente
+          </Button>
+        </Link>
+      </div>
       <GovLinks />
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {cards.map((c, i) => (

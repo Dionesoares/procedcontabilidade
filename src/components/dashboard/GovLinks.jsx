@@ -4,6 +4,9 @@ import { ExternalLink } from "lucide-react";
 const links = [
   { label: "Gov.br", url: "https://sso.acesso.gov.br/login?client_id=www.gov.br&authorization_id=19f294a9206" },
   { label: "e-CAC Receita Federal", url: "https://cav.receita.fazenda.gov.br/autenticacao/login" },
+  { label: "Portal do Cliente", url: "https://onvio.com.br/clientcenter/pt/auth?r=%2Fhome" },
+  { label: "Sintegra", url: "http://www.sintegra.gov.br/" },
+  { label: "CCP", url: "https://ccponline.palmas.to.gov.br/" },
 ];
 
 export default function GovLinks() {
