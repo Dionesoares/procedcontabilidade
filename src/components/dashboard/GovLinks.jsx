@@ -7,6 +7,7 @@ const links = [
   { label: "Portal do Cliente", url: "https://onvio.com.br/clientcenter/pt/auth?r=%2Fhome" },
   { label: "Sintegra", url: "http://www.sintegra.gov.br/" },
   { label: "CCP", url: "https://ccponline.palmas.to.gov.br/" },
+  { label: "Sefaz", url: "https://www.to.gov.br/sefaz" },
 ];
 
 export default function GovLinks() {

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Building2, Shield, TrendingUp, Users, CheckCircle2, MessageCircle } from "lucide-react";
+import QuickLinksMobile from "@/components/home/QuickLinksMobile";
 import { Button } from "@/components/ui/button";
 
 const WHATSAPP_LINK = "https://wa.me/5563992544417";
@@ -68,7 +69,7 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl text-slate-500 leading-relaxed mb-10 max-w-2xl">
+              <p className="text-lg sm:text-xl text-slate-500 leading-relaxed mb-10 max-w-2xl text-justify">
                 Consultoria Contábil, Fiscal, Tributária e Pessoal para empresas e MEIs.
               </p>
 
@@ -89,6 +90,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Quick links - mobile only */}
+      <QuickLinksMobile />
 
       {/* Stats */}
       <section className="border-y border-slate-100 bg-white">
@@ -118,7 +122,7 @@ export default function Home() {
             <h2 className="font-heading font-bold text-3xl sm:text-4xl text-slate-900 mb-4">
               Tudo que sua empresa precisa
             </h2>
-            <p className="text-slate-500 max-w-xl mx-auto">
+            <p className="text-slate-500 max-w-xl mx-auto text-justify">
               Soluções completas de contabilidade em um só lugar.
             </p>
           </div>
@@ -159,7 +163,7 @@ export default function Home() {
           <h2 className="font-heading font-bold text-3xl sm:text-4xl mb-4">
             Pronto para simplificar sua contabilidade?
           </h2>
-          <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto text-justify">
             Fale com um de nossos especialistas e descubra como podemos ajudar sua empresa a crescer.
           </p>
           <a href={WHATSAPP_LINK} target="_blank" rel="noopener">

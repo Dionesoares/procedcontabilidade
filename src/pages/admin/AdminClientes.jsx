@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Edit, Trash2, X } from "lucide-react";
+import { Plus, Search, Edit, Trash2, X, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -46,6 +46,16 @@ export default function AdminClientes() {
   const handleDelete = async (id) => {
     if (!confirm("Excluir este cliente?")) return;
     try { await base44.entities.Client.delete(id); load(); } catch {}
+  };
+
+  const handleSendAccess = async (c) => {
+    if (!c.email) { toast({ title: "Cliente sem email cadastrado", variant: "destructive" }); return; }
+    try {
+      await base44.users.inviteUser(c.email, "user");
+      toast({ title: "Senha de acesso enviada!", description: `Um convite foi enviado para ${c.email}` });
+    } catch {
+      toast({ title: "Erro ao enviar senha de acesso", variant: "destructive" });
+    }
   };
 
   const filtered = clients.filter(c =>
@@ -101,6 +111,7 @@ export default function AdminClientes() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => handleSendAccess(c)} title="Enviar senha de acesso" className="p-1.5 text-slate-400 hover:text-green-600 rounded"><KeyRound className="w-4 h-4" /></button>
                         <button onClick={() => openEdit(c)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Edit className="w-4 h-4" /></button>
                         <button onClick={() => handleDelete(c.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
                       </div>
