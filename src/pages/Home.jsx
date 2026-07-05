@@ -30,8 +30,8 @@ export default function Home() {
         <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-200/20 rounded-full blur-3xl" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="max-w-3xl">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="max-w-3xl mx-auto sm:mx-0 text-center sm:text-left">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -42,7 +42,7 @@ export default function Home() {
                 Contabilidade Digital & Estratégica
               </div>
 
-              <h1 className="font-heading font-black text-5xl sm:text-6xl lg:text-7xl text-slate-900 leading-[1.05] tracking-tight mb-6">
+              <h1 className="font-heading font-black text-4xl sm:text-6xl lg:text-7xl text-slate-900 leading-[1.1] sm:leading-[1.05] tracking-tight mb-6">
                 <span className="relative inline-block">
                   <span className="relative" style={{
                     textShadow: "2px 2px 0px rgba(16, 185, 129, 0.15), 4px 4px 0px rgba(16, 185, 129, 0.08), 6px 6px 0px rgba(16, 185, 129, 0.03)"
@@ -69,11 +69,11 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl text-slate-500 leading-relaxed mb-10 max-w-2xl text-justify">
+              <p className="text-base sm:text-xl text-slate-500 leading-relaxed mb-8 sm:mb-10 max-w-2xl mx-auto sm:mx-0 text-justify">
                 Consultoria Contábil, Fiscal, Tributária e Pessoal para empresas e MEIs.
               </p>
 
-              <div className="flex flex-row flex-wrap gap-3 sm:gap-4">
+              <div className="flex flex-row flex-wrap gap-3 sm:gap-4 justify-center sm:justify-start">
                 <a href={WHATSAPP_LINK} target="_blank" rel="noopener">
                   <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white px-4 sm:px-8 h-13 text-sm sm:text-base shadow-lg shadow-blue-200">
                     <MessageCircle className="w-4 h-4 mr-2" />
@@ -141,7 +141,7 @@ export default function Home() {
                   <f.icon className="w-6 h-6 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-1">{f.title}</h3>
-                <p className="text-sm text-slate-500">{f.desc}</p>
+                <p className="text-sm text-slate-500 text-justify">{f.desc}</p>
               </motion.div>
             ))}
           </div>
