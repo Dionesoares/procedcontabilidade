@@ -73,15 +73,15 @@ export default function Home() {
                 Consultoria Contábil, Fiscal, Tributária e Pessoal para empresas e MEIs.
               </p>
 
-              <div className="flex flex-row flex-wrap gap-5 sm:gap-6 justify-center sm:justify-start">
+              <div className="flex flex-row flex-wrap gap-5 sm:gap-6 justify-between sm:justify-start">
                 <a href={WHATSAPP_LINK} target="_blank" rel="noopener">
                   <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white px-4 sm:px-8 h-13 text-sm sm:text-base shadow-lg shadow-blue-200">
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Falar com especialista
                   </Button>
                 </a>
-                <Link to="/servicos">
-                  <Button size="lg" variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50 px-4 sm:px-8 h-13 text-sm sm:text-base">
+                <Link to="/servicos" className="ml-auto sm:ml-0">
+                  <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white px-4 sm:px-8 h-13 text-sm sm:text-base shadow-lg shadow-blue-200">
                     Abrir minha empresa
                   </Button>
                 </Link>
