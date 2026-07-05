@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileText, Inbox, MessageSquare, TrendingUp, Pencil, MessageCircle, KeyRound } from "lucide-react";
+import { FileText, Inbox, MessageSquare, TrendingUp, Pencil, MessageCircle, KeyRound, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import GovLinks from "@/components/dashboard/GovLinks";
@@ -57,6 +57,11 @@ export default function ClienteDashboard() {
           <Link to="/forgot-password">
             <Button variant="outline" size="sm">
               <KeyRound className="w-4 h-4 mr-1.5" /> Redefinir Senha
+            </Button>
+          </Link>
+          <Link to="/cliente/solicitacoes">
+            <Button size="sm" className="bg-blue-700 hover:bg-blue-800">
+              <Plus className="w-4 h-4 mr-1.5" /> Nova Solicitação
             </Button>
           </Link>
           <a href={WHATSAPP_LINK} target="_blank" rel="noopener">

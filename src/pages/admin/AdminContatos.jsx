@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
 
 export default function AdminContatos() {
   const { toast } = useToast();
@@ -39,7 +41,14 @@ export default function AdminContatos() {
                   <SelectContent>{["Novo","Em Análise","Respondido","Arquivado"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <p className="text-sm text-slate-600">{c.message}</p>
+              <p className="text-sm text-slate-600 mb-3">{c.message}</p>
+              {c.phone && (
+                <a href={`https://wa.me/55${c.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener">
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                    <MessageCircle className="w-4 h-4 mr-1.5" /> WhatsApp
+                  </Button>
+                </a>
+              )}
             </div>
           ))}
         </div>
