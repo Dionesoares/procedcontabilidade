@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Trash2 } from "lucide-react";
 
 export default function AdminContatos() {
   const { toast } = useToast();
@@ -18,6 +18,11 @@ export default function AdminContatos() {
 
   const updateStatus = async (id, status) => {
     try { await base44.entities.ContactSubmission.update(id, { status }); toast({ title: "Atualizado!" }); load(); } catch {}
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Deseja excluir este contato?")) return;
+    try { await base44.entities.ContactSubmission.delete(id); toast({ title: "Contato excluído!" }); load(); } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
@@ -36,10 +41,13 @@ export default function AdminContatos() {
                   <h3 className="font-semibold text-slate-900">{c.name}</h3>
                   <p className="text-sm text-slate-500">{c.email} {c.phone && `• ${c.phone}`}</p>
                 </div>
-                <Select value={c.status} onValueChange={v => updateStatus(c.id, v)}>
-                  <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                  <SelectContent>{["Novo","Em Análise","Respondido","Arquivado"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  <Select value={c.status} onValueChange={v => updateStatus(c.id, v)}>
+                    <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                    <SelectContent>{["Novo","Em Análise","Respondido","Arquivado"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <button onClick={() => handleDelete(c.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
+                </div>
               </div>
               <p className="text-sm text-slate-600 mb-3">{c.message}</p>
               {c.phone && (
