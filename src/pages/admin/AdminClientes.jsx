@@ -34,9 +34,14 @@ export default function AdminClientes() {
     e.preventDefault();
     setSaving(true);
     try {
-      if (editing) { await base44.entities.Client.update(editing.id, form); }
-      else { await base44.entities.Client.create(form); }
-      toast({ title: editing ? "Cliente atualizado!" : "Cliente criado!" });
+      if (editing) {
+        await base44.entities.Client.update(editing.id, form);
+        toast({ title: "Cliente atualizado!" });
+      } else {
+        await base44.entities.Client.create(form);
+        toast({ title: "Cliente criado!" });
+        await handleSendAccess(form);
+      }
       setDialogOpen(false);
       load();
     } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
@@ -50,11 +55,17 @@ export default function AdminClientes() {
 
   const handleSendAccess = async (c) => {
     if (!c.email) { toast({ title: "Cliente sem email cadastrado", variant: "destructive" }); return; }
+    const accessCode = String(Math.floor(100000 + Math.random() * 900000));
     try {
+      await base44.integrations.Core.SendEmail({
+        to: c.email,
+        subject: "Sua senha de acesso - ProcedContabilidade",
+        body: `Olá, ${c.name || ""}!\n\nSua senha numérica de acesso à Área do Cliente é: ${accessCode}\n\nAcesse o site, clique em "Área do Cliente" > "Criar uma conta" usando este email e essa senha para ativar seu login. Você poderá alterá-la a qualquer momento pela opção "Redefinir Senha" no seu painel.\n\nAtenciosamente,\nProcedContabilidade`,
+      });
       await base44.users.inviteUser(c.email, "user");
-      toast({ title: "Senha de acesso enviada!", description: `Um convite foi enviado para ${c.email}` });
-    } catch {
-      toast({ title: "Erro ao enviar senha de acesso", variant: "destructive" });
+      toast({ title: "Senha de acesso enviada!", description: `Enviamos a senha numérica para ${c.email}` });
+    } catch (err) {
+      toast({ title: "Erro ao enviar senha de acesso", description: err?.message, variant: "destructive" });
     }
   };
 

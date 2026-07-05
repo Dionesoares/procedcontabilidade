@@ -62,7 +62,7 @@ export default function PublicFooter() {
               </a>
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <MapPin className="w-4 h-4 text-blue-500 shrink-0" />
-                <span>São Paulo, SP</span>
+                <span>Palmas, TO</span>
               </div>
             </div>
           </div>

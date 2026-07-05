@@ -21,7 +21,7 @@ export default function PublicNavbar() {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
             <span
-              className="font-heading font-black text-lg text-slate-900 tracking-tight"
+              className="font-heading font-black text-2xl text-slate-900 tracking-tight"
               style={{ textShadow: "1px 1px 0px rgba(37, 99, 235, 0.25), 2px 2px 0px rgba(37, 99, 235, 0.12)" }}
             >
               Proced<span className="text-blue-600">Contabilidade</span>
