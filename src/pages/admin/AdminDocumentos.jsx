@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import FolderBar from "@/components/documents/FolderBar";
 
 const emptyForm = { title: "", description: "", category: "", client_id: "", status: "Pendente" };
 
@@ -14,6 +15,8 @@ export default function AdminDocumentos() {
   const { toast } = useToast();
   const [docs, setDocs] = useState([]);
   const [clients, setClients] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const [activeFolder, setActiveFolder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -24,11 +27,21 @@ export default function AdminDocumentos() {
   const load = async () => {
     setLoading(true);
     try {
-      const [d, c] = await Promise.all([base44.entities.Document.list("-created_date"), base44.entities.Client.list()]);
-      setDocs(d); setClients(c);
+      const [d, c, f] = await Promise.all([base44.entities.Document.list("-created_date"), base44.entities.Client.list(), base44.entities.DocumentFolder.list("-created_date")]);
+      setDocs(d); setClients(c); setFolders(f);
     } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
+
+  const handleCreateFolder = async (name) => {
+    try {
+      await base44.entities.DocumentFolder.create({ name });
+      toast({ title: "Pasta criada!" });
+      load();
+    } catch { toast({ title: "Erro ao criar pasta", variant: "destructive" }); }
+  };
+
+  const visibleDocs = activeFolder ? docs.filter(d => d.folder_id === activeFolder) : docs;
 
   const clientName = (id) => clients.find(c => c.id === id)?.name || "—";
 
@@ -38,7 +51,7 @@ export default function AdminDocumentos() {
   const handleSave = async (e) => {
     e.preventDefault(); setSaving(true);
     try {
-      let data = { ...form };
+      let data = { ...form, folder_id: activeFolder || "" };
       if (file) {
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
         data.file_url = file_url;
@@ -64,11 +77,13 @@ export default function AdminDocumentos() {
         <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800"><Plus className="w-4 h-4 mr-1" /> Novo</Button>
       </div>
 
-      {docs.length === 0 ? (
+      <FolderBar folders={folders} activeFolder={activeFolder} onSelect={setActiveFolder} onCreate={handleCreateFolder} />
+
+      {visibleDocs.length === 0 ? (
         <div className="text-center py-16 text-slate-400">Nenhum documento ainda.</div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {docs.map(d => (
+          {visibleDocs.map(d => (
             <div key={d.id} className="bg-white rounded-xl border border-slate-200 p-5">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">

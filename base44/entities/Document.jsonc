@@ -29,6 +29,10 @@
       "type": "string",
       "title": "Cliente ID"
     },
+    "folder_id": {
+      "type": "string",
+      "title": "Pasta ID"
+    },
     "status": {
       "type": "string",
       "enum": [

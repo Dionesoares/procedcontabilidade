@@ -1,0 +1,17 @@
+{
+  "name": "DocumentFolder",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nome da Pasta"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { label: "Início", path: "/" },
-  { label: "Sobre", path: "/sobre" },
-  { label: "Serviços", path: "/servicos" },
-  { label: "Benefícios", path: "/beneficios" },
-  { label: "Contato", path: "/contato" },
+  { label: "Sobre", path: "/#sobre" },
+  { label: "Serviços", path: "/#servicos" },
+  { label: "Benefícios", path: "/#beneficios" },
+  { label: "Contato", path: "/#contato" },
   { label: "Falar Conosco", path: "/falar-conosco" },
 ];
 
