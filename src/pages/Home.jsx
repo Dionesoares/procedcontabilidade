@@ -10,7 +10,7 @@ import Beneficios from "@/pages/Beneficios";
 import Contato from "@/pages/Contato";
 
 const WHATSAPP_LINK = "https://wa.me/5563992544417";
-const HERO_ILLUSTRATION = "https://media.base44.com/images/public/6a47fd721adb1f32b231e32a/dca7282af_generated_image.png";
+const HERO_ILLUSTRATION = "https://media.base44.com/images/public/6a47fd721adb1f32b231e32a/df1a64d05_Designsemnome2.png";
 
 export default function Home() {
   useEffect(() => {
