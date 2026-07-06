@@ -5,6 +5,8 @@ import { getMyClient } from "@/lib/clientLookup";
 import FolderBar from "@/components/documents/FolderBar";
 import { useToast } from "@/components/ui/use-toast";
 
+const DEFAULT_FOLDERS = ["Administrativo", "Contabilidade", "Financeiro", "Fiscal", "Patrimônio", "Pessoal", "Registro de Empresas"];
+
 export default function ClienteDocumentos() {
   const { toast } = useToast();
   const [docs, setDocs] = useState([]);
@@ -23,7 +25,13 @@ export default function ClienteDocumentos() {
           base44.entities.Document.filter({ client_id: cl.id }, "-created_date"),
           base44.entities.DocumentFolder.filter({ client_id: cl.id }, "-created_date"),
         ]);
-        setDocs(d); setFolders(f);
+        if (f.length === 0) {
+          const created = await Promise.all(DEFAULT_FOLDERS.map(name => base44.entities.DocumentFolder.create({ name, client_id: cl.id })));
+          setFolders(created);
+        } else {
+          setFolders(f);
+        }
+        setDocs(d);
       }
     } catch {} finally { setLoading(false); }
   };
