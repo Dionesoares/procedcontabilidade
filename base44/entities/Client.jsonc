@@ -55,6 +55,10 @@
     "user_id": {
       "type": "string",
       "title": "User ID"
+    },
+    "access_password": {
+      "type": "string",
+      "title": "Senha de Acesso"
     }
   },
   "required": [

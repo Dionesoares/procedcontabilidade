@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 
-const emptyForm = { name: "", email: "", phone: "", cpf_cnpj: "", company_name: "", company_type: "", address: "", notes: "", status: "Ativo" };
+const emptyForm = { name: "", email: "", phone: "", cpf_cnpj: "", company_name: "", company_type: "", address: "", notes: "", status: "Ativo", access_password: "" };
 
 export default function AdminClientes() {
   const { toast } = useToast();
@@ -28,7 +28,7 @@ export default function AdminClientes() {
   useEffect(() => { load(); }, []);
 
   const openNew = () => { setEditing(null); setForm(emptyForm); setDialogOpen(true); };
-  const openEdit = (c) => { setEditing(c); setForm({ name: c.name || "", email: c.email || "", phone: c.phone || "", cpf_cnpj: c.cpf_cnpj || "", company_name: c.company_name || "", company_type: c.company_type || "", address: c.address || "", notes: c.notes || "", status: c.status || "Ativo" }); setDialogOpen(true); };
+  const openEdit = (c) => { setEditing(c); setForm({ name: c.name || "", email: c.email || "", phone: c.phone || "", cpf_cnpj: c.cpf_cnpj || "", company_name: c.company_name || "", company_type: c.company_type || "", address: c.address || "", notes: c.notes || "", status: c.status || "Ativo", access_password: c.access_password || "" }); setDialogOpen(true); };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -40,7 +40,6 @@ export default function AdminClientes() {
       } else {
         await base44.entities.Client.create(form);
         toast({ title: "Cliente criado!" });
-        await handleSendAccess(form);
       }
       setDialogOpen(false);
       load();
@@ -63,29 +62,14 @@ export default function AdminClientes() {
     } catch { toast({ title: "Erro ao vincular cliente", variant: "destructive" }); }
   };
 
-  const generateAccessPassword = () => {
-    const letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
-    const digits = "23456789";
-    let pass = "";
-    for (let i = 0; i < 5; i++) pass += letters[Math.floor(Math.random() * letters.length)];
-    for (let i = 0; i < 3; i++) pass += digits[Math.floor(Math.random() * digits.length)];
-    return pass;
-  };
-
-  const handleSendAccess = async (c) => {
+  const handleSendAccess = (c) => {
     if (!c.email) { toast({ title: "Cliente sem email cadastrado", variant: "destructive" }); return; }
     if (!c.phone) { toast({ title: "Cliente sem telefone cadastrado", variant: "destructive" }); return; }
-    const accessPassword = generateAccessPassword();
-    try {
-      await base44.users.inviteUser(c.email, "user");
-      const instructions = `Sua senha de acesso à Área do Cliente é: ${accessPassword}. Acesse o site, clique em "Área do Cliente" > "Criar uma conta" e use este email e essa senha para ativar seu login. Você poderá alterá-la a qualquer momento pela opção "Redefinir Senha" no seu painel.`;
-      const message = `Olá, ${c.name || ""}! ${instructions}`;
-      const phoneDigits = c.phone.replace(/\D/g, "");
-      window.open(`https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
-      toast({ title: "Senha de acesso pronta!", description: "Um convite foi enviado por email e abrimos o WhatsApp para você enviar a senha." });
-    } catch (err) {
-      toast({ title: "Erro ao gerar senha de acesso", description: err?.message, variant: "destructive" });
-    }
+    if (!c.access_password) { toast({ title: "Defina uma senha de acesso para o cliente antes de enviar", variant: "destructive" }); return; }
+    const message = `Olá, ${c.name || ""}! Sua senha de acesso à Área do Cliente é: ${c.access_password}. Acesse o site, clique em "Área do Cliente" > "Criar uma conta" e use este email e essa senha para ativar seu login. Você poderá alterá-la a qualquer momento pela opção "Redefinir Senha" no seu painel.`;
+    const phoneDigits = c.phone.replace(/\D/g, "");
+    window.open(`https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
+    toast({ title: "WhatsApp aberto!", description: "Envie a mensagem com a senha de acesso." });
   };
 
   const filtered = clients.filter(c =>
@@ -180,6 +164,7 @@ export default function AdminClientes() {
               </div>
             </div>
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Endereço</label><Input value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
+            <div><label className="text-sm font-medium text-slate-700 mb-1 block">Senha de Acesso</label><Input value={form.access_password} onChange={e => setForm({...form, access_password: e.target.value})} placeholder="Defina a senha do cliente" /></div>
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Status</label>
               <Select value={form.status} onValueChange={v => setForm({...form, status: v})}>
