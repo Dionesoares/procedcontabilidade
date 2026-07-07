@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Edit, Trash2, Upload, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,13 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import FolderBar from "@/components/documents/FolderBar";
+import { DEFAULT_FOLDERS } from "@/lib/defaultFolders";
 
-const emptyForm = { title: "", description: "", category: "", client_id: "", status: "Pendente" };
+const emptyForm = { title: "", description: "", category: "", client_id: "", folder_id: "", status: "Pendente" };
 
 export default function AdminDocumentos() {
   const { toast } = useToast();
   const [docs, setDocs] = useState([]);
   const [clients, setClients] = useState([]);
+  const [selectedClient, setSelectedClient] = useState("");
   const [folders, setFolders] = useState([]);
   const [activeFolder, setActiveFolder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,31 +29,61 @@ export default function AdminDocumentos() {
   const load = async () => {
     setLoading(true);
     try {
-      const [d, c, f] = await Promise.all([base44.entities.Document.list("-created_date"), base44.entities.Client.list(), base44.entities.DocumentFolder.list("-created_date")]);
-      setDocs(d); setClients(c); setFolders(f);
+      const [d, c] = await Promise.all([base44.entities.Document.list("-created_date"), base44.entities.Client.list()]);
+      setDocs(d); setClients(c);
     } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
+  const loadFolders = async (clientId) => {
+    if (!clientId) { setFolders([]); return; }
+    let f = await base44.entities.DocumentFolder.filter({ client_id: clientId }, "-created_date");
+    if (f.length === 0) {
+      f = await Promise.all(DEFAULT_FOLDERS.map(name => base44.entities.DocumentFolder.create({ name, client_id: clientId })));
+    }
+    setFolders(f);
+  };
+
+  useEffect(() => { setActiveFolder(null); loadFolders(selectedClient); }, [selectedClient]);
+
   const handleCreateFolder = async (name) => {
+    if (!selectedClient) return;
     try {
-      await base44.entities.DocumentFolder.create({ name });
+      await base44.entities.DocumentFolder.create({ name, client_id: selectedClient });
       toast({ title: "Pasta criada!" });
-      load();
+      loadFolders(selectedClient);
     } catch { toast({ title: "Erro ao criar pasta", variant: "destructive" }); }
   };
 
-  const visibleDocs = activeFolder ? docs.filter(d => d.folder_id === activeFolder) : docs;
+  const handleDeleteFolder = async (id) => {
+    if (!confirm("Excluir pasta?")) return;
+    try {
+      await base44.entities.DocumentFolder.delete(id);
+      if (activeFolder === id) setActiveFolder(null);
+      loadFolders(selectedClient);
+    } catch { toast({ title: "Erro ao excluir pasta", variant: "destructive" }); }
+  };
+
+  const visibleDocs = docs.filter(d => {
+    if (selectedClient && d.client_id !== selectedClient) return false;
+    if (activeFolder && d.folder_id !== activeFolder) return false;
+    return true;
+  });
 
   const clientName = (id) => clients.find(c => c.id === id)?.name || "—";
 
-  const openNew = () => { setEditing(null); setForm(emptyForm); setFile(null); setDialogOpen(true); };
-  const openEdit = (d) => { setEditing(d); setForm({ title: d.title||"", description: d.description||"", category: d.category||"", client_id: d.client_id||"", status: d.status||"Pendente" }); setFile(null); setDialogOpen(true); };
+  const openNew = () => { setEditing(null); setForm({ ...emptyForm, client_id: selectedClient }); setFile(null); setDialogOpen(true); };
+  const openEdit = (d) => { setEditing(d); setForm({ title: d.title||"", description: d.description||"", category: d.category||"", client_id: d.client_id||"", folder_id: d.folder_id||"", status: d.status||"Pendente" }); setFile(null); setDialogOpen(true); };
+
+  const handleFormClientChange = (v) => {
+    setForm({ ...form, client_id: v, folder_id: "" });
+    setSelectedClient(v);
+  };
 
   const handleSave = async (e) => {
     e.preventDefault(); setSaving(true);
     try {
-      let data = { ...form, folder_id: activeFolder || "" };
+      let data = { ...form };
       if (file) {
         const { file_url } = await base44.integrations.Core.UploadFile({ file });
         data.file_url = file_url;
@@ -77,7 +109,17 @@ export default function AdminDocumentos() {
         <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800"><Plus className="w-4 h-4 mr-1" /> Novo</Button>
       </div>
 
-      <FolderBar folders={folders} activeFolder={activeFolder} onSelect={setActiveFolder} onCreate={handleCreateFolder} />
+      <div className="mb-6 max-w-xs">
+        <label className="text-sm font-medium text-slate-700 mb-1 block">Filtrar por cliente</label>
+        <Select value={selectedClient} onValueChange={setSelectedClient}>
+          <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+          <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+        </Select>
+      </div>
+
+      {selectedClient && (
+        <FolderBar folders={folders} activeFolder={activeFolder} onSelect={setActiveFolder} onCreate={handleCreateFolder} onDelete={handleDeleteFolder} />
+      )}
 
       {visibleDocs.length === 0 ? (
         <div className="text-center py-16 text-slate-400">Nenhum documento ainda.</div>
@@ -110,12 +152,21 @@ export default function AdminDocumentos() {
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Título*</label><Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} required /></div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Cliente</label>
-                <Select value={form.client_id} onValueChange={v => setForm({...form, client_id: v})}>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">Cliente*</label>
+                <Select value={form.client_id} onValueChange={handleFormClientChange}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">Pasta</label>
+                <Select value={form.folder_id} onValueChange={v => setForm({...form, folder_id: v})} disabled={!form.client_id}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>{folders.map(f => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">Categoria</label>
                 <Select value={form.category} onValueChange={v => setForm({...form, category: v})}>
@@ -123,13 +174,13 @@ export default function AdminDocumentos() {
                   <SelectContent>{["Fiscal","Contábil","Trabalhista","Societário","Outros"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Status</label>
-              <Select value={form.status} onValueChange={v => setForm({...form, status: v})}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{["Pendente","Enviado","Aprovado"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">Status</label>
+                <Select value={form.status} onValueChange={v => setForm({...form, status: v})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{["Pendente","Enviado","Aprovado"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
             </div>
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Descrição</label><Textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={2} /></div>
             <div>

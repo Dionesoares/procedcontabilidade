@@ -4,8 +4,7 @@ import { FileText, Download } from "lucide-react";
 import { getMyClient } from "@/lib/clientLookup";
 import FolderBar from "@/components/documents/FolderBar";
 import { useToast } from "@/components/ui/use-toast";
-
-const DEFAULT_FOLDERS = ["Administrativo", "Contabilidade", "Financeiro", "Fiscal", "Patrimônio", "Pessoal", "Registro de Empresas"];
+import { DEFAULT_FOLDERS } from "@/lib/defaultFolders";
 
 export default function ClienteDocumentos() {
   const { toast } = useToast();

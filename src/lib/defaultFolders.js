@@ -1,0 +1,1 @@
+export const DEFAULT_FOLDERS = ["Administrativo", "Contabilidade", "Financeiro", "Fiscal", "Patrimônio", "Pessoal", "Registro de Empresas"];

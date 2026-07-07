@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { FolderPlus, Folder } from "lucide-react";
+import { FolderPlus, Folder, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function FolderBar({ folders, activeFolder, onSelect, onCreate }) {
+export default function FolderBar({ folders, activeFolder, onSelect, onCreate, onDelete }) {
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
 
@@ -22,13 +22,22 @@ export default function FolderBar({ folders, activeFolder, onSelect, onCreate })
         <Folder className="w-3.5 h-3.5" /> Todas
       </button>
       {folders.map(f => (
-        <button
+        <div
           key={f.id}
-          onClick={() => onSelect(f.id)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${activeFolder === f.id ? "bg-blue-700 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
         >
-          <Folder className="w-3.5 h-3.5" /> {f.name}
-        </button>
+          <button onClick={() => onSelect(f.id)} className="flex items-center gap-1.5">
+            <Folder className="w-3.5 h-3.5" /> {f.name}
+          </button>
+          {onDelete && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(f.id); }}
+              className={`ml-1 ${activeFolder === f.id ? "text-white/70 hover:text-white" : "text-slate-400 hover:text-red-600"}`}
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
       ))}
 
       {creating ? (
