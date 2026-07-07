@@ -69,7 +69,6 @@ export default function Login() {
             {loading ? "Entrando..." : "Entrar"}
           </Button>
           <div className="text-center space-y-1">
-            <Link to="/register" className="text-sm text-blue-600 hover:underline block">Criar uma conta</Link>
             <Link to="/forgot-password" className="text-sm text-slate-400 hover:text-slate-600 block">Esqueci minha senha</Link>
           </div>
         </form>

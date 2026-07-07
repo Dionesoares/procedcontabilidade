@@ -23,7 +23,7 @@ export default function AdminClientes() {
 
   const load = async () => {
     setLoading(true);
-    try { setClients(await base44.entities.Client.list("-created_date")); } catch {} finally { setLoading(false); }
+    try { setClients(await base44.entities.Client.list("-created_date", 1000)); } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
