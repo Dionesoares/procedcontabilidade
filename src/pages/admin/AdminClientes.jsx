@@ -169,7 +169,6 @@ export default function AdminClientes() {
               <div><label className="text-sm font-medium text-slate-700 mb-1 block">Senha Combinada</label><Input value={form.access_password} onChange={e => setForm({...form, access_password: e.target.value})} placeholder="Anotação para enviar ao cliente" /></div>
               <div><label className="text-sm font-medium text-slate-700 mb-1 block">Confirmar Senha</label><Input value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repita a senha combinada" /></div>
             </div>
-            <p className="text-xs text-slate-400 -mt-2">Esse campo é apenas uma anotação para você combinar a senha com o cliente pelo WhatsApp — o cliente ainda precisa criar essa senha no link de cadastro para conseguir logar.</p>
             {formError && <div className="text-sm text-red-600">{formError}</div>}
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Status</label>
