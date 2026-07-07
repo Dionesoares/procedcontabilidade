@@ -63,16 +63,31 @@ export default function AdminClientes() {
     } catch { toast({ title: "Erro ao vincular cliente", variant: "destructive" }); }
   };
 
+  const generateAccessPassword = () => {
+    const letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
+    const digits = "23456789";
+    let pass = "";
+    for (let i = 0; i < 5; i++) pass += letters[Math.floor(Math.random() * letters.length)];
+    for (let i = 0; i < 3; i++) pass += digits[Math.floor(Math.random() * digits.length)];
+    return pass;
+  };
+
   const handleSendAccess = async (c) => {
     if (!c.email) { toast({ title: "Cliente sem email cadastrado", variant: "destructive" }); return; }
     if (!c.phone) { toast({ title: "Cliente sem telefone cadastrado", variant: "destructive" }); return; }
-    const accessCode = String(Math.floor(100000 + Math.random() * 900000));
+    const accessPassword = generateAccessPassword();
     try {
       await base44.users.inviteUser(c.email, "user");
-      const message = `Olá, ${c.name || ""}! Sua senha numérica de acesso à Área do Cliente é: ${accessCode}. Acesse o site, clique em "Área do Cliente" > "Criar uma conta" usando este email e essa senha para ativar seu login. Você poderá alterá-la a qualquer momento pela opção "Redefinir Senha" no seu painel.`;
+      const instructions = `Sua senha de acesso à Área do Cliente é: ${accessPassword}. Acesse o site, clique em "Área do Cliente" > "Criar uma conta" e use este email e essa senha para ativar seu login. Você poderá alterá-la a qualquer momento pela opção "Redefinir Senha" no seu painel.`;
+      await base44.integrations.Core.SendEmail({
+        to: c.email,
+        subject: "Sua senha de acesso à Área do Cliente",
+        body: `Olá, ${c.name || ""}!\n\n${instructions}`,
+      });
+      const message = `Olá, ${c.name || ""}! ${instructions}`;
       const phoneDigits = c.phone.replace(/\D/g, "");
       window.open(`https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
-      toast({ title: "Senha de acesso pronta!", description: "Envie a mensagem pelo WhatsApp que foi aberto." });
+      toast({ title: "Senha de acesso enviada!", description: "Enviamos por email e abrimos o WhatsApp para você confirmar o envio." });
     } catch (err) {
       toast({ title: "Erro ao gerar senha de acesso", description: err?.message, variant: "destructive" });
     }
