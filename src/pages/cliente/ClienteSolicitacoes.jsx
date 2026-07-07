@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Send } from "lucide-react";
+import { Plus, Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +43,15 @@ export default function ClienteSolicitacoes() {
     } catch { toast({ title: "Erro", variant: "destructive" }); } finally { setSaving(false); }
   };
 
+  const handleDelete = async (id) => {
+    if (!confirm("Excluir esta solicitação?")) return;
+    try {
+      await base44.entities.ServiceRequest.delete(id);
+      toast({ title: "Solicitação excluída!" });
+      setRequests(await base44.entities.ServiceRequest.filter({ client_id: client.id }, "-created_date"));
+    } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
+  };
+
   const statusColor = { Novo: "bg-blue-100 text-blue-700", "Em Análise": "bg-amber-100 text-amber-700", "Em Andamento": "bg-purple-100 text-purple-700", Concluído: "bg-blue-100 text-blue-700", Cancelado: "bg-red-100 text-red-700" };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
@@ -62,7 +71,10 @@ export default function ClienteSolicitacoes() {
             <div key={r.id} className="bg-white rounded-xl border border-slate-200 p-5">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-semibold text-slate-900">{r.service_type}</h3>
-                <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColor[r.status] || ""}`}>{r.status}</span>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColor[r.status] || ""}`}>{r.status}</span>
+                  <button onClick={() => handleDelete(r.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded" title="Excluir"><Trash2 className="w-4 h-4" /></button>
+                </div>
               </div>
               {r.description && <p className="text-sm text-slate-600">{r.description}</p>}
             </div>

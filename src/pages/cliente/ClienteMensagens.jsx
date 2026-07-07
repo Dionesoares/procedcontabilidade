@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Send } from "lucide-react";
+import { Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +24,15 @@ export default function ClienteMensagens() {
     } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
+
+  const handleDelete = async (id) => {
+    if (!confirm("Excluir esta mensagem?")) return;
+    try {
+      await base44.entities.Message.delete(id);
+      toast({ title: "Mensagem excluída!" });
+      setMessages(await base44.entities.Message.filter({ client_id: client.id }, "-created_date"));
+    } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
+  };
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -60,10 +69,11 @@ export default function ClienteMensagens() {
         <div className="space-y-3">
           {messages.map(m => (
             <div key={m.id} className={`rounded-xl border p-4 ${m.sender_type === "admin" ? "bg-blue-50/50 border-blue-100" : "bg-white border-slate-200"}`}>
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center justify-between mb-2">
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${m.sender_type === "admin" ? "bg-blue-100 text-blue-700" : "bg-blue-100 text-blue-700"}`}>
                   {m.sender_type === "admin" ? "Proced" : "Você"}
                 </span>
+                <button onClick={() => handleDelete(m.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded" title="Excluir"><Trash2 className="w-4 h-4" /></button>
               </div>
               {m.subject && <p className="text-sm font-medium text-slate-800 mb-1">{m.subject}</p>}
               <p className="text-sm text-slate-600">{m.content}</p>
