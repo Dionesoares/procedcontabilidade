@@ -46,13 +46,14 @@ export default function AdminClientes() {
         await base44.entities.Client.update(editing.id, form);
         toast({ title: "Cliente atualizado!" });
       } else {
-        await base44.entities.Client.create(form);
+        const newClient = await base44.entities.Client.create(form);
         try {
           await base44.users.inviteUser(form.email, "user");
           toast({ title: "Cliente criado!", description: "Um e-mail foi enviado para o cliente criar a senha de acesso." });
         } catch {
           toast({ title: "Cliente criado!", description: "Não foi possível enviar o e-mail de convite automaticamente.", variant: "destructive" });
         }
+        if (newClient.phone) handleSendAccess(newClient);
       }
       setDialogOpen(false);
       load();
@@ -68,12 +69,11 @@ export default function AdminClientes() {
   const handleSendAccess = (c) => {
     if (!c.email) { toast({ title: "Cliente sem email cadastrado", variant: "destructive" }); return; }
     if (!c.phone) { toast({ title: "Cliente sem telefone cadastrado", variant: "destructive" }); return; }
-    if (!c.access_password) { toast({ title: "Defina uma senha de acesso para o cliente antes de enviar", variant: "destructive" }); return; }
     const registerLink = `${window.location.origin}/register`;
-    const message = `Olá, ${c.name || ""}! Seu cadastro na Área do Cliente foi criado. Para ativar seu acesso, entre neste link: ${registerLink} e crie sua senha usando o email ${c.email}. Sugestão de senha combinada com você: ${c.access_password} (você pode usar essa ou escolher outra ao criar sua conta). Depois de criar a senha, é só fazer login normalmente no site.`;
+    const message = `Olá, ${c.name || ""}! Seu cadastro na Área do Cliente foi criado. Para ativar seu acesso, acesse este link: ${registerLink} e crie sua senha de acesso usando o email ${c.email}. Depois de criar sua senha, é só fazer login normalmente no site.`;
     const phoneDigits = c.phone.replace(/\D/g, "");
     window.open(`https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
-    toast({ title: "WhatsApp aberto!", description: "Envie a mensagem com a senha de acesso." });
+    toast({ title: "WhatsApp aberto!", description: "Envie o link para o cliente criar a senha de acesso." });
   };
 
   const filtered = clients.filter(c =>
