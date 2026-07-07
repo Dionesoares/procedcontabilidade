@@ -38,9 +38,8 @@ export default function Contato() {
       <section className="py-24 bg-gradient-to-br from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mb-14">
-            <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-3">Contato</p>
             <h1 className="font-heading font-bold text-4xl sm:text-5xl text-slate-900 mb-4">Entre em Contato</h1>
-            <p className="text-lg text-slate-500">Estamos prontos para ajudar sua empresa.</p>
+            <p className="text-lg text-slate-500">Estamos prontos para ajudar sua empresa continuar crescendo.</p>
           </motion.div>
 
           <div className="grid lg:grid-cols-5 gap-12">
