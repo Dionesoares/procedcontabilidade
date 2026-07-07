@@ -3,7 +3,7 @@ import { Plus, Download, Trash2, Send, Search } from "lucide-react";
 
 export default function DocumentsToolbar({ canManage, onAdd, onDownload, onDelete, filter, onFilterChange, search, onSearchChange }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-orange-500 text-white px-3 py-2 rounded-t-lg">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-blue-700 text-white px-3 py-2 rounded-t-lg">
       <div className="flex items-center gap-1 flex-wrap">
         {canManage && (
           <button onClick={onAdd} className="flex items-center gap-1 px-2.5 py-1.5 text-sm rounded hover:bg-white/10">
@@ -29,7 +29,7 @@ export default function DocumentsToolbar({ canManage, onAdd, onDownload, onDelet
           <button
             key={f}
             onClick={() => onFilterChange(f)}
-            className={`px-3 py-1 rounded text-xs font-medium ${filter === f ? "bg-white text-orange-600" : "bg-white/20 hover:bg-white/30"}`}
+            className={`px-3 py-1 rounded text-xs font-medium ${filter === f ? "bg-white text-blue-700" : "bg-white/20 hover:bg-white/30"}`}
           >
             {f.toUpperCase()}
           </button>
