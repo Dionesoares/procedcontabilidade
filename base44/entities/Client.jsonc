@@ -65,5 +65,11 @@
     "name",
     "email",
     "cpf_cnpj"
-  ]
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
 }
