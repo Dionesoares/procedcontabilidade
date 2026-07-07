@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Edit, Trash2, X, KeyRound, Link2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, X, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -50,16 +50,6 @@ export default function AdminClientes() {
   const handleDelete = async (id) => {
     if (!confirm("Excluir este cliente?")) return;
     try { await base44.entities.Client.delete(id); load(); } catch {}
-  };
-
-  const handleLink = async (c) => {
-    try {
-      const users = await base44.entities.User.filter({ email: c.email });
-      if (!users.length) { toast({ title: "Cliente ainda não possui conta de login", description: "Envie a senha de acesso primeiro.", variant: "destructive" }); return; }
-      await base44.entities.Client.update(c.id, { user_id: users[0].id });
-      toast({ title: "Cliente vinculado com sucesso!" });
-      load();
-    } catch { toast({ title: "Erro ao vincular cliente", variant: "destructive" }); }
   };
 
   const handleSendAccess = (c) => {
@@ -125,9 +115,6 @@ export default function AdminClientes() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {!c.user_id && (
-                          <button onClick={() => handleLink(c)} title="Vincular cliente" className="p-1.5 text-slate-400 hover:text-purple-600 rounded"><Link2 className="w-4 h-4" /></button>
-                        )}
                         <button onClick={() => handleSendAccess(c)} title="Enviar senha de acesso" className="p-1.5 text-slate-400 hover:text-green-600 rounded"><KeyRound className="w-4 h-4" /></button>
                         <button onClick={() => openEdit(c)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Edit className="w-4 h-4" /></button>
                         <button onClick={() => handleDelete(c.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
