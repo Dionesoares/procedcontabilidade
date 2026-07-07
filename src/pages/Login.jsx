@@ -20,10 +20,16 @@ export default function Login() {
     setError("");
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      window.location.href = "/admin";
+      const currentUser = await base44.auth.me();
+      if (isAdminLogin && currentUser.role !== "admin") {
+        setError("Esta conta não tem permissão de administrador.");
+        base44.auth.logout();
+        setLoading(false);
+        return;
+      }
+      window.location.href = currentUser.role === "admin" ? "/admin" : "/cliente";
     } catch (err) {
-      setError("Email ou senha incorretos.");
-    } finally {
+      setError(err?.response?.data?.message || err?.message || "Email ou senha incorretos.");
       setLoading(false);
     }
   };
