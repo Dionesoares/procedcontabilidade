@@ -39,7 +39,12 @@ export default function AdminClientes() {
         toast({ title: "Cliente atualizado!" });
       } else {
         await base44.entities.Client.create(form);
-        toast({ title: "Cliente criado!" });
+        try {
+          await base44.users.inviteUser(form.email, "user");
+          toast({ title: "Cliente criado!", description: "Um e-mail foi enviado para o cliente criar a senha de acesso." });
+        } catch {
+          toast({ title: "Cliente criado!", description: "Não foi possível enviar o e-mail de convite automaticamente.", variant: "destructive" });
+        }
       }
       setDialogOpen(false);
       load();
