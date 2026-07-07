@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 const emptyForm = { name: "", email: "", phone: "", cpf_cnpj: "", company_name: "", company_type: "", address: "", notes: "", status: "Ativo", access_password: "" };
+const emptyConfirmPassword = "";
 
 export default function AdminClientes() {
   const { toast } = useToast();
@@ -19,7 +20,9 @@ export default function AdminClientes() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [confirmPassword, setConfirmPassword] = useState(emptyConfirmPassword);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -27,11 +30,16 @@ export default function AdminClientes() {
   };
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setEditing(null); setForm(emptyForm); setDialogOpen(true); };
-  const openEdit = (c) => { setEditing(c); setForm({ name: c.name || "", email: c.email || "", phone: c.phone || "", cpf_cnpj: c.cpf_cnpj || "", company_name: c.company_name || "", company_type: c.company_type || "", address: c.address || "", notes: c.notes || "", status: c.status || "Ativo", access_password: c.access_password || "" }); setDialogOpen(true); };
+  const openNew = () => { setEditing(null); setForm(emptyForm); setConfirmPassword(""); setFormError(""); setDialogOpen(true); };
+  const openEdit = (c) => { setEditing(c); setForm({ name: c.name || "", email: c.email || "", phone: c.phone || "", cpf_cnpj: c.cpf_cnpj || "", company_name: c.company_name || "", company_type: c.company_type || "", address: c.address || "", notes: c.notes || "", status: c.status || "Ativo", access_password: c.access_password || "" }); setConfirmPassword(c.access_password || ""); setFormError(""); setDialogOpen(true); };
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setFormError("");
+    if (form.access_password && form.access_password !== confirmPassword) {
+      setFormError("A confirmação de senha não coincide.");
+      return;
+    }
     setSaving(true);
     try {
       if (editing) {
@@ -61,7 +69,8 @@ export default function AdminClientes() {
     if (!c.email) { toast({ title: "Cliente sem email cadastrado", variant: "destructive" }); return; }
     if (!c.phone) { toast({ title: "Cliente sem telefone cadastrado", variant: "destructive" }); return; }
     if (!c.access_password) { toast({ title: "Defina uma senha de acesso para o cliente antes de enviar", variant: "destructive" }); return; }
-    const message = `Olá, ${c.name || ""}! Sua senha de acesso à Área do Cliente é: ${c.access_password}. Acesse o site, clique em "Área do Cliente" > "Criar uma conta" e use este email e essa senha para ativar seu login. Você poderá alterá-la a qualquer momento pela opção "Redefinir Senha" no seu painel.`;
+    const registerLink = `${window.location.origin}/register`;
+    const message = `Olá, ${c.name || ""}! Seu cadastro na Área do Cliente foi criado. Para ativar seu acesso, entre neste link: ${registerLink} e crie sua senha usando o email ${c.email}. Sugestão de senha combinada com você: ${c.access_password} (você pode usar essa ou escolher outra ao criar sua conta). Depois de criar a senha, é só fazer login normalmente no site.`;
     const phoneDigits = c.phone.replace(/\D/g, "");
     window.open(`https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
     toast({ title: "WhatsApp aberto!", description: "Envie a mensagem com a senha de acesso." });
@@ -156,7 +165,12 @@ export default function AdminClientes() {
               </div>
             </div>
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Endereço</label><Input value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
-            <div><label className="text-sm font-medium text-slate-700 mb-1 block">Senha de Acesso</label><Input value={form.access_password} onChange={e => setForm({...form, access_password: e.target.value})} placeholder="Defina a senha do cliente" /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-sm font-medium text-slate-700 mb-1 block">Senha Combinada</label><Input value={form.access_password} onChange={e => setForm({...form, access_password: e.target.value})} placeholder="Anotação para enviar ao cliente" /></div>
+              <div><label className="text-sm font-medium text-slate-700 mb-1 block">Confirmar Senha</label><Input value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repita a senha combinada" /></div>
+            </div>
+            <p className="text-xs text-slate-400 -mt-2">Esse campo é apenas uma anotação para você combinar a senha com o cliente pelo WhatsApp — o cliente ainda precisa criar essa senha no link de cadastro para conseguir logar.</p>
+            {formError && <div className="text-sm text-red-600">{formError}</div>}
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Status</label>
               <Select value={form.status} onValueChange={v => setForm({...form, status: v})}>
