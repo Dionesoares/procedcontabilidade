@@ -1,31 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, FileText, ListTodo, Inbox, TrendingUp, AlertCircle, Plus } from "lucide-react";
+import { Users, FileText, ListTodo, Inbox, TrendingUp, AlertCircle, Plus, Clock } from "lucide-react";
+import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GovLinks from "@/components/dashboard/GovLinks";
+import CalendarWidget from "@/components/dashboard/CalendarWidget";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ clients: 0, tasks: 0, documents: 0, requests: 0, pendingTasks: 0, newRequests: 0 });
   const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState([]);
+  const [requests, setRequests] = useState([]);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [clients, tasks, docs, requests] = await Promise.all([
+        const [clients, tasksData, docs, requestsData] = await Promise.all([
           base44.entities.Client.list(),
           base44.entities.Task.list(),
           base44.entities.Document.list(),
           base44.entities.ServiceRequest.list(),
         ]);
+        setTasks(tasksData);
+        setRequests(requestsData);
         setStats({
           clients: clients.length,
-          tasks: tasks.length,
+          tasks: tasksData.length,
           documents: docs.length,
-          requests: requests.length,
-          pendingTasks: tasks.filter(t => t.status === "Pendente").length,
-          newRequests: requests.filter(r => r.status === "Novo").length,
+          requests: requestsData.length,
+          pendingTasks: tasksData.filter(t => t.status === "Pendente").length,
+          newRequests: requestsData.filter(r => r.status === "Novo").length,
         });
       } catch {} finally { setLoading(false); }
     };
@@ -72,6 +78,29 @@ export default function AdminDashboard() {
             <p className="text-sm text-slate-500">{c.label}</p>
           </motion.div>
         ))}
+      </div>
+      <div className="mt-6 grid lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-1">
+          <CalendarWidget tasks={tasks} requests={requests} isAdmin />
+        </div>
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h3 className="font-heading font-semibold text-slate-900 mb-4">Tarefas com Vencimento Próximo</h3>
+            {tasks.filter(t => t.status !== "Concluída" && t.due_date).sort((a, b) => new Date(a.due_date) - new Date(b.due_date)).slice(0, 5).map(t => (
+              <div key={t.id} className="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
+                <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">{t.title}</p>
+                  <p className="text-xs text-slate-400">{t.category} · {t.priority}</p>
+                </div>
+                <span className="text-xs font-medium text-slate-500 shrink-0">{format(new Date(t.due_date), "dd/MM")}</span>
+              </div>
+            ))}
+            {tasks.filter(t => t.status !== "Concluída" && t.due_date).length === 0 && (
+              <p className="text-sm text-slate-400">Nenhuma tarefa com vencimento.</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { FileText, Inbox, MessageSquare, TrendingUp, Pencil, MessageCircle, KeyR
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import GovLinks from "@/components/dashboard/GovLinks";
+import CalendarWidget from "@/components/dashboard/CalendarWidget";
 import { getMyClient } from "@/lib/clientLookup";
 import { Button } from "@/components/ui/button";
 import EditarDadosDialog from "@/components/cliente/EditarDadosDialog";
@@ -15,6 +16,7 @@ export default function ClienteDashboard() {
   const [loading, setLoading] = useState(true);
   const [client, setClient] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [requests, setRequests] = useState([]);
 
   useEffect(() => {
     const load = async () => {
@@ -28,6 +30,7 @@ export default function ClienteDashboard() {
             base44.entities.ServiceRequest.filter({ client_id: cl.id }),
             base44.entities.Message.filter({ client_id: cl.id }),
           ]);
+          setRequests(reqs);
           setStats({ docs: docs.length, requests: reqs.length, messages: msgs.length, unread: msgs.filter(m => m.sender_type === "admin" && !m.is_read).length });
         }
       } catch {} finally { setLoading(false); }
@@ -95,6 +98,29 @@ export default function ClienteDashboard() {
             <p className="text-sm text-slate-500">{c.label}</p>
           </motion.div>
         ))}
+      </div>
+      <div className="mt-6 grid lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-1">
+          <CalendarWidget requests={requests} />
+        </div>
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <h3 className="font-heading font-semibold text-slate-900 mb-4">Minhas Solicitações Recentes</h3>
+            {requests.slice(0, 5).map(r => (
+              <div key={r.id} className="flex items-center gap-3 py-2.5 border-b border-slate-50 last:border-0">
+                <Inbox className="w-4 h-4 text-blue-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">{r.service_type}</p>
+                  {r.description && <p className="text-xs text-slate-400 truncate">{r.description}</p>}
+                </div>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${r.status === "Concluído" ? "bg-green-50 text-green-600" : r.status === "Novo" ? "bg-blue-50 text-blue-600" : "bg-amber-50 text-amber-600"}`}>{r.status}</span>
+              </div>
+            ))}
+            {requests.length === 0 && (
+              <p className="text-sm text-slate-400">Nenhuma solicitação registrada.</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
