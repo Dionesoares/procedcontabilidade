@@ -79,15 +79,10 @@ export default function AdminClientes() {
     try {
       await base44.users.inviteUser(c.email, "user");
       const instructions = `Sua senha de acesso à Área do Cliente é: ${accessPassword}. Acesse o site, clique em "Área do Cliente" > "Criar uma conta" e use este email e essa senha para ativar seu login. Você poderá alterá-la a qualquer momento pela opção "Redefinir Senha" no seu painel.`;
-      await base44.integrations.Core.SendEmail({
-        to: c.email,
-        subject: "Sua senha de acesso à Área do Cliente",
-        body: `Olá, ${c.name || ""}!\n\n${instructions}`,
-      });
       const message = `Olá, ${c.name || ""}! ${instructions}`;
       const phoneDigits = c.phone.replace(/\D/g, "");
       window.open(`https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
-      toast({ title: "Senha de acesso enviada!", description: "Enviamos por email e abrimos o WhatsApp para você confirmar o envio." });
+      toast({ title: "Senha de acesso pronta!", description: "Um convite foi enviado por email e abrimos o WhatsApp para você enviar a senha." });
     } catch (err) {
       toast({ title: "Erro ao gerar senha de acesso", description: err?.message, variant: "destructive" });
     }
