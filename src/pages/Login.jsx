@@ -21,13 +21,13 @@ export default function Login() {
     try {
       await base44.auth.loginViaEmailPassword(email, password);
       const currentUser = await base44.auth.me();
-      if (isAdminLogin && currentUser.role !== "admin") {
+      if (isAdminLogin && currentUser.role !== "admin" && currentUser.role !== "contador") {
         setError("Esta conta não tem permissão de administrador.");
         base44.auth.logout();
         setLoading(false);
         return;
       }
-      window.location.href = currentUser.role === "admin" ? "/admin" : "/cliente";
+      window.location.href = (currentUser.role === "admin" || currentUser.role === "contador") ? "/admin" : "/cliente";
     } catch (err) {
       setError(err?.response?.data?.message || err?.message || "Email ou senha incorretos.");
       setLoading(false);

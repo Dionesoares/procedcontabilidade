@@ -25,7 +25,7 @@ export function AdminRouter() {
 
   if (loading) return <div className="fixed inset-0 flex items-center justify-center"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== "admin") return <Navigate to="/cliente" replace />;
+  if (user.role !== "admin" && user.role !== "contador") return <Navigate to="/cliente" replace />;
 
   return (
     <Routes>
@@ -53,7 +53,7 @@ export function ClienteRouter() {
 
   if (loading) return <div className="fixed inset-0 flex items-center justify-center"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role === "admin") return <Navigate to="/admin" replace />;
+  if (user.role === "admin" || user.role === "contador") return <Navigate to="/admin" replace />;
 
   return (
     <Routes>

@@ -19,7 +19,7 @@ export default function AdminContadores() {
     setLoading(true);
     try {
       const users = await base44.entities.User.list();
-      setContadores(users.filter(u => u.role === "admin"));
+      setContadores(users.filter(u => u.role === "contador"));
     } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -30,7 +30,7 @@ export default function AdminContadores() {
     e.preventDefault();
     setSaving(true);
     try {
-      await base44.users.inviteUser(form.email, "admin");
+      await base44.users.inviteUser(form.email, "contador");
       if (form.phone) handleSendAccess(form);
       toast({ title: "Contador cadastrado!", description: "E-mail de convite enviado para criar a senha de acesso." });
       setDialogOpen(false);

@@ -107,7 +107,7 @@ export default function DashboardLayout({ user, isAdmin }) {
             <Menu className="w-5 h-5" />
           </button>
           <div className="text-sm text-slate-500 flex items-center gap-1">
-            {isAdmin ? "Administrador" : "Cliente"}
+            {user?.role === "contador" ? "Contador" : isAdmin ? "Administrador" : "Cliente"}
             <ChevronRight className="w-3 h-3" />
             <span className="text-slate-700 font-medium">
               {links.find(l => l.path === location.pathname)?.label || "Painel"}
