@@ -23,7 +23,7 @@ export default function AdminClientes() {
 
   const load = async () => {
     setLoading(true);
-    try { setClients(await base44.entities.Client.list("-created_date", 1000)); } catch {} finally { setLoading(false); }
+    try { setClients(await base44.entities.Client.filter({}, "-created_date", 10000)); } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -53,9 +53,14 @@ export default function AdminClientes() {
     finally { setSaving(false); }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm("Excluir este cliente?")) return;
-    try { await base44.entities.Client.delete(id); load(); } catch {}
+  const handleDelete = async (c) => {
+    if (!confirm("Excluir este cliente? O usuário será removido do sistema, permitindo novo cadastro com o mesmo email.")) return;
+    try {
+      if (c.user_id) { try { await base44.entities.User.delete(c.user_id); } catch {} }
+      await base44.entities.Client.delete(c.id);
+      toast({ title: "Cliente excluído do sistema!" });
+      load();
+    } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
   };
 
   const handleSendAccess = (c) => {
@@ -123,7 +128,7 @@ export default function AdminClientes() {
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => handleSendAccess(c)} title="Enviar senha de acesso" className="p-1.5 text-slate-400 hover:text-green-600 rounded"><KeyRound className="w-4 h-4" /></button>
                         <button onClick={() => openEdit(c)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Edit className="w-4 h-4" /></button>
-                        <button onClick={() => handleDelete(c.id)} className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(c)} className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>

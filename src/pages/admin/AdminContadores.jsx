@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, KeyRound, UserCog } from "lucide-react";
+import { Plus, KeyRound, UserCog, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -38,6 +38,15 @@ export default function AdminContadores() {
     } catch {
       toast({ title: "Erro ao cadastrar", description: "Verifique se o e-mail já não está cadastrado.", variant: "destructive" });
     } finally { setSaving(false); }
+  };
+
+  const handleDelete = async (c) => {
+    if (!confirm("Excluir este contador? O usuário será removido do sistema, permitindo novo cadastro com o mesmo email.")) return;
+    try {
+      await base44.entities.User.delete(c.id);
+      toast({ title: "Contador excluído do sistema!" });
+      load();
+    } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
   };
 
   const handleSendAccess = (c) => {
@@ -83,6 +92,7 @@ export default function AdminContadores() {
                       <button onClick={() => handleSendAccess({ ...c, phone: "" })} title="Reenviar acesso" className="p-1.5 text-slate-400 hover:text-green-600 rounded" disabled={!c.phone}>
                         <KeyRound className="w-4 h-4" />
                       </button>
+                      <button onClick={() => handleDelete(c)} title="Excluir" className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
                     </td>
                   </tr>
                 ))}
