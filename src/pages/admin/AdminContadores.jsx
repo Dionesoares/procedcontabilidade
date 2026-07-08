@@ -30,9 +30,15 @@ export default function AdminContadores() {
     e.preventDefault();
     setSaving(true);
     try {
-      await base44.users.inviteUser(form.email, "contador");
+      const existingUsers = await base44.entities.User.list();
+      const existing = existingUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
+      if (existing) {
+        await base44.entities.User.update(existing.id, { role: "contador" });
+      } else {
+        await base44.users.inviteUser(form.email, "contador");
+      }
       if (form.phone) handleSendAccess(form);
-      toast({ title: "Contador cadastrado!", description: "E-mail de convite enviado para criar a senha de acesso." });
+      toast({ title: existing ? "Contador atualizado!" : "Contador cadastrado!", description: "E-mail de convite enviado para criar a senha de acesso." });
       setDialogOpen(false);
       load();
     } catch {

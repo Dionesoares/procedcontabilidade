@@ -40,7 +40,13 @@ export default function AdminClientes() {
       } else {
         const newClient = await base44.entities.Client.create(form);
         try {
-          await base44.users.inviteUser(form.email, "user");
+          const existingUsers = await base44.entities.User.list();
+          const existing = existingUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
+          if (existing) {
+            await base44.entities.User.update(existing.id, { role: "user" });
+          } else {
+            await base44.users.inviteUser(form.email, "user");
+          }
           toast({ title: "Cliente criado!", description: "Um e-mail foi enviado para o cliente criar a senha de acesso." });
         } catch {
           toast({ title: "Cliente criado!", description: "Não foi possível enviar o e-mail de convite automaticamente.", variant: "destructive" });
