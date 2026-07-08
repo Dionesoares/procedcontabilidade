@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, Send, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,6 +40,9 @@ export default function Contato() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mb-14">
             <h1 className="font-heading font-bold text-4xl sm:text-5xl text-slate-900 mb-4">Entre em Contato</h1>
             <p className="text-lg text-slate-500">Estamos prontos para ajudar sua empresa continuar crescendo.</p>
+            <a href={`https://wa.me/5563992544417?text=${encodeURIComponent("Olá! Gostaria de falar com o contador.")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-5 bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-2.5 rounded-lg transition-colors">
+              <MessageCircle className="w-5 h-5" /> Falar no WhatsApp
+            </a>
           </motion.div>
 
           <div className="grid lg:grid-cols-5 gap-12">

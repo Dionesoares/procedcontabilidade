@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { MessageSquare, Send } from "lucide-react";
+import { MessageSquare, Send, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,6 +47,9 @@ export default function FalarConosco() {
             </div>
             <h1 className="font-heading font-bold text-4xl text-slate-900 mb-3">Falar com Especialista</h1>
             <p className="text-slate-500 text-lg">Preencha o formulário e entraremos em contato rapidamente.</p>
+            <a href={`https://wa.me/5563992544417?text=${encodeURIComponent("Olá! Gostaria de falar com o contador.")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-5 bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-2.5 rounded-lg transition-colors">
+              <MessageCircle className="w-5 h-5" /> Falar no WhatsApp
+            </a>
           </motion.div>
 
           <motion.form
