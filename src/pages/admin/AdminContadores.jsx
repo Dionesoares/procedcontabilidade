@@ -30,23 +30,26 @@ export default function AdminContadores() {
     e.preventDefault();
     setSaving(true);
     try {
-      const existingUsers = await base44.entities.User.list();
-      const existing = existingUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
-      if (existing) {
-        await base44.entities.User.update(existing.id, { role: "contador" });
-        toast({ title: "Contador atualizado!", description: "Perfil atualizado para Contador com acesso ao painel administrativo." });
-      } else {
-        await base44.users.inviteUser(form.email, "admin");
-        const refreshedUsers = await base44.entities.User.list();
-        const created = refreshedUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
-        if (created) await base44.entities.User.update(created.id, { role: "contador" });
+      try {
+        const existingUsers = await base44.entities.User.list();
+        const existing = existingUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
+        if (existing) {
+          await base44.entities.User.update(existing.id, { role: "contador" });
+        } else {
+          await base44.users.inviteUser(form.email, "admin");
+          const refreshedUsers = await base44.entities.User.list();
+          const created = refreshedUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
+          if (created) await base44.entities.User.update(created.id, { role: "contador" });
+        }
         toast({ title: "Contador cadastrado!", description: "E-mail de convite enviado para criar a senha de acesso." });
+      } catch {
+        toast({ title: "Contador cadastrado!", description: "Não foi possível enviar o e-mail de convite automaticamente.", variant: "destructive" });
       }
       if (form.phone) handleSendAccess(form);
       setDialogOpen(false);
       load();
     } catch {
-      toast({ title: "Erro ao cadastrar", description: "Verifique se o e-mail já não está cadastrado.", variant: "destructive" });
+      toast({ title: "Erro ao cadastrar", variant: "destructive" });
     } finally { setSaving(false); }
   };
 
