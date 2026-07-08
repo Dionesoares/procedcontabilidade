@@ -75,7 +75,10 @@ export default function AdminContadores() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h1 className="font-heading font-bold text-2xl text-slate-900">Contadores</h1>
+        <div>
+          <h1 className="font-heading font-bold text-2xl text-slate-900">Contadores</h1>
+          <p className="text-sm text-slate-500 mt-1">Contadores têm acesso total ao Painel do Administrador e podem cadastrar novos contadores.</p>
+        </div>
         <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800">
           <Plus className="w-4 h-4 mr-1" /> Novo Contador
         </Button>
