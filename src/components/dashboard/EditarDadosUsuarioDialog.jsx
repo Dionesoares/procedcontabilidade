@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export default function EditarDadosUsuarioDialog({ open, onOpenChange, user, onSaved }) {
   const { toast } = useToast();
+  const [name, setName] = useState(user?.full_name || user?.display_name || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [saving, setSaving] = useState(false);
 
@@ -14,7 +15,7 @@ export default function EditarDadosUsuarioDialog({ open, onOpenChange, user, onS
     e.preventDefault();
     setSaving(true);
     try {
-      await base44.auth.updateMe({ phone });
+      await base44.auth.updateMe({ phone, display_name: name });
       toast({ title: "Dados atualizados!" });
       onOpenChange(false);
       onSaved && onSaved();
@@ -32,7 +33,7 @@ export default function EditarDadosUsuarioDialog({ open, onOpenChange, user, onS
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <label className="text-sm font-medium text-slate-700 mb-1 block">Nome</label>
-            <Input value={user?.full_name || ""} disabled />
+            <Input value={name} onChange={e => setName(e.target.value)} placeholder="Seu nome" disabled={!!user?.full_name} />
           </div>
           <div>
             <label className="text-sm font-medium text-slate-700 mb-1 block">Email</label>
