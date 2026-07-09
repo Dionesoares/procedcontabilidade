@@ -18,8 +18,8 @@ export default function AdminContadores() {
   const load = async () => {
     setLoading(true);
     try {
-      const users = await base44.entities.User.list();
-      setContadores(users.filter(u => u.role === "contador"));
+      const res = await base44.functions.invoke('manageContadores', { action: 'list' });
+      setContadores(res?.data?.contadores || []);
       const invites = await base44.entities.ContadorInvite.list();
       setPendingInvites(invites);
     } catch {} finally { setLoading(false); }
@@ -29,8 +29,8 @@ export default function AdminContadores() {
   const openNew = () => { setForm({ name: "", email: "", phone: "", password: "" }); setDialogOpen(true); };
 
   const findUserByEmail = async (email) => {
-    const users = await base44.entities.User.list();
-    return users.find(u => u.email?.toLowerCase() === email.toLowerCase()) || null;
+    const res = await base44.functions.invoke('manageContadores', { action: 'findByEmail', email });
+    return res?.data?.user || null;
   };
 
   const handleSave = async (e) => {
@@ -40,7 +40,7 @@ export default function AdminContadores() {
       const existing = await findUserByEmail(form.email);
       if (existing && existing.full_name) {
         // Já possui conta ativa: apenas concede o acesso de contador.
-        await base44.entities.User.update(existing.id, { role: "contador", display_name: form.name, phone: form.phone });
+        await base44.functions.invoke('manageContadores', { action: 'grantAccess', userId: existing.id, name: form.name, phone: form.phone });
         toast({ title: "Contador atualizado!", description: "O acesso ao painel do contador foi concedido." });
       } else {
         // Ainda não tem conta: cria/atualiza um convite pendente que será aplicado no cadastro.
@@ -63,7 +63,7 @@ export default function AdminContadores() {
   const handleDelete = async (c) => {
     if (!confirm("Excluir este contador? O usuário será removido do sistema, permitindo novo cadastro com o mesmo email.")) return;
     try {
-      await base44.entities.User.delete(c.id);
+      await base44.functions.invoke('manageContadores', { action: 'delete', userId: c.id });
       toast({ title: "Contador excluído do sistema!" });
       load();
     } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
