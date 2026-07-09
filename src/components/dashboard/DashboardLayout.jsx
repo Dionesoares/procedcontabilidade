@@ -3,10 +3,12 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Users, FileText, ListTodo, MessageSquare, Inbox,
-  LogOut, Menu, X, ChevronRight, FolderOpen, Settings, UserCog
+  LogOut, Menu, X, ChevronRight, FolderOpen, Settings, UserCog, Pencil, KeyRound
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/dashboard/NotificationBell";
+import EditarDadosUsuarioDialog from "@/components/dashboard/EditarDadosUsuarioDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 const adminLinks = [
   { label: "Painel", path: "/admin", icon: LayoutDashboard },
@@ -28,11 +30,20 @@ const clientLinks = [
 
 export default function DashboardLayout({ user, isAdmin }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const location = useLocation();
+  const { toast } = useToast();
   const links = isAdmin ? adminLinks : clientLinks;
 
   const handleLogout = () => {
     base44.auth.logout("/");
+  };
+
+  const handleChangePassword = async () => {
+    try {
+      await base44.auth.resetPasswordRequest(user.email);
+    } catch {}
+    toast({ title: "Verifique seu e-mail", description: "Enviamos um link para você criar uma nova senha." });
   };
 
   return (
@@ -91,6 +102,20 @@ export default function DashboardLayout({ user, isAdmin }) {
             <p className="text-xs text-slate-400 truncate">{user?.email}</p>
           </div>
           <button
+            onClick={() => setEditOpen(true)}
+            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            <Pencil className="w-4 h-4" />
+            Editar Dados
+          </button>
+          <button
+            onClick={handleChangePassword}
+            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            <KeyRound className="w-4 h-4" />
+            Alterar Senha
+          </button>
+          <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
@@ -99,6 +124,8 @@ export default function DashboardLayout({ user, isAdmin }) {
           </button>
         </div>
       </aside>
+
+      <EditarDadosUsuarioDialog open={editOpen} onOpenChange={setEditOpen} user={user} />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">

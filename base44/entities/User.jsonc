@@ -8,6 +8,10 @@
         "contador",
         "user"
       ]
+    },
+    "phone": {
+      "type": "string",
+      "description": "Telefone de contato do usu\u00e1rio"
     }
   },
   "required": [
