@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Users, FileText, ListTodo, MessageSquare, Inbox,
-  LogOut, Menu, X, ChevronRight, FolderOpen, Settings, UserCog, Pencil, KeyRound
+  LogOut, Menu, X, ChevronRight, FolderOpen, Settings, UserCog, Pencil, KeyRound, Wallet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/dashboard/NotificationBell";
@@ -14,6 +14,7 @@ const adminLinks = [
   { label: "Painel", path: "/admin", icon: LayoutDashboard },
   { label: "Clientes", path: "/admin/clientes", icon: Users },
   { label: "Contadores", path: "/admin/contadores", icon: UserCog },
+  { label: "Financeiro", path: "/admin/financeiro", icon: Wallet },
   { label: "Tarefas", path: "/admin/tarefas", icon: ListTodo },
   { label: "Documentos", path: "/admin/documentos", icon: FileText },
   { label: "Solicitações", path: "/admin/solicitacoes", icon: Inbox },

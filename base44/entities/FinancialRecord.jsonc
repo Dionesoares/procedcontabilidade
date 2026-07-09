@@ -1,0 +1,57 @@
+{
+  "name": "FinancialRecord",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "title": "Descri\u00e7\u00e3o"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nome do Cliente"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Receita",
+        "Despesa"
+      ],
+      "default": "Receita",
+      "title": "Tipo"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Valor"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Data de Vencimento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Pago",
+        "Atrasado"
+      ],
+      "default": "Pendente",
+      "title": "Status"
+    }
+  },
+  "required": [
+    "description",
+    "type",
+    "amount"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
+}

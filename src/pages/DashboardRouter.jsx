@@ -10,6 +10,7 @@ import AdminSolicitacoes from "@/pages/admin/AdminSolicitacoes";
 import AdminMensagens from "@/pages/admin/AdminMensagens";
 import AdminContatos from "@/pages/admin/AdminContatos";
 import AdminContadores from "@/pages/admin/AdminContadores";
+import AdminFinanceiro from "@/pages/admin/AdminFinanceiro";
 import ClienteDashboard from "@/pages/cliente/ClienteDashboard";
 import ClienteDocumentos from "@/pages/cliente/ClienteDocumentos";
 import ClienteSolicitacoes from "@/pages/cliente/ClienteSolicitacoes";
@@ -38,6 +39,7 @@ export function AdminRouter() {
         <Route path="mensagens" element={<AdminMensagens />} />
         <Route path="contatos-recebidos" element={<AdminContatos />} />
         <Route path="contadores" element={<AdminContadores />} />
+        <Route path="financeiro" element={<AdminFinanceiro />} />
       </Route>
     </Routes>
   );
