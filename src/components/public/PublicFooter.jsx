@@ -60,9 +60,9 @@ export default function PublicFooter() {
                 <MessageCircle className="w-4 h-4 text-blue-500 shrink-0" />
                 <span>(63) 99254-4417 - WhatsApp</span>
               </a>
-              <div className="flex items-center gap-2 text-sm text-slate-400">
-                <MapPin className="w-4 h-4 text-blue-500 shrink-0" />
-                <span>Palmas, TO</span>
+              <div className="flex items-start gap-2 text-sm text-slate-400">
+                <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                <span>Rua Porto Nacional Qd 28 Lt 15, Orla Oeste - Luzimangues / Porto Nacional CEP. 77.502-000</span>
               </div>
             </div>
           </div>

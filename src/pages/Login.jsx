@@ -46,7 +46,7 @@ export default function Login() {
               Proced<span className="text-blue-600">Contabilidade</span>
             </span>
           </Link>
-          <h1 className="font-heading font-bold text-2xl text-slate-900 mb-1">{isAdminLogin ? "Área do Administrador" : "Área do Cliente"}</h1>
+          <h1 className="font-heading font-bold text-2xl text-slate-900 mb-1">{isAdminLogin ? "Área do Contador" : "Área do Cliente"}</h1>
           <p className="text-slate-500 text-sm">{isAdminLogin ? "Acesse o painel administrativo." : "Acesse sua conta para gerenciar seus serviços."}</p>
         </div>
 

@@ -119,11 +119,11 @@ export default function AdminContadores() {
               <tbody className="divide-y divide-slate-100">
                 {contadores.map(c => (
                   <tr key={c.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-900">{c.full_name || c.display_name || "—"}</td>
+                    <td className="px-4 py-3 font-medium text-slate-900">{c.display_name || c.full_name || "—"}</td>
                     <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{c.email}</td>
                     <td className="px-4 py-3"><span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Contador</span></td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => handleSendAccess({ name: c.full_name || c.display_name, email: c.email, phone: c.phone })} title="Reenviar link" className="p-1.5 text-slate-400 hover:text-green-600 rounded" disabled={!c.phone}>
+                      <button onClick={() => handleSendAccess({ name: c.display_name || c.full_name, email: c.email, phone: c.phone })} title="Reenviar link" className="p-1.5 text-slate-400 hover:text-green-600 rounded" disabled={!c.phone}>
                         <KeyRound className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleDelete(c)} title="Excluir" className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
