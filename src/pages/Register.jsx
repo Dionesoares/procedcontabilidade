@@ -33,12 +33,8 @@ export default function Register() {
       const { access_token } = await base44.auth.verifyOtp({ email, otpCode });
       base44.auth.setToken(access_token);
       try {
-        const invites = await base44.entities.ContadorInvite.filter({ email });
-        if (invites && invites.length > 0) {
-          const invite = invites[0];
-          const me = await base44.auth.me();
-          await base44.entities.User.update(me.id, { role: "contador", display_name: invite.name, phone: invite.phone });
-          await base44.entities.ContadorInvite.delete(invite.id);
+        const res = await base44.functions.invoke('applyContadorInvite', { email });
+        if (res?.data?.applied) {
           window.location.href = "/admin";
           return;
         }
