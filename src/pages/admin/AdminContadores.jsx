@@ -75,9 +75,8 @@ export default function AdminContadores() {
   };
 
   const handleSendAccess = (c) => {
-    const registerLink = `${window.location.origin}/register`;
-    const senhaInfo = c.password ? ` Use a senha: ${c.password}` : "";
-    const message = `Olá, ${c.name || ""}! Você foi cadastrado como Contador na plataforma Proced Contabilidade, com acesso total ao painel do sistema. Para ativar seu acesso, acesse este link: ${registerLink} e crie sua conta usando o email ${c.email}.${senhaInfo} Depois de criar sua senha, é só fazer login normalmente no site.`;
+    const senhaInfo = c.password ? ` Sugestão de senha: ${c.password}` : "";
+    const message = `Olá, ${c.name || ""}! Você foi cadastrado como Contador na plataforma Proced Contabilidade, com acesso total ao painel do sistema. Verifique seu email (${c.email}) e clique no link "Aceitar Convite" que enviamos para criar sua senha e ativar seu acesso.${senhaInfo} Depois disso, é só fazer login normalmente no site.`;
     const phoneDigits = c.phone.replace(/\D/g, "");
     window.open(`https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
     toast({ title: "WhatsApp aberto!", description: "Envie o convite para o contador criar seu acesso." });
