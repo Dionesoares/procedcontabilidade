@@ -40,28 +40,25 @@ export default function AdminContadores() {
     e.preventDefault();
     setSaving(true);
     try {
-      try {
-        const existing = await findUserByEmail(form.email, 1);
-        if (existing) {
-          await base44.entities.User.update(existing.id, { role: "contador", display_name: form.name, phone: form.phone });
-        } else {
-          await base44.users.inviteUser(form.email, "admin");
-          const created = await findUserByEmail(form.email, 6);
-          if (created) {
-            await base44.entities.User.update(created.id, { role: "contador", display_name: form.name, phone: form.phone });
-          } else {
-            toast({ title: "Contador convidado, mas o acesso ao painel precisa ser confirmado manualmente.", variant: "destructive" });
-          }
+      const existing = await findUserByEmail(form.email, 1);
+      if (existing && existing.full_name) {
+        // Já possui conta ativa: apenas atualiza o papel de acesso.
+        await base44.entities.User.update(existing.id, { role: "contador", display_name: form.name, phone: form.phone });
+        toast({ title: "Contador atualizado!", description: "O acesso ao painel do contador foi concedido." });
+      } else {
+        // Conta ainda não criada (ou convite pendente): (re)envia o convite por e-mail.
+        await base44.users.inviteUser(form.email, "admin");
+        const created = await findUserByEmail(form.email, 6);
+        if (created) {
+          await base44.entities.User.update(created.id, { role: "contador", display_name: form.name, phone: form.phone });
         }
-        toast({ title: "Convite enviado!", description: "E-mail de convite enviado para criar a senha de acesso." });
-      } catch {
-        toast({ title: "Contador cadastrado!", description: "Não foi possível enviar o e-mail de convite automaticamente.", variant: "destructive" });
+        toast({ title: "Convite enviado!", description: "Um e-mail de convite foi enviado para o contador criar sua senha." });
       }
       if (form.phone) handleSendAccess(form);
       setDialogOpen(false);
       load();
     } catch {
-      toast({ title: "Erro ao cadastrar", variant: "destructive" });
+      toast({ title: "Erro ao enviar convite", description: "Não foi possível enviar o e-mail de convite. Tente novamente.", variant: "destructive" });
     } finally { setSaving(false); }
   };
 
