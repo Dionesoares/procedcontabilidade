@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, KeyRound, UserCog, Trash2 } from "lucide-react";
+import { Send, KeyRound, UserCog, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -12,7 +12,7 @@ export default function AdminContadores() {
   const [contadores, setContadores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -24,7 +24,7 @@ export default function AdminContadores() {
   };
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setForm({ name: "", email: "", phone: "" }); setDialogOpen(true); };
+  const openNew = () => { setForm({ name: "", email: "", phone: "", password: "" }); setDialogOpen(true); };
 
   const findUserByEmail = async (email, attempts = 5) => {
     for (let i = 0; i < attempts; i++) {
@@ -53,7 +53,7 @@ export default function AdminContadores() {
             toast({ title: "Contador convidado, mas o acesso ao painel precisa ser confirmado manualmente.", variant: "destructive" });
           }
         }
-        toast({ title: "Contador cadastrado!", description: "E-mail de convite enviado para criar a senha de acesso." });
+        toast({ title: "Convite enviado!", description: "E-mail de convite enviado para criar a senha de acesso." });
       } catch {
         toast({ title: "Contador cadastrado!", description: "Não foi possível enviar o e-mail de convite automaticamente.", variant: "destructive" });
       }
@@ -76,10 +76,11 @@ export default function AdminContadores() {
 
   const handleSendAccess = (c) => {
     const registerLink = `${window.location.origin}/register`;
-    const message = `Olá, ${c.name || ""}! Seu cadastro como Contador foi criado na plataforma Proced Contabilidade. Para ativar seu acesso, acesse este link: ${registerLink} e crie sua senha de acesso usando o email ${c.email}. Depois de criar sua senha, é só fazer login normalmente no site.`;
+    const senhaInfo = c.password ? ` Use a senha: ${c.password}` : "";
+    const message = `Olá, ${c.name || ""}! Você foi cadastrado como Contador na plataforma Proced Contabilidade, com acesso total ao painel do sistema. Para ativar seu acesso, acesse este link: ${registerLink} e crie sua conta usando o email ${c.email}.${senhaInfo} Depois de criar sua senha, é só fazer login normalmente no site.`;
     const phoneDigits = c.phone.replace(/\D/g, "");
     window.open(`https://wa.me/55${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank");
-    toast({ title: "WhatsApp aberto!", description: "Envie o link para o contador criar a senha de acesso." });
+    toast({ title: "WhatsApp aberto!", description: "Envie o convite para o contador criar seu acesso." });
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
@@ -92,7 +93,7 @@ export default function AdminContadores() {
           <p className="text-sm text-slate-500 mt-1">Contadores têm acesso total ao Painel do Administrador e podem cadastrar novos contadores.</p>
         </div>
         <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800">
-          <Plus className="w-4 h-4 mr-1" /> Novo Contador
+          <Send className="w-4 h-4 mr-1" /> Enviar Convite
         </Button>
       </div>
 
@@ -117,7 +118,7 @@ export default function AdminContadores() {
                     <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{c.email}</td>
                     <td className="px-4 py-3"><span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Contador</span></td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => handleSendAccess({ name: c.full_name || c.display_name, email: c.email, phone: c.phone })} title="Reenviar acesso" className="p-1.5 text-slate-400 hover:text-green-600 rounded" disabled={!c.phone}>
+                      <button onClick={() => handleSendAccess({ name: c.full_name || c.display_name, email: c.email, phone: c.phone, password: "" })} title="Reenviar convite" className="p-1.5 text-slate-400 hover:text-green-600 rounded" disabled={!c.phone}>
                         <KeyRound className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleDelete(c)} title="Excluir" className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
@@ -133,16 +134,17 @@ export default function AdminContadores() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><UserCog className="w-5 h-5 text-blue-600" /> Novo Contador</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><UserCog className="w-5 h-5 text-blue-600" /> Enviar Convite de Contador</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4">
-            <div><label className="text-sm font-medium text-slate-700 mb-1 block">Nome</label><Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Nome do contador" /></div>
+            <div><label className="text-sm font-medium text-slate-700 mb-1 block">Nome*</label><Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} required placeholder="Nome do contador" /></div>
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Email*</label><Input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required placeholder="email@exemplo.com" /></div>
-            <div><label className="text-sm font-medium text-slate-700 mb-1 block">Telefone</label><Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="(63) 99999-9999" /></div>
-            <p className="text-xs text-slate-400">O contador receberá um e-mail para criar a senha e um link será aberto no WhatsApp para envio manual.</p>
+            <div><label className="text-sm font-medium text-slate-700 mb-1 block">Telefone*</label><Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required placeholder="(63) 99999-9999" /></div>
+            <div><label className="text-sm font-medium text-slate-700 mb-1 block">Senha sugerida*</label><Input value={form.password} onChange={e => setForm({...form, password: e.target.value})} required placeholder="Senha de acesso" /></div>
+            <p className="text-xs text-slate-400">O contador receberá um convite por e-mail e um link será aberto no WhatsApp com os dados de acesso. Ao criar a conta, o contador tem acesso total ao painel do sistema.</p>
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={saving} className="bg-blue-700 hover:bg-blue-800">{saving ? "Salvando..." : "Cadastrar"}</Button>
+              <Button type="submit" disabled={saving} className="bg-blue-700 hover:bg-blue-800">{saving ? "Enviando..." : "Enviar Convite"}</Button>
             </div>
           </form>
         </DialogContent>
