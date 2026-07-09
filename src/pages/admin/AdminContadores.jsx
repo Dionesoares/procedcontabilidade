@@ -26,20 +26,32 @@ export default function AdminContadores() {
 
   const openNew = () => { setForm({ name: "", email: "", phone: "" }); setDialogOpen(true); };
 
+  const findUserByEmail = async (email, attempts = 5) => {
+    for (let i = 0; i < attempts; i++) {
+      const users = await base44.entities.User.list();
+      const found = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+      if (found) return found;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+    return null;
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
       try {
-        const existingUsers = await base44.entities.User.list();
-        const existing = existingUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
+        const existing = await findUserByEmail(form.email, 1);
         if (existing) {
           await base44.entities.User.update(existing.id, { role: "contador" });
         } else {
           await base44.users.inviteUser(form.email, "admin");
-          const refreshedUsers = await base44.entities.User.list();
-          const created = refreshedUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
-          if (created) await base44.entities.User.update(created.id, { role: "contador" });
+          const created = await findUserByEmail(form.email, 6);
+          if (created) {
+            await base44.entities.User.update(created.id, { role: "contador" });
+          } else {
+            toast({ title: "Contador convidado, mas o acesso ao painel precisa ser confirmado manualmente.", variant: "destructive" });
+          }
         }
         toast({ title: "Contador cadastrado!", description: "E-mail de convite enviado para criar a senha de acesso." });
       } catch {
