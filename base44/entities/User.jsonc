@@ -12,6 +12,10 @@
     "phone": {
       "type": "string",
       "description": "Telefone de contato do usu\u00e1rio"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Nome cadastrado pelo administrador para contadores ainda n\u00e3o registrados"
     }
   },
   "required": [
