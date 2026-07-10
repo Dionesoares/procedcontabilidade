@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Pencil, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { Plus, Trash2, Pencil, TrendingUp, TrendingDown, Wallet, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import FinanceiroFormDialog from "@/components/financeiro/FinanceiroFormDialog";
 import FinanceiroSummaryCards from "@/components/financeiro/FinanceiroSummaryCards";
+import FinanceiroReportChart from "@/components/financeiro/FinanceiroReportChart";
+import CobrancaDialog from "@/components/financeiro/CobrancaDialog";
 
 export default function AdminFinanceiro() {
   const { toast } = useToast();
@@ -12,6 +14,7 @@ export default function AdminFinanceiro() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [cobrancaOpen, setCobrancaOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -67,12 +70,21 @@ export default function AdminFinanceiro() {
           <h1 className="font-heading font-bold text-2xl text-slate-900">Financeiro</h1>
           <p className="text-sm text-slate-500 mt-1">Controle de receitas e despesas do escritório.</p>
         </div>
-        <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800">
-          <Plus className="w-4 h-4 mr-1" /> Novo Lançamento
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button onClick={() => setCobrancaOpen(true)} variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
+            <Send className="w-4 h-4 mr-1" /> Cobrar Cliente
+          </Button>
+          <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800">
+            <Plus className="w-4 h-4 mr-1" /> Novo Lançamento
+          </Button>
+        </div>
       </div>
 
       <FinanceiroSummaryCards records={records} />
+
+      <div className="mt-6">
+        <FinanceiroReportChart records={records} />
+      </div>
 
       {records.length === 0 ? (
         <div className="text-center py-16 text-slate-400">Nenhum lançamento cadastrado.</div>
@@ -122,6 +134,7 @@ export default function AdminFinanceiro() {
       )}
 
       <FinanceiroFormDialog open={dialogOpen} onOpenChange={setDialogOpen} record={editing} onSave={handleSave} />
+      <CobrancaDialog open={cobrancaOpen} onOpenChange={setCobrancaOpen} onCharged={load} />
     </div>
   );
 }
