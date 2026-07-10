@@ -99,7 +99,7 @@ export default function DashboardLayout({ user, isAdmin }) {
 
         <div className="p-3 border-t border-slate-100">
           <div className="px-3 py-2 mb-2">
-            <p className="text-sm font-medium text-slate-900 truncate">{user?.full_name || user?.email}</p>
+            <p className="text-sm font-medium text-slate-900 truncate">{user?.display_name || user?.full_name || user?.email}</p>
             <p className="text-xs text-slate-400 truncate">{user?.email}</p>
           </div>
           <button
