@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const emptyForm = { description: "", client_name: "", type: "Receita", amount: "", due_date: "", status: "Pendente" };
+const emptyForm = { description: "", client_id: "", client_name: "", type: "Receita", amount: "", due_date: "", status: "Pendente" };
 
 export default function FinanceiroFormDialog({ open, onOpenChange, record, onSave }) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [clients, setClients] = useState([]);
 
   useEffect(() => {
-    if (open) setForm(record ? { ...emptyForm, ...record } : emptyForm);
+    if (open) {
+      setForm(record ? { ...emptyForm, ...record } : emptyForm);
+      base44.entities.Client.list().then(setClients);
+    }
   }, [open, record]);
 
   const handleSubmit = async (e) => {
@@ -34,7 +39,25 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
           </div>
           <div>
             <label className="text-sm font-medium text-slate-700 mb-1 block">Cliente (opcional)</label>
-            <Input value={form.client_name} onChange={e => setForm({ ...form, client_name: e.target.value })} placeholder="Nome do cliente" />
+            <Select
+              value={form.client_id || "none"}
+              onValueChange={v => {
+                if (v === "none") {
+                  setForm({ ...form, client_id: "", client_name: "" });
+                } else {
+                  const client = clients.find(c => c.id === v);
+                  setForm({ ...form, client_id: v, client_name: client?.name || "" });
+                }
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhum</SelectItem>
+                {clients.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
