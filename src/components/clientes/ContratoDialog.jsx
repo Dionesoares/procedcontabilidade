@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Printer, Download } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { fillContractTemplate } from "@/lib/contractTemplate";
 
 export default function ContratoDialog({ open, onOpenChange, client, contract, onSave }) {
@@ -18,6 +20,26 @@ export default function ContratoDialog({ open, onOpenChange, client, contract, o
       setSigned(contract?.status === "Assinado");
     }
   }, [open, contract, client]);
+
+  const handlePrint = () => {
+    const win = window.open("", "_blank");
+    win.document.write(`<pre style="white-space:pre-wrap;font-family:monospace;font-size:12px;padding:24px;">${content.replace(/</g, "&lt;")}</pre>`);
+    win.document.close();
+    win.focus();
+    win.print();
+  };
+
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF();
+    const lines = doc.splitTextToSize(content, 180);
+    let y = 15;
+    lines.forEach((line) => {
+      if (y > 285) { doc.addPage(); y = 15; }
+      doc.text(line, 15, y);
+      y += 5;
+    });
+    doc.save(`contrato-${(client?.name || "cliente").replace(/\s+/g, "-").toLowerCase()}.pdf`);
+  };
 
   const handleSave = () => {
     onSave({
@@ -50,11 +72,21 @@ export default function ContratoDialog({ open, onOpenChange, client, contract, o
             <label htmlFor="signed" className="text-sm text-slate-700">Confirmo que li e assino digitalmente este contrato em nome do cliente.</label>
           </div>
         </div>
-        <div className="flex justify-end gap-3 pt-2 border-t mt-2">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button type="button" onClick={handleSave} className="bg-blue-700 hover:bg-blue-800">
-            {signed ? "Assinar e Salvar" : "Salvar Rascunho"}
-          </Button>
+        <div className="flex justify-between items-center gap-3 pt-2 border-t mt-2 flex-wrap">
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={handlePrint}>
+              <Printer className="w-4 h-4 mr-1" /> Imprimir
+            </Button>
+            <Button type="button" variant="outline" onClick={handleDownloadPdf}>
+              <Download className="w-4 h-4 mr-1" /> Baixar PDF
+            </Button>
+          </div>
+          <div className="flex gap-3">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button type="button" onClick={handleSave} className="bg-blue-700 hover:bg-blue-800">
+              {signed ? "Assinar e Salvar" : "Salvar Rascunho"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

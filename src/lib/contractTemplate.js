@@ -2,7 +2,7 @@ export const CONTRACT_TEMPLATE = `INSTRUMENTO PARTICULAR DE CONTRATO DE PRESTAÇ
 
 CONTRATADA: KLEBER ROCHA DOS REIS, prestadora de serviços, estabelecida à Rua Porto Nacional, Quadra 28 Lote 15, Bairro: Orla Oeste - Luzimangues – Porto Nacional – TO, CEP: 77.502-000, e inscrição perante o CRC sob o nº 006394/O-2, portador da Cédula de Identidade RG N° 0807.134 SSP-TO e CPF nº 030.054.841-90.
 
-CONTRATANTE: [RAZÃO SOCIAL], firma comercial, estabelecida à [ENDEREÇO], CEP: [CEP], neste ato por seu representante legal, o Sr. [NOME DO RESPONSÁVEL], portador do CPF nº [CPF/CNPJ].
+CONTRATANTE: [RAZÃO SOCIAL], firma comercial, estabelecida à [ENDEREÇO], neste ato por seu representante legal, o Sr. [NOME DO RESPONSÁVEL], portador do CPF nº [CPF/CNPJ].
 
 Pelo presente instrumento particular, as partes acima, devidamente qualificadas, doravante denominadas, simplesmente, CONTRATADA e CONTRATANTE, na melhor forma de direito, ajustam e contratam a prestação de serviços profissionais, segundo as cláusulas e condições adiante arroladas.
 
@@ -94,7 +94,6 @@ export function fillContractTemplate(client = {}) {
   return CONTRACT_TEMPLATE
     .replaceAll("[RAZÃO SOCIAL]", client.company_name || client.name || "[RAZÃO SOCIAL]")
     .replaceAll("[ENDEREÇO]", client.address || "[ENDEREÇO]")
-    .replaceAll("[CEP]", "[CEP]")
     .replaceAll("[NOME DO RESPONSÁVEL]", client.name || "[NOME DO RESPONSÁVEL]")
     .replaceAll("[CPF/CNPJ]", client.cpf_cnpj || "[CPF/CNPJ]")
     .replaceAll("[DATA]", today);
