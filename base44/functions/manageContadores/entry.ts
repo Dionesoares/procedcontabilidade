@@ -30,6 +30,12 @@ Deno.serve(async (req) => {
       return Response.json({ success: true });
     }
 
+    if (action === 'update') {
+      if (!userId) return Response.json({ error: 'userId is required' }, { status: 400 });
+      await base44.asServiceRole.entities.User.update(userId, { display_name: name, phone });
+      return Response.json({ success: true });
+    }
+
     if (action === 'delete') {
       if (!userId) return Response.json({ error: 'userId is required' }, { status: 400 });
       await base44.asServiceRole.entities.User.delete(userId);

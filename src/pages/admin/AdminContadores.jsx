@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Send, KeyRound, UserCog, Trash2 } from "lucide-react";
+import { Send, KeyRound, UserCog, Trash2, Pencil } from "lucide-react";
+import EditarContadorDialog from "@/components/admin/EditarContadorDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +15,7 @@ export default function AdminContadores() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [saving, setSaving] = useState(false);
+  const [editContador, setEditContador] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -123,6 +125,7 @@ export default function AdminContadores() {
                     <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{c.email}</td>
                     <td className="px-4 py-3"><span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Contador</span></td>
                     <td className="px-4 py-3 text-right">
+                      <button onClick={() => setEditContador(c)} title="Editar perfil" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Pencil className="w-4 h-4" /></button>
                       <button onClick={() => handleSendAccess({ name: c.display_name || c.full_name, email: c.email, phone: c.phone })} title="Reenviar link" className="p-1.5 text-slate-400 hover:text-green-600 rounded" disabled={!c.phone}>
                         <KeyRound className="w-4 h-4" />
                       </button>
@@ -189,6 +192,13 @@ export default function AdminContadores() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <EditarContadorDialog
+        open={!!editContador}
+        onOpenChange={(v) => !v && setEditContador(null)}
+        contador={editContador}
+        onSaved={load}
+      />
     </div>
   );
 }
