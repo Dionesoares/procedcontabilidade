@@ -1,0 +1,45 @@
+{
+  "name": "Contract",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nome do Cliente"
+    },
+    "content": {
+      "type": "string",
+      "title": "Conte\u00fado do Contrato"
+    },
+    "signature_name": {
+      "type": "string",
+      "title": "Nome do Assinante"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Assinado"
+      ],
+      "default": "Pendente",
+      "title": "Status"
+    },
+    "signed_at": {
+      "type": "string",
+      "title": "Assinado em"
+    }
+  },
+  "required": [
+    "client_id",
+    "content"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
+}

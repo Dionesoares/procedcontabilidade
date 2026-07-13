@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Search, Edit, Trash2, X, KeyRound } from "lucide-react";
+import { Plus, Search, Edit, Trash2, X, KeyRound, FileSignature } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+import ContratoDialog from "@/components/clientes/ContratoDialog";
 
 const emptyForm = { name: "", email: "", phone: "", cpf_cnpj: "", company_name: "", company_type: "", address: "", notes: "", status: "Ativo" };
 
@@ -20,6 +21,8 @@ export default function AdminClientes() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [contractDialogOpen, setContractDialogOpen] = useState(false);
+  const [contract, setContract] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -27,8 +30,27 @@ export default function AdminClientes() {
   };
   useEffect(() => { load(); }, []);
 
-  const openNew = () => { setEditing(null); setForm(emptyForm); setDialogOpen(true); };
-  const openEdit = (c) => { setEditing(c); setForm({ name: c.name || "", email: c.email || "", phone: c.phone || "", cpf_cnpj: c.cpf_cnpj || "", company_name: c.company_name || "", company_type: c.company_type || "", address: c.address || "", notes: c.notes || "", status: c.status || "Ativo" }); setDialogOpen(true); };
+  const openNew = () => { setEditing(null); setForm(emptyForm); setContract(null); setDialogOpen(true); };
+  const openEdit = async (c) => {
+    setEditing(c);
+    setForm({ name: c.name || "", email: c.email || "", phone: c.phone || "", cpf_cnpj: c.cpf_cnpj || "", company_name: c.company_name || "", company_type: c.company_type || "", address: c.address || "", notes: c.notes || "", status: c.status || "Ativo" });
+    setContract(null);
+    try {
+      const existing = await base44.entities.Contract.filter({ client_id: c.id });
+      if (existing.length) setContract(existing[0]);
+    } catch {}
+    setDialogOpen(true);
+  };
+
+  const saveContractForClient = async (clientId) => {
+    if (!contract?.content) return;
+    const data = { client_id: clientId, client_name: form.name, content: contract.content, signature_name: contract.signature_name || "", status: contract.status || "Pendente", signed_at: contract.signed_at || "" };
+    if (contract.id) {
+      await base44.entities.Contract.update(contract.id, data);
+    } else {
+      await base44.entities.Contract.create(data);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -36,9 +58,11 @@ export default function AdminClientes() {
     try {
       if (editing) {
         await base44.entities.Client.update(editing.id, form);
+        await saveContractForClient(editing.id);
         toast({ title: "Cliente atualizado!" });
       } else {
         const newClient = await base44.entities.Client.create(form);
+        await saveContractForClient(newClient.id);
         try {
           const existingUsers = await base44.entities.User.list();
           const existing = existingUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
@@ -176,6 +200,19 @@ export default function AdminClientes() {
               </Select>
             </div>
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Observações</label><Textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} rows={2} /></div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">Contrato de Serviços</label>
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="outline" onClick={() => setContractDialogOpen(true)}>
+                  <FileSignature className="w-4 h-4 mr-1" /> Editar e Assinar Contrato
+                </Button>
+                {contract && (
+                  <Badge className={contract.status === "Assinado" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}>
+                    {contract.status || "Pendente"}
+                  </Badge>
+                )}
+              </div>
+            </div>
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
               <Button type="submit" disabled={saving} className="bg-blue-700 hover:bg-blue-800">{saving ? "Salvando..." : "Salvar"}</Button>
@@ -183,6 +220,14 @@ export default function AdminClientes() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ContratoDialog
+        open={contractDialogOpen}
+        onOpenChange={setContractDialogOpen}
+        client={form}
+        contract={contract}
+        onSave={setContract}
+      />
     </div>
   );
 }
