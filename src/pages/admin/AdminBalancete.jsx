@@ -10,6 +10,7 @@ import BalanceteChart from "@/components/balancete/BalanceteChart";
 import BalanceteHierarchyTable from "@/components/balancete/BalanceteHierarchyTable";
 import BalanceteRelatorioGeral from "@/components/balancete/BalanceteRelatorioGeral";
 import BalanceteClientHeader from "@/components/balancete/BalanceteClientHeader";
+import BalanceteHeaderEditDialog from "@/components/balancete/BalanceteHeaderEditDialog";
 import BalanceteLancamentoDialog from "@/components/balancete/BalanceteLancamentoDialog";
 import { computeBalanceteTree } from "@/lib/balanceteCalc";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
@@ -35,6 +36,8 @@ export default function AdminBalancete() {
   const [signatureCliente, setSignatureCliente] = useState("");
   const [uploadingExcel, setUploadingExcel] = useState(false);
   const fileInputRef = useRef(null);
+  const [headerData, setHeaderData] = useState({ companyName: "", cnpj: "", address: "", folha: "0001", numeroLivro: "0001" });
+  const [headerDialogOpen, setHeaderDialogOpen] = useState(false);
 
   useEffect(() => {
     base44.entities.Client.list().then(setClients).finally(() => setLoading(false));
@@ -50,7 +53,26 @@ export default function AdminBalancete() {
     setViewingBalancete(null);
     const c = clients.find((cl) => cl.id === clientId);
     setSignatureCliente(c?.name || "");
+    setHeaderData({
+      companyName: c?.company_name || c?.name || "",
+      cnpj: c?.cpf_cnpj || "",
+      address: c?.address || "",
+      folha: "0001",
+      numeroLivro: "0001",
+    });
   }, [clientId]);
+
+  useEffect(() => {
+    if (viewingBalancete) {
+      setHeaderData({
+        companyName: viewingBalancete.client_company_name || viewingBalancete.client_name || "",
+        cnpj: viewingBalancete.client_cnpj || "",
+        address: viewingBalancete.client_address || "",
+        folha: viewingBalancete.folha || "0001",
+        numeroLivro: viewingBalancete.numero_livro || "0001",
+      });
+    }
+  }, [viewingBalancete]);
 
   const selectedClient = clients.find((c) => c.id === clientId);
   const categoriaLabel = (v) => CATEGORIA_OPTIONS.find((c) => c.value === v)?.label || v;
@@ -60,6 +82,29 @@ export default function AdminBalancete() {
   const headerPeriodEnd = viewingBalancete ? viewingBalancete.period_end : periodEnd;
   const headerSignatureContador = viewingBalancete ? viewingBalancete.signature_contador : signatureContador;
   const headerSignatureCliente = viewingBalancete ? viewingBalancete.signature_cliente : signatureCliente;
+
+  const handleSaveHeader = async (form) => {
+    setHeaderData(form);
+    setHeaderDialogOpen(false);
+    if (viewingBalancete) {
+      try {
+        const updated = await base44.entities.Balancete.update(viewingBalancete.id, {
+          client_company_name: form.companyName,
+          client_cnpj: form.cnpj,
+          client_address: form.address,
+          folha: form.folha,
+          numero_livro: form.numeroLivro,
+        });
+        setViewingBalancete(updated);
+        setSaved((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+        toast({ title: "Cabeçalho atualizado!" });
+      } catch {
+        toast({ title: "Erro ao atualizar cabeçalho", variant: "destructive" });
+      }
+    } else {
+      toast({ title: "Cabeçalho atualizado!", description: "Será usado ao gerar o próximo balancete." });
+    }
+  };
 
   const openNew = () => { setEditingLancamento(null); setDialogOpen(true); };
   const openEdit = (l) => { setEditingLancamento(l); setDialogOpen(true); };
@@ -99,9 +144,11 @@ export default function AdminBalancete() {
       const created = await base44.entities.Balancete.create({
         client_id: clientId,
         client_name: selectedClient?.name || "",
-        client_company_name: selectedClient?.company_name || selectedClient?.name || "",
-        client_cnpj: selectedClient?.cpf_cnpj || "",
-        client_address: selectedClient?.address || "",
+        client_company_name: headerData.companyName || selectedClient?.company_name || selectedClient?.name || "",
+        client_cnpj: headerData.cnpj || selectedClient?.cpf_cnpj || "",
+        client_address: headerData.address || selectedClient?.address || "",
+        folha: headerData.folha || "0001",
+        numero_livro: headerData.numeroLivro || "0001",
         period_start: periodStart,
         period_end: periodEnd,
         tree: JSON.stringify(previewTree),
@@ -124,6 +171,11 @@ export default function AdminBalancete() {
   const handleExcelUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !clientId) return;
+    if (/\.xls$/i.test(file.name)) {
+      toast({ title: "Formato não suportado", description: "Arquivos .xls não são aceitos. Abra a planilha e salve como .xlsx ou .csv antes de importar.", variant: "destructive" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
     setUploadingExcel(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
@@ -184,7 +236,10 @@ export default function AdminBalancete() {
       toast({ title: "Planilha importada!", description: `${items.length} lançamento(s) adicionado(s).` });
       loadLancamentos(clientId);
     } catch (err) {
-      toast({ title: "Erro ao importar planilha", description: err?.message || "Verifique o formato do arquivo e tente novamente.", variant: "destructive" });
+      const msg = /unsupported file type/i.test(err?.message || "")
+        ? "Formato de arquivo não suportado. Use .xlsx ou .csv."
+        : err?.message || "Verifique o formato do arquivo e tente novamente.";
+      toast({ title: "Erro ao importar planilha", description: msg, variant: "destructive" });
     } finally {
       setUploadingExcel(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -243,9 +298,9 @@ export default function AdminBalancete() {
         <Button onClick={handleGerar} disabled={!clientId || generating} className="bg-blue-700 hover:bg-blue-800">
           {generating ? "Gerando..." : "Gerar Balancete"}
         </Button>
-        <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleExcelUpload} />
+        <input ref={fileInputRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={handleExcelUpload} />
         <Button type="button" variant="outline" disabled={!clientId || uploadingExcel} onClick={() => fileInputRef.current?.click()}>
-          <Upload className="w-4 h-4 mr-1" /> {uploadingExcel ? "Importando..." : "Carregar Excel"}
+          <Upload className="w-4 h-4 mr-1" /> {uploadingExcel ? "Importando..." : "Carregar Excel (.xlsx/.csv)"}
         </Button>
       </div>
 
@@ -300,7 +355,16 @@ export default function AdminBalancete() {
             </div>
           )}
           <div className="space-y-6">
-            <BalanceteClientHeader client={selectedClient} periodStart={headerPeriodStart} periodEnd={headerPeriodEnd} />
+            <BalanceteClientHeader
+              companyName={headerData.companyName}
+              cnpj={headerData.cnpj}
+              address={headerData.address}
+              folha={headerData.folha}
+              numeroLivro={headerData.numeroLivro}
+              periodStart={headerPeriodStart}
+              periodEnd={headerPeriodEnd}
+              onEdit={() => setHeaderDialogOpen(true)}
+            />
             <BalanceteSummaryCards tree={currentTree} />
             <BalanceteChart tree={currentTree} />
             <BalanceteHierarchyTable tree={currentTree} />
@@ -342,6 +406,7 @@ export default function AdminBalancete() {
       )}
 
       <BalanceteLancamentoDialog open={dialogOpen} onOpenChange={setDialogOpen} lancamento={editingLancamento} onSave={handleSaveLancamento} />
+      <BalanceteHeaderEditDialog open={headerDialogOpen} onOpenChange={setHeaderDialogOpen} data={headerData} onSave={handleSaveHeader} />
     </div>
   );
 }

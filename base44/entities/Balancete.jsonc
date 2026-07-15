@@ -22,6 +22,16 @@
       "type": "string",
       "title": "Endere\u00e7o do Cliente"
     },
+    "folha": {
+      "type": "string",
+      "default": "0001",
+      "title": "Folha"
+    },
+    "numero_livro": {
+      "type": "string",
+      "default": "0001",
+      "title": "N\u00famero do Livro"
+    },
     "period_start": {
       "type": "string",
       "format": "date",

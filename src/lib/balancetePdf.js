@@ -22,7 +22,7 @@ export function generateBalancetePdf(balancete) {
   doc.setFont(undefined, "bold");
   doc.text("Folha:", 165, y);
   doc.setFont(undefined, "normal");
-  doc.text("0001", 180, y);
+  doc.text(String(balancete.folha || "0001"), 180, y);
   y += 6;
   doc.setFont(undefined, "bold");
   doc.text("C.N.P.J:", 14, y);
@@ -31,7 +31,7 @@ export function generateBalancetePdf(balancete) {
   doc.setFont(undefined, "bold");
   doc.text("Número livro:", 165, y);
   doc.setFont(undefined, "normal");
-  doc.text("0001", 190, y);
+  doc.text(String(balancete.numero_livro || "0001"), 190, y);
   y += 6;
   doc.setFont(undefined, "bold");
   doc.text("Endereço:", 14, y);
