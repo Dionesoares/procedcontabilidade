@@ -1,9 +1,9 @@
 import React from "react";
 import { Landmark, ScrollText, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
-import { fmtRaw } from "@/lib/balanceteCalc";
+import { fmtRaw, getTotals } from "@/lib/balanceteCalc";
 
 export default function BalanceteSummaryCards({ tree }) {
-  const [ativo, passivo, despesas, receitas] = tree || [];
+  const { ativo, passivo, despesas, receitas } = getTotals(tree);
   const cards = [
     { icon: Landmark, label: "Ativo", value: fmtRaw(ativo?.saldoAtualRaw), color: "bg-blue-100 text-blue-600" },
     { icon: ScrollText, label: "Passivo", value: fmtRaw(passivo?.saldoAtualRaw), color: "bg-slate-200 text-slate-700" },

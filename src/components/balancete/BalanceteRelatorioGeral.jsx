@@ -1,8 +1,17 @@
 import React from "react";
-import { fmtRaw } from "@/lib/balanceteCalc";
+import { fmtRaw, getTotals } from "@/lib/balanceteCalc";
 
-export default function BalanceteRelatorioGeral({ tree, clientName, signatureContador, signatureCliente }) {
-  const [ativo, passivo, despesas, receitas] = tree || [];
+export default function BalanceteRelatorioGeral({
+  tree,
+  clientName,
+  signatureContador,
+  signatureContadorCrc,
+  signatureContadorCpf,
+  signatureCliente,
+  signatureClienteRole,
+  signatureClienteCpf,
+}) {
+  const { ativo, passivo, despesas, receitas } = getTotals(tree);
   const resultado = (receitas?.saldoAtualRaw || 0) - (despesas?.saldoAtualRaw || 0);
 
   return (
@@ -35,12 +44,15 @@ export default function BalanceteRelatorioGeral({ tree, clientName, signatureCon
 
       <div className="grid sm:grid-cols-2 gap-8 pt-6 border-t border-slate-100">
         <div className="text-center">
-          <p className="border-t border-slate-400 pt-2 mt-10 text-sm font-medium text-slate-800">{signatureContador || "___________________________"}</p>
-          <p className="text-xs text-slate-400">Contador Responsável</p>
+          <p className="border-t border-slate-400 pt-2 mt-10 text-sm font-medium text-slate-800">{signatureCliente || clientName || "___________________________"}</p>
+          <p className="text-xs text-slate-500">{signatureClienteRole || "Sócio Proprietário"}</p>
+          {signatureClienteCpf && <p className="text-xs text-slate-400">CPF: {signatureClienteCpf}</p>}
         </div>
         <div className="text-center">
-          <p className="border-t border-slate-400 pt-2 mt-10 text-sm font-medium text-slate-800">{signatureCliente || clientName || "___________________________"}</p>
-          <p className="text-xs text-slate-400">Cliente / Sócio Proprietário</p>
+          <p className="border-t border-slate-400 pt-2 mt-10 text-sm font-medium text-slate-800">{signatureContador || "___________________________"}</p>
+          <p className="text-xs text-slate-500">Contador</p>
+          {signatureContadorCrc && <p className="text-xs text-slate-400">Reg. no CRC sob o No. {signatureContadorCrc}</p>}
+          {signatureContadorCpf && <p className="text-xs text-slate-400">CPF: {signatureContadorCpf}</p>}
         </div>
       </div>
     </div>

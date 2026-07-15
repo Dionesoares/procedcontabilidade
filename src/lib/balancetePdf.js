@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import { flattenTree, fmtRaw } from "@/lib/balanceteCalc";
+import { flattenTree, fmtRawPlain, fmtMoneyPlain, fmtRaw, getTotals } from "@/lib/balanceteCalc";
 
 const fmtDate = (d) => (d ? new Date(d + "T00:00:00").toLocaleDateString("pt-BR") : "-");
 
@@ -64,15 +64,15 @@ export function generateBalancetePdf(balancete) {
     const isLeaf = !r.children || r.children.length === 0;
     doc.setFont(undefined, isLeaf ? "normal" : "bold");
     doc.text(String(r.code), 14, y);
-    doc.text(String(r.label).slice(0, 40), 30 + r.depth * 3, y);
-    doc.text(fmtRaw(r.saldoAnteriorRaw).replace("R$ ", ""), 105, y);
-    doc.text(Number(r.debito).toLocaleString("pt-BR", { minimumFractionDigits: 2 }), 138, y);
-    doc.text(Number(r.credito).toLocaleString("pt-BR", { minimumFractionDigits: 2 }), 160, y);
-    doc.text(fmtRaw(r.saldoAtualRaw).replace("R$ ", ""), 180, y);
+    doc.text(String(r.label).slice(0, 42), 30 + r.depth * 3, y);
+    doc.text(fmtRawPlain(r.saldoAnteriorRaw), 105, y);
+    doc.text(fmtMoneyPlain(r.debito), 138, y);
+    doc.text(fmtMoneyPlain(r.credito), 160, y);
+    doc.text(fmtRawPlain(r.saldoAtualRaw), 180, y);
     y += 6;
   });
 
-  const [ativo, passivo, despesas, receitas] = tree;
+  const { ativo, passivo, despesas, receitas } = getTotals(tree);
   const resultado = (receitas?.saldoAtualRaw || 0) - (despesas?.saldoAtualRaw || 0);
 
   if (y > 240) {
@@ -94,8 +94,8 @@ export function generateBalancetePdf(balancete) {
   y += 6;
   doc.text(`Resultado do Período: R$ ${Math.abs(resultado).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} ${resultado >= 0 ? "(Lucro)" : "(Prejuízo)"}`, 14, y);
 
-  y += 24;
-  if (y > 285) {
+  y += 20;
+  if (y > 270) {
     doc.addPage();
     y = 40;
   }
@@ -103,12 +103,26 @@ export function generateBalancetePdf(balancete) {
   doc.line(120, y, 190, y);
   y += 5;
   doc.setFontSize(9);
-  doc.text(balancete.signature_contador || "", 20, y);
-  doc.text(balancete.signature_cliente || balancete.client_name || "", 120, y);
+  doc.setFont(undefined, "bold");
+  doc.text(balancete.signature_cliente || balancete.client_name || "", 20, y);
+  doc.text(balancete.signature_contador || "", 120, y);
   y += 5;
   doc.setFontSize(8);
-  doc.text("Contador Responsável", 20, y);
-  doc.text("Cliente / Sócio Proprietário", 120, y);
+  doc.setFont(undefined, "normal");
+  doc.text(balancete.signature_cliente_role || "Sócio Proprietário", 20, y);
+  doc.text("Contador", 120, y);
+  if (balancete.signature_contador_crc) {
+    y += 4;
+    doc.text(`Reg. no CRC sob o No. ${balancete.signature_contador_crc}`, 120, y);
+  }
+  const clienteCpfY = y;
+  if (balancete.signature_cliente_cpf) {
+    doc.text(`CPF: ${balancete.signature_cliente_cpf}`, 20, clienteCpfY);
+  }
+  if (balancete.signature_contador_cpf) {
+    y += 4;
+    doc.text(`CPF: ${balancete.signature_contador_cpf}`, 120, y);
+  }
 
   doc.save(`balancete-${(balancete.client_name || "cliente").replace(/\s+/g, "-").toLowerCase()}.pdf`);
 }

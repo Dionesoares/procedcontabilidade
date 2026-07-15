@@ -12,10 +12,9 @@ import BalanceteRelatorioGeral from "@/components/balancete/BalanceteRelatorioGe
 import BalanceteClientHeader from "@/components/balancete/BalanceteClientHeader";
 import BalanceteHeaderEditDialog from "@/components/balancete/BalanceteHeaderEditDialog";
 import BalanceteLancamentoDialog from "@/components/balancete/BalanceteLancamentoDialog";
-import { computeBalanceteTree } from "@/lib/balanceteCalc";
+import { computeBalanceteTree, buildTreeFromFlatRows, getTotals } from "@/lib/balanceteCalc";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
 import { CATEGORIA_OPTIONS } from "@/lib/chartOfAccounts";
-import { mapDescricaoToCategoria } from "@/lib/balanceteCategoriaMap";
 
 const todayYear = new Date().getFullYear();
 
@@ -33,7 +32,11 @@ export default function AdminBalancete() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingLancamento, setEditingLancamento] = useState(null);
   const [signatureContador, setSignatureContador] = useState("");
+  const [signatureContadorCrc, setSignatureContadorCrc] = useState("");
+  const [signatureContadorCpf, setSignatureContadorCpf] = useState("");
   const [signatureCliente, setSignatureCliente] = useState("");
+  const [signatureClienteRole, setSignatureClienteRole] = useState("Sócio Proprietário");
+  const [signatureClienteCpf, setSignatureClienteCpf] = useState("");
   const [uploadingExcel, setUploadingExcel] = useState(false);
   const fileInputRef = useRef(null);
   const [headerData, setHeaderData] = useState({ companyName: "", cnpj: "", address: "", folha: "0001", numeroLivro: "0001" });
@@ -81,7 +84,11 @@ export default function AdminBalancete() {
   const headerPeriodStart = viewingBalancete ? viewingBalancete.period_start : periodStart;
   const headerPeriodEnd = viewingBalancete ? viewingBalancete.period_end : periodEnd;
   const headerSignatureContador = viewingBalancete ? viewingBalancete.signature_contador : signatureContador;
+  const headerSignatureContadorCrc = viewingBalancete ? viewingBalancete.signature_contador_crc : signatureContadorCrc;
+  const headerSignatureContadorCpf = viewingBalancete ? viewingBalancete.signature_contador_cpf : signatureContadorCpf;
   const headerSignatureCliente = viewingBalancete ? viewingBalancete.signature_cliente : signatureCliente;
+  const headerSignatureClienteRole = viewingBalancete ? viewingBalancete.signature_cliente_role : signatureClienteRole;
+  const headerSignatureClienteCpf = viewingBalancete ? viewingBalancete.signature_cliente_cpf : signatureClienteCpf;
 
   const handleSaveHeader = async (form) => {
     setHeaderData(form);
@@ -157,7 +164,11 @@ export default function AdminBalancete() {
         despesas_saldo: despesas.saldoAtualRaw,
         receitas_saldo: receitas.saldoAtualRaw,
         signature_contador: signatureContador,
+        signature_contador_crc: signatureContadorCrc,
+        signature_contador_cpf: signatureContadorCpf,
         signature_cliente: signatureCliente,
+        signature_cliente_role: signatureClienteRole,
+        signature_cliente_cpf: signatureClienteCpf,
       });
       toast({ title: "Balancete gerado!", description: "Já está disponível no portal do cliente." });
       setSaved((prev) => [created, ...prev]);
@@ -184,20 +195,36 @@ export default function AdminBalancete() {
         json_schema: {
           type: "object",
           properties: {
+            empresa: { type: "string", description: "Nome/razão social da empresa (linha 'Empresa')" },
+            cnpj: { type: "string", description: "CNPJ da empresa" },
+            endereco: { type: "string", description: "Endereço da empresa" },
+            folha: { type: "string", description: "Número da folha, se houver" },
+            numero_livro: { type: "string", description: "Número do livro, se houver" },
+            periodo_inicio: { type: "string", description: "Data de início do período no formato YYYY-MM-DD" },
+            periodo_fim: { type: "string", description: "Data de fim do período no formato YYYY-MM-DD" },
             linhas: {
               type: "array",
-              description: "Uma linha para cada conta/lançamento da planilha (ignore linhas de título ou cabeçalho)",
+              description: "Uma linha para CADA conta da tabela do balancete, na MESMA ordem em que aparecem na planilha, incluindo linhas de totais/grupos (ex: ATIVO, ATIVO CIRCULANTE) e as contas analíticas finais. Não pule nenhuma linha da tabela.",
               items: {
                 type: "object",
                 properties: {
-                  descricao: { type: "string", description: "Descrição da conta (coluna Descrição da conta)" },
-                  debito: { type: "number", description: "Valor da coluna Débito desta linha; use 0 se estiver vazia" },
-                  credito: { type: "number", description: "Valor da coluna Crédito desta linha; use 0 se estiver vazia" },
-                  data: { type: "string", description: "Data do lançamento no formato YYYY-MM-DD, se houver" },
+                  code: { type: "string", description: "Código da conta (coluna Código)" },
+                  descricao: { type: "string", description: "Descrição da conta, sem os espaços de indentação à esquerda" },
+                  nivel: { type: "integer", description: "Nível hierárquico da conta, começando em 0 para as contas de nível mais alto (ATIVO, PASSIVO...), com base na indentação/espaços à esquerda da descrição original" },
+                  saldo_anterior: { type: "number", description: "Valor numérico do Saldo Anterior; NEGATIVO se o sufixo for 'c' (credor), POSITIVO se for 'd' (devedor)" },
+                  debito: { type: "number", description: "Valor da coluna Débito" },
+                  credito: { type: "number", description: "Valor da coluna Crédito" },
+                  saldo_atual: { type: "number", description: "Valor numérico do Saldo Atual; NEGATIVO se o sufixo for 'c' (credor), POSITIVO se for 'd' (devedor)" },
                 },
-                required: ["descricao"],
+                required: ["descricao", "nivel"],
               },
             },
+            assinatura_cliente_nome: { type: "string", description: "Nome de quem assina pelo cliente (primeiro bloco de assinatura)" },
+            assinatura_cliente_cargo: { type: "string", description: "Cargo de quem assina pelo cliente, ex: ADMINISTRADOR" },
+            assinatura_cliente_cpf: { type: "string", description: "CPF de quem assina pelo cliente" },
+            assinatura_contador_nome: { type: "string", description: "Nome do contador responsável" },
+            assinatura_contador_crc: { type: "string", description: "Número de registro no CRC do contador" },
+            assinatura_contador_cpf: { type: "string", description: "CPF do contador" },
           },
           required: ["linhas"],
         },
@@ -208,33 +235,42 @@ export default function AdminBalancete() {
         return;
       }
 
-      const linhas = result?.output?.linhas || [];
-      const items = [];
-      linhas.forEach((linha) => {
-        const categoria = mapDescricaoToCategoria(linha.descricao);
-        if (!categoria) return; // linha de título/subtotal não reconhecida
-        const debito = Number(linha.debito) || 0;
-        const credito = Number(linha.credito) || 0;
-        if (debito === 0 && credito === 0) return;
-        items.push({
-          client_id: clientId,
-          client_name: selectedClient?.name || "",
-          categoria,
-          descricao: linha.descricao,
-          tipo: debito > 0 ? "Débito" : "Crédito",
-          amount: debito > 0 ? debito : credito,
-          due_date: linha.data || "",
-        });
-      });
-
-      if (items.length === 0) {
-        toast({ title: "Nenhum lançamento reconhecido na planilha", description: "Verifique se as contas usam descrições contábeis reconhecíveis (ex: Caixa, Fornecedores, Salários...).", variant: "destructive" });
+      const out = result?.output || {};
+      const linhas = out.linhas || [];
+      if (linhas.length === 0) {
+        toast({ title: "Nenhuma conta reconhecida na planilha", description: "Verifique se o arquivo segue o modelo de balancete (Código, Descrição, Saldo Anterior, Débito, Crédito, Saldo Atual).", variant: "destructive" });
         return;
       }
 
-      await base44.entities.BalanceteLancamento.bulkCreate(items);
-      toast({ title: "Planilha importada!", description: `${items.length} lançamento(s) adicionado(s).` });
-      loadLancamentos(clientId);
+      const tree = buildTreeFromFlatRows(linhas);
+      const { ativo, passivo, despesas, receitas } = getTotals(tree);
+
+      const created = await base44.entities.Balancete.create({
+        client_id: clientId,
+        client_name: selectedClient?.name || "",
+        client_company_name: out.empresa || headerData.companyName || selectedClient?.company_name || selectedClient?.name || "",
+        client_cnpj: out.cnpj || headerData.cnpj || selectedClient?.cpf_cnpj || "",
+        client_address: out.endereco || headerData.address || selectedClient?.address || "",
+        folha: out.folha || headerData.folha || "0001",
+        numero_livro: out.numero_livro || headerData.numeroLivro || "0001",
+        period_start: out.periodo_inicio || periodStart,
+        period_end: out.periodo_fim || periodEnd,
+        tree: JSON.stringify(tree),
+        ativo_saldo: ativo?.saldoAtualRaw || 0,
+        passivo_saldo: passivo?.saldoAtualRaw || 0,
+        despesas_saldo: despesas?.saldoAtualRaw || 0,
+        receitas_saldo: receitas?.saldoAtualRaw || 0,
+        signature_contador: out.assinatura_contador_nome || signatureContador,
+        signature_contador_crc: out.assinatura_contador_crc || signatureContadorCrc,
+        signature_contador_cpf: out.assinatura_contador_cpf || signatureContadorCpf,
+        signature_cliente: out.assinatura_cliente_nome || signatureCliente,
+        signature_cliente_role: out.assinatura_cliente_cargo || signatureClienteRole,
+        signature_cliente_cpf: out.assinatura_cliente_cpf || signatureClienteCpf,
+      });
+
+      setSaved((prev) => [created, ...prev]);
+      setViewingBalancete(created);
+      toast({ title: "Balancete importado!", description: "A árvore completa da planilha foi recriada e já está disponível no portal do cliente." });
     } catch (err) {
       const msg = /unsupported file type/i.test(err?.message || "")
         ? "Formato de arquivo não suportado. Use .xlsx ou .csv."
@@ -292,8 +328,24 @@ export default function AdminBalancete() {
           <Input value={signatureContador} onChange={(e) => setSignatureContador(e.target.value)} placeholder="Nome do contador" className="w-48" />
         </div>
         <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Reg. CRC do Contador</label>
+          <Input value={signatureContadorCrc} onChange={(e) => setSignatureContadorCrc(e.target.value)} placeholder="Ex: 006394" className="w-32" />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">CPF do Contador</label>
+          <Input value={signatureContadorCpf} onChange={(e) => setSignatureContadorCpf(e.target.value)} placeholder="000.000.000-00" className="w-36" />
+        </div>
+        <div>
           <label className="text-xs font-medium text-slate-500 mb-1 block">Assinatura do Cliente/Sócio</label>
           <Input value={signatureCliente} onChange={(e) => setSignatureCliente(e.target.value)} placeholder="Nome do sócio proprietário" className="w-48" />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Cargo do Cliente</label>
+          <Input value={signatureClienteRole} onChange={(e) => setSignatureClienteRole(e.target.value)} placeholder="Ex: Administrador" className="w-36" />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">CPF do Cliente</label>
+          <Input value={signatureClienteCpf} onChange={(e) => setSignatureClienteCpf(e.target.value)} placeholder="000.000.000-00" className="w-36" />
         </div>
         <Button onClick={handleGerar} disabled={!clientId || generating} className="bg-blue-700 hover:bg-blue-800">
           {generating ? "Gerando..." : "Gerar Balancete"}
@@ -368,7 +420,16 @@ export default function AdminBalancete() {
             <BalanceteSummaryCards tree={currentTree} />
             <BalanceteChart tree={currentTree} />
             <BalanceteHierarchyTable tree={currentTree} />
-            <BalanceteRelatorioGeral tree={currentTree} clientName={selectedClient?.name} signatureContador={headerSignatureContador} signatureCliente={headerSignatureCliente} />
+            <BalanceteRelatorioGeral
+              tree={currentTree}
+              clientName={selectedClient?.name}
+              signatureContador={headerSignatureContador}
+              signatureContadorCrc={headerSignatureContadorCrc}
+              signatureContadorCpf={headerSignatureContadorCpf}
+              signatureCliente={headerSignatureCliente}
+              signatureClienteRole={headerSignatureClienteRole}
+              signatureClienteCpf={headerSignatureClienteCpf}
+            />
           </div>
 
           <div className="mt-8">

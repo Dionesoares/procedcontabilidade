@@ -82,7 +82,16 @@ export default function ClienteBalancete() {
           <BalanceteSummaryCards tree={tree} />
           <BalanceteChart tree={tree} />
           <BalanceteHierarchyTable tree={tree} />
-          <BalanceteRelatorioGeral tree={tree} clientName={selected.client_name} signatureContador={selected.signature_contador} signatureCliente={selected.signature_cliente} />
+          <BalanceteRelatorioGeral
+            tree={tree}
+            clientName={selected.client_name}
+            signatureContador={selected.signature_contador}
+            signatureContadorCrc={selected.signature_contador_crc}
+            signatureContadorCpf={selected.signature_contador_cpf}
+            signatureCliente={selected.signature_cliente}
+            signatureClienteRole={selected.signature_cliente_role}
+            signatureClienteCpf={selected.signature_cliente_cpf}
+          />
         </div>
       )}
     </div>

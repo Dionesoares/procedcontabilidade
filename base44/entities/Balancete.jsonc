@@ -70,9 +70,26 @@
       "type": "string",
       "title": "Assinatura do Contador"
     },
+    "signature_contador_crc": {
+      "type": "string",
+      "title": "Registro CRC do Contador"
+    },
+    "signature_contador_cpf": {
+      "type": "string",
+      "title": "CPF do Contador"
+    },
     "signature_cliente": {
       "type": "string",
       "title": "Assinatura do Cliente/S\u00f3cio Propriet\u00e1rio"
+    },
+    "signature_cliente_role": {
+      "type": "string",
+      "default": "S\u00f3cio Propriet\u00e1rio",
+      "title": "Cargo do Cliente"
+    },
+    "signature_cliente_cpf": {
+      "type": "string",
+      "title": "CPF do Cliente"
     }
   },
   "required": [

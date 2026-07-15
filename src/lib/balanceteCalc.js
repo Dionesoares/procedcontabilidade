@@ -60,3 +60,53 @@ export function fmtRaw(raw) {
 export function fmtMoney(v) {
   return `R$ ${Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 }
+
+// Plain formatting (no "R$" prefix, lowercase d/c suffix) matching the standard
+// accounting balancete report layout used for the hierarchy table and PDF.
+export function fmtRawPlain(raw) {
+  const v = Number(raw || 0);
+  return v >= 0
+    ? `${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}d`
+    : `${(-v).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}c`;
+}
+
+export function fmtMoneyPlain(v) {
+  return Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+}
+
+// Finds the top-level Ativo/Passivo/Despesas/Receitas nodes by label instead of
+// relying on array position - required because a fully imported balancete tree
+// can have a different number/order of top-level branches (e.g. Contas de Apuração).
+export function getTotals(tree) {
+  const nodes = tree || [];
+  const find = (test) => nodes.find((n) => test((n.label || "").toUpperCase()));
+  const ativo = find((l) => l === "ATIVO" || l.startsWith("ATIVO "));
+  const passivo = find((l) => l === "PASSIVO" || l.startsWith("PASSIVO "));
+  const despesas = find((l) => l.includes("DESPESA"));
+  const receitas = find((l) => l.includes("RECEITA"));
+  return { ativo, passivo, despesas, receitas };
+}
+
+// Rebuilds a nested account tree from a flat list of rows extracted from an
+// uploaded balancete spreadsheet, using each row's indentation level (nivel).
+export function buildTreeFromFlatRows(rows) {
+  const root = [];
+  const stack = [];
+  (rows || []).forEach((r) => {
+    const nivel = Number(r.nivel) || 0;
+    const node = {
+      code: String(r.code || ""),
+      label: String(r.descricao || "").trim(),
+      saldoAnteriorRaw: Number(r.saldo_anterior) || 0,
+      debito: Number(r.debito) || 0,
+      credito: Number(r.credito) || 0,
+      saldoAtualRaw: Number(r.saldo_atual) || 0,
+      children: [],
+    };
+    while (stack.length && stack[stack.length - 1].nivel >= nivel) stack.pop();
+    if (stack.length === 0) root.push(node);
+    else stack[stack.length - 1].node.children.push(node);
+    stack.push({ node, nivel });
+  });
+  return root;
+}
