@@ -1,13 +1,14 @@
 import React from "react";
-import { ArrowDownCircle, ArrowUpCircle, Scale, Wallet } from "lucide-react";
-import { fmtSaldo, fmtMoney } from "@/lib/balanceteCalc";
+import { Landmark, ScrollText, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { fmtRaw } from "@/lib/balanceteCalc";
 
-export default function BalanceteSummaryCards({ saldoAnterior, totalDebito, totalCredito, saldoAtual }) {
+export default function BalanceteSummaryCards({ tree }) {
+  const [ativo, passivo, despesas, receitas] = tree || [];
   const cards = [
-    { icon: Scale, label: "Saldo Anterior", value: fmtSaldo(saldoAnterior), color: "bg-slate-100 text-slate-600" },
-    { icon: ArrowDownCircle, label: "Débito", value: fmtMoney(totalDebito), color: "bg-red-100 text-red-600" },
-    { icon: ArrowUpCircle, label: "Crédito", value: fmtMoney(totalCredito), color: "bg-blue-100 text-blue-600" },
-    { icon: Wallet, label: "Saldo Atual", value: fmtSaldo(saldoAtual), color: "bg-emerald-100 text-emerald-600" },
+    { icon: Landmark, label: "Ativo", value: fmtRaw(ativo?.saldoAtualRaw), color: "bg-blue-100 text-blue-600" },
+    { icon: ScrollText, label: "Passivo", value: fmtRaw(passivo?.saldoAtualRaw), color: "bg-slate-200 text-slate-700" },
+    { icon: ArrowDownCircle, label: "Despesas", value: fmtRaw(despesas?.saldoAtualRaw), color: "bg-red-100 text-red-600" },
+    { icon: ArrowUpCircle, label: "Receitas", value: fmtRaw(receitas?.saldoAtualRaw), color: "bg-emerald-100 text-emerald-600" },
   ];
 
   return (

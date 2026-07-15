@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Pencil, TrendingUp, TrendingDown, Wallet, Send } from "lucide-react";
+import { Plus, Trash2, Pencil, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import FinanceiroFormDialog from "@/components/financeiro/FinanceiroFormDialog";
 import FinanceiroSummaryCards from "@/components/financeiro/FinanceiroSummaryCards";
 import FinanceiroReportChart from "@/components/financeiro/FinanceiroReportChart";
-import CobrancaDialog from "@/components/financeiro/CobrancaDialog";
 
 export default function AdminFinanceiro() {
   const { toast } = useToast();
@@ -14,7 +13,6 @@ export default function AdminFinanceiro() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [cobrancaOpen, setCobrancaOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -71,9 +69,6 @@ export default function AdminFinanceiro() {
           <p className="text-sm text-slate-500 mt-1">Controle de receitas e despesas do escritório.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button onClick={() => setCobrancaOpen(true)} variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
-            <Send className="w-4 h-4 mr-1" /> Cobrar Cliente
-          </Button>
           <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800">
             <Plus className="w-4 h-4 mr-1" /> Novo Lançamento
           </Button>
@@ -95,7 +90,6 @@ export default function AdminFinanceiro() {
               <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                 <tr>
                   <th className="text-left px-4 py-3">Descrição</th>
-                  <th className="text-left px-4 py-3 hidden md:table-cell">Cliente</th>
                   <th className="text-left px-4 py-3">Tipo</th>
                   <th className="text-left px-4 py-3">Valor</th>
                   <th className="text-left px-4 py-3 hidden md:table-cell">Vencimento</th>
@@ -107,7 +101,6 @@ export default function AdminFinanceiro() {
                 {records.map(r => (
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 font-medium text-slate-900">{r.description}</td>
-                    <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{r.client_name || "—"}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${r.type === "Receita" ? "bg-blue-100 text-blue-700" : "bg-slate-200 text-slate-700"}`}>
                         {r.type === "Receita" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -134,7 +127,6 @@ export default function AdminFinanceiro() {
       )}
 
       <FinanceiroFormDialog open={dialogOpen} onOpenChange={setDialogOpen} record={editing} onSave={handleSave} />
-      <CobrancaDialog open={cobrancaOpen} onOpenChange={setCobrancaOpen} onCharged={load} />
     </div>
   );
 }

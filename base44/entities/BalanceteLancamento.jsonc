@@ -1,0 +1,62 @@
+{
+  "name": "BalanceteLancamento",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nome do Cliente"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "caixa_geral",
+        "duplicatas_receber",
+        "mercadorias_revenda",
+        "fornecedores",
+        "impostos_recolher",
+        "despesas_pessoal",
+        "despesas_administrativas",
+        "receita_vendas"
+      ],
+      "title": "Categoria Cont\u00e1bil"
+    },
+    "descricao": {
+      "type": "string",
+      "title": "Descri\u00e7\u00e3o"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "D\u00e9bito",
+        "Cr\u00e9dito"
+      ],
+      "default": "D\u00e9bito",
+      "title": "Tipo de Lan\u00e7amento"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Valor"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Data"
+    }
+  },
+  "required": [
+    "client_id",
+    "categoria",
+    "tipo",
+    "amount"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
+}

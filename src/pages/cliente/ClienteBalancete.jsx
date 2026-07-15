@@ -6,7 +6,7 @@ import { FileBarChart, Download } from "lucide-react";
 import { getMyClient } from "@/lib/clientLookup";
 import BalanceteSummaryCards from "@/components/balancete/BalanceteSummaryCards";
 import BalanceteChart from "@/components/balancete/BalanceteChart";
-import BalanceteTable from "@/components/balancete/BalanceteTable";
+import BalanceteHierarchyTable from "@/components/balancete/BalanceteHierarchyTable";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
 
 export default function ClienteBalancete() {
@@ -32,7 +32,7 @@ export default function ClienteBalancete() {
   }, []);
 
   const selected = balancetes.find((b) => b.id === selectedId);
-  const items = selected ? JSON.parse(selected.items || "[]") : [];
+  const tree = selected ? JSON.parse(selected.tree || "[]") : [];
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
@@ -68,9 +68,9 @@ export default function ClienteBalancete() {
         <div className="text-center py-16 text-slate-400">Nenhum balancete disponível ainda. Seu contador irá gerá-lo em breve.</div>
       ) : (
         <div className="space-y-6">
-          <BalanceteSummaryCards saldoAnterior={selected.saldo_anterior} totalDebito={selected.total_debito} totalCredito={selected.total_credito} saldoAtual={selected.saldo_atual} />
-          <BalanceteChart items={items} />
-          <BalanceteTable items={items} saldoAnterior={selected.saldo_anterior} totalDebito={selected.total_debito} totalCredito={selected.total_credito} saldoAtual={selected.saldo_atual} />
+          <BalanceteSummaryCards tree={tree} />
+          <BalanceteChart tree={tree} />
+          <BalanceteHierarchyTable tree={tree} />
         </div>
       )}
     </div>

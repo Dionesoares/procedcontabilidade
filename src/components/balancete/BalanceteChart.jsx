@@ -1,12 +1,13 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { fmtMoney } from "@/lib/balanceteCalc";
+import { flattenTree, fmtMoney } from "@/lib/balanceteCalc";
 
-export default function BalanceteChart({ items }) {
-  const data = items.slice(0, 8).map((it) => ({
-    name: it.description.length > 16 ? it.description.slice(0, 16) + "…" : it.description,
-    Débito: it.debito,
-    Crédito: it.credito,
+export default function BalanceteChart({ tree }) {
+  const leaves = flattenTree(tree).filter((r) => !r.children || r.children.length === 0).filter((r) => r.debito > 0 || r.credito > 0);
+  const data = leaves.map((l) => ({
+    name: l.label.length > 18 ? l.label.slice(0, 18) + "…" : l.label,
+    Débito: l.debito,
+    Crédito: l.credito,
   }));
 
   if (data.length === 0) {

@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { FileBarChart, Download, Trash2, Eye } from "lucide-react";
+import { FileBarChart, Download, Trash2, Eye, Plus, Pencil } from "lucide-react";
 import BalanceteSummaryCards from "@/components/balancete/BalanceteSummaryCards";
 import BalanceteChart from "@/components/balancete/BalanceteChart";
-import BalanceteTable from "@/components/balancete/BalanceteTable";
-import { computeBalancete, fmtSaldo } from "@/lib/balanceteCalc";
+import BalanceteHierarchyTable from "@/components/balancete/BalanceteHierarchyTable";
+import BalanceteLancamentoDialog from "@/components/balancete/BalanceteLancamentoDialog";
+import { computeBalanceteTree } from "@/lib/balanceteCalc";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
+import { CATEGORIA_OPTIONS } from "@/lib/chartOfAccounts";
 
 const todayYear = new Date().getFullYear();
 
@@ -19,41 +21,77 @@ export default function AdminBalancete() {
   const [clientId, setClientId] = useState("");
   const [periodStart, setPeriodStart] = useState(`${todayYear}-01-01`);
   const [periodEnd, setPeriodEnd] = useState(`${todayYear}-12-31`);
-  const [records, setRecords] = useState([]);
+  const [lancamentos, setLancamentos] = useState([]);
   const [saved, setSaved] = useState([]);
-  const [viewing, setViewing] = useState(null);
+  const [viewingTree, setViewingTree] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingLancamento, setEditingLancamento] = useState(null);
 
   useEffect(() => {
     base44.entities.Client.list().then(setClients).finally(() => setLoading(false));
   }, []);
 
+  const loadLancamentos = (id) => base44.entities.BalanceteLancamento.filter({ client_id: id }).then(setLancamentos);
+
   useEffect(() => {
-    if (!clientId) { setRecords([]); setSaved([]); setViewing(null); return; }
-    base44.entities.FinancialRecord.filter({ client_id: clientId }).then(setRecords);
+    if (!clientId) { setLancamentos([]); setSaved([]); setViewingTree(null); return; }
+    loadLancamentos(clientId);
     base44.entities.Balancete.filter({ client_id: clientId }, "-created_date").then(setSaved);
-    setViewing(null);
+    setViewingTree(null);
   }, [clientId]);
 
   const selectedClient = clients.find((c) => c.id === clientId);
-  const preview = useMemo(() => computeBalancete(records, periodStart, periodEnd), [records, periodStart, periodEnd]);
-  const current = viewing || preview;
+  const categoriaLabel = (v) => CATEGORIA_OPTIONS.find((c) => c.value === v)?.label || v;
+  const previewTree = useMemo(() => computeBalanceteTree(lancamentos, periodStart, periodEnd), [lancamentos, periodStart, periodEnd]);
+  const currentTree = viewingTree || previewTree;
+
+  const openNew = () => { setEditingLancamento(null); setDialogOpen(true); };
+  const openEdit = (l) => { setEditingLancamento(l); setDialogOpen(true); };
+
+  const handleSaveLancamento = async (data) => {
+    try {
+      if (editingLancamento) {
+        await base44.entities.BalanceteLancamento.update(editingLancamento.id, data);
+        toast({ title: "Lançamento atualizado!" });
+      } else {
+        await base44.entities.BalanceteLancamento.create({ ...data, client_id: clientId, client_name: selectedClient?.name || "" });
+        toast({ title: "Lançamento criado!" });
+      }
+      setDialogOpen(false);
+      loadLancamentos(clientId);
+    } catch {
+      toast({ title: "Erro ao salvar lançamento", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteLancamento = async (l) => {
+    if (!confirm("Excluir este lançamento?")) return;
+    try {
+      await base44.entities.BalanceteLancamento.delete(l.id);
+      toast({ title: "Lançamento excluído!" });
+      loadLancamentos(clientId);
+    } catch {
+      toast({ title: "Erro ao excluir", variant: "destructive" });
+    }
+  };
 
   const handleGerar = async () => {
     if (!clientId) return;
     setGenerating(true);
     try {
+      const [ativo, passivo, despesas, receitas] = previewTree;
       const created = await base44.entities.Balancete.create({
         client_id: clientId,
         client_name: selectedClient?.name || "",
         period_start: periodStart,
         period_end: periodEnd,
-        saldo_anterior: preview.saldoAnterior,
-        total_debito: preview.totalDebito,
-        total_credito: preview.totalCredito,
-        saldo_atual: preview.saldoAtual,
-        items: JSON.stringify(preview.items),
+        tree: JSON.stringify(previewTree),
+        ativo_saldo: ativo.saldoAtualRaw,
+        passivo_saldo: passivo.saldoAtualRaw,
+        despesas_saldo: despesas.saldoAtualRaw,
+        receitas_saldo: receitas.saldoAtualRaw,
       });
       toast({ title: "Balancete gerado!", description: "Já está disponível no portal do cliente." });
       setSaved((prev) => [created, ...prev]);
@@ -64,19 +102,17 @@ export default function AdminBalancete() {
     }
   };
 
-  const handleDelete = async (b) => {
+  const handleDeleteBalancete = async (b) => {
     if (!confirm("Excluir este balancete gerado?")) return;
     try {
       await base44.entities.Balancete.delete(b.id);
       setSaved((prev) => prev.filter((s) => s.id !== b.id));
-      if (viewing?.id === b.id) setViewing(null);
+      setViewingTree(null);
       toast({ title: "Balancete excluído!" });
     } catch {
       toast({ title: "Erro ao excluir", variant: "destructive" });
     }
   };
-
-  const handleDownload = (b) => generateBalancetePdf(b);
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
@@ -86,7 +122,7 @@ export default function AdminBalancete() {
         <h1 className="font-heading font-bold text-2xl text-slate-900 flex items-center gap-2">
           <FileBarChart className="w-6 h-6 text-blue-600" /> Balancete
         </h1>
-        <p className="text-sm text-slate-500 mt-1">Gere o balancete de um cliente a partir dos lançamentos financeiros.</p>
+        <p className="text-sm text-slate-500 mt-1">Lance despesas e receitas do cliente e gere o balancete contábil.</p>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6 flex flex-wrap items-end gap-4">
@@ -113,25 +149,59 @@ export default function AdminBalancete() {
       </div>
 
       {!clientId ? (
-        <div className="text-center py-16 text-slate-400">Selecione um cliente para visualizar o balancete.</div>
+        <div className="text-center py-16 text-slate-400">Selecione um cliente para lançar despesas/receitas e visualizar o balancete.</div>
       ) : (
         <>
-          {viewing && (
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-heading font-semibold text-slate-900">Lançamentos do Cliente</h2>
+            <Button size="sm" onClick={openNew} className="bg-blue-700 hover:bg-blue-800">
+              <Plus className="w-4 h-4 mr-1" /> Novo Lançamento
+            </Button>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-8">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                <tr>
+                  <th className="text-left px-4 py-3">Conta</th>
+                  <th className="text-left px-4 py-3">Descrição</th>
+                  <th className="text-left px-4 py-3">Tipo</th>
+                  <th className="text-left px-4 py-3">Valor</th>
+                  <th className="text-left px-4 py-3">Data</th>
+                  <th className="text-right px-4 py-3">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {lancamentos.length === 0 ? (
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-400">Nenhum lançamento cadastrado para este cliente.</td></tr>
+                ) : lancamentos.map((l) => (
+                  <tr key={l.id} className="hover:bg-slate-50">
+                    <td className="px-4 py-3 text-slate-700">{categoriaLabel(l.categoria)}</td>
+                    <td className="px-4 py-3 text-slate-500">{l.descricao || "—"}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${l.tipo === "Crédito" ? "bg-blue-100 text-blue-700" : "bg-red-100 text-red-700"}`}>{l.tipo}</span>
+                    </td>
+                    <td className="px-4 py-3 font-medium">R$ {Number(l.amount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
+                    <td className="px-4 py-3 text-slate-500">{l.due_date ? new Date(l.due_date + "T00:00:00").toLocaleDateString("pt-BR") : "—"}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button onClick={() => openEdit(l)} title="Editar" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => handleDeleteLancamento(l)} title="Excluir" className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {viewingTree && (
             <div className="mb-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-700">
-              <span>Visualizando balancete gerado em {new Date(viewing.created_date).toLocaleDateString("pt-BR")}</span>
-              <button onClick={() => setViewing(null)} className="font-medium hover:underline">Voltar à pré-visualização atual</button>
+              <span>Visualizando um balancete já gerado.</span>
+              <button onClick={() => setViewingTree(null)} className="font-medium hover:underline">Voltar à pré-visualização atual</button>
             </div>
           )}
           <div className="space-y-6">
-            <BalanceteSummaryCards saldoAnterior={current.saldo_anterior ?? current.saldoAnterior} totalDebito={current.total_debito ?? current.totalDebito} totalCredito={current.total_credito ?? current.totalCredito} saldoAtual={current.saldo_atual ?? current.saldoAtual} />
-            <BalanceteChart items={viewing ? JSON.parse(viewing.items || "[]") : preview.items} />
-            <BalanceteTable
-              items={viewing ? JSON.parse(viewing.items || "[]") : preview.items}
-              saldoAnterior={current.saldo_anterior ?? current.saldoAnterior}
-              totalDebito={current.total_debito ?? current.totalDebito}
-              totalCredito={current.total_credito ?? current.totalCredito}
-              saldoAtual={current.saldo_atual ?? current.saldoAtual}
-            />
+            <BalanceteSummaryCards tree={currentTree} />
+            <BalanceteChart tree={currentTree} />
+            <BalanceteHierarchyTable tree={currentTree} />
           </div>
 
           <div className="mt-8">
@@ -145,7 +215,6 @@ export default function AdminBalancete() {
                     <tr>
                       <th className="text-left px-4 py-3">Período</th>
                       <th className="text-left px-4 py-3">Gerado em</th>
-                      <th className="text-right px-4 py-3">Saldo Atual</th>
                       <th className="text-right px-4 py-3">Ações</th>
                     </tr>
                   </thead>
@@ -154,11 +223,10 @@ export default function AdminBalancete() {
                       <tr key={b.id} className="hover:bg-slate-50">
                         <td className="px-4 py-3 text-slate-700">{new Date(b.period_start + "T00:00:00").toLocaleDateString("pt-BR")} - {new Date(b.period_end + "T00:00:00").toLocaleDateString("pt-BR")}</td>
                         <td className="px-4 py-3 text-slate-500">{new Date(b.created_date).toLocaleDateString("pt-BR")}</td>
-                        <td className="px-4 py-3 text-right font-medium">{fmtSaldo(b.saldo_atual)}</td>
                         <td className="px-4 py-3 text-right">
-                          <button onClick={() => setViewing(b)} title="Visualizar" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Eye className="w-4 h-4" /></button>
-                          <button onClick={() => handleDownload(b)} title="Baixar PDF" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Download className="w-4 h-4" /></button>
-                          <button onClick={() => handleDelete(b)} title="Excluir" className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => setViewingTree(JSON.parse(b.tree || "[]"))} title="Visualizar" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Eye className="w-4 h-4" /></button>
+                          <button onClick={() => generateBalancetePdf(b)} title="Baixar PDF" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Download className="w-4 h-4" /></button>
+                          <button onClick={() => handleDeleteBalancete(b)} title="Excluir" className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
                         </td>
                       </tr>
                     ))}
@@ -169,6 +237,8 @@ export default function AdminBalancete() {
           </div>
         </>
       )}
+
+      <BalanceteLancamentoDialog open={dialogOpen} onOpenChange={setDialogOpen} lancamento={editingLancamento} onSave={handleSaveLancamento} />
     </div>
   );
 }

@@ -20,29 +20,29 @@
       "format": "date",
       "title": "Fim do Per\u00edodo"
     },
-    "saldo_anterior": {
-      "type": "number",
-      "default": 0,
-      "title": "Saldo Anterior"
-    },
-    "total_debito": {
-      "type": "number",
-      "default": 0,
-      "title": "Total D\u00e9bito"
-    },
-    "total_credito": {
-      "type": "number",
-      "default": 0,
-      "title": "Total Cr\u00e9dito"
-    },
-    "saldo_atual": {
-      "type": "number",
-      "default": 0,
-      "title": "Saldo Atual"
-    },
-    "items": {
+    "tree": {
       "type": "string",
-      "title": "Itens (JSON)"
+      "title": "\u00c1rvore de Contas (JSON)"
+    },
+    "ativo_saldo": {
+      "type": "number",
+      "default": 0,
+      "title": "Saldo do Ativo"
+    },
+    "passivo_saldo": {
+      "type": "number",
+      "default": 0,
+      "title": "Saldo do Passivo"
+    },
+    "despesas_saldo": {
+      "type": "number",
+      "default": 0,
+      "title": "Saldo das Despesas"
+    },
+    "receitas_saldo": {
+      "type": "number",
+      "default": 0,
+      "title": "Saldo das Receitas"
     }
   },
   "required": [
