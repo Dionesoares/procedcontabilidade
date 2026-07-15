@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   LayoutDashboard, Users, FileText, ListTodo, MessageSquare, Inbox,
-  LogOut, Menu, X, ChevronRight, FolderOpen, Settings, UserCog, Pencil, KeyRound, Wallet
+  LogOut, Menu, X, ChevronRight, FolderOpen, Settings, UserCog, Pencil, KeyRound, Wallet, FileBarChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/dashboard/NotificationBell";
@@ -15,6 +15,7 @@ const adminLinks = [
   { label: "Clientes", path: "/admin/clientes", icon: Users },
   { label: "Contadores", path: "/admin/contadores", icon: UserCog },
   { label: "Financeiro", path: "/admin/financeiro", icon: Wallet },
+  { label: "Balancete", path: "/admin/balancete", icon: FileBarChart },
   { label: "Tarefas", path: "/admin/tarefas", icon: ListTodo },
   { label: "Documentos", path: "/admin/documentos", icon: FileText },
   { label: "Solicitações", path: "/admin/solicitacoes", icon: Inbox },
@@ -25,6 +26,7 @@ const adminLinks = [
 const clientLinks = [
   { label: "Meu Painel", path: "/cliente", icon: LayoutDashboard },
   { label: "Meus Documentos", path: "/cliente/documentos", icon: FileText },
+  { label: "Balancete", path: "/cliente/balancete", icon: FileBarChart },
   { label: "Solicitações", path: "/cliente/solicitacoes", icon: Inbox },
   { label: "Mensagens", path: "/cliente/mensagens", icon: MessageSquare },
 ];

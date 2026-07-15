@@ -1,0 +1,59 @@
+{
+  "name": "Balancete",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nome do Cliente"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date",
+      "title": "In\u00edcio do Per\u00edodo"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date",
+      "title": "Fim do Per\u00edodo"
+    },
+    "saldo_anterior": {
+      "type": "number",
+      "default": 0,
+      "title": "Saldo Anterior"
+    },
+    "total_debito": {
+      "type": "number",
+      "default": 0,
+      "title": "Total D\u00e9bito"
+    },
+    "total_credito": {
+      "type": "number",
+      "default": 0,
+      "title": "Total Cr\u00e9dito"
+    },
+    "saldo_atual": {
+      "type": "number",
+      "default": 0,
+      "title": "Saldo Atual"
+    },
+    "items": {
+      "type": "string",
+      "title": "Itens (JSON)"
+    }
+  },
+  "required": [
+    "client_id",
+    "period_start",
+    "period_end"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
+}
