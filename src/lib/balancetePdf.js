@@ -14,11 +14,34 @@ export function generateBalancetePdf(balancete) {
   doc.text("BALANCETE", 105, y, { align: "center" });
   y += 9;
 
-  doc.setFontSize(10);
+  doc.setFontSize(9);
+  doc.setFont(undefined, "bold");
+  doc.text("Empresa:", 14, y);
   doc.setFont(undefined, "normal");
-  doc.text(`Cliente: ${balancete.client_name || ""}`, 14, y);
+  doc.text(String(balancete.client_company_name || balancete.client_name || ""), 34, y);
+  doc.setFont(undefined, "bold");
+  doc.text("Folha:", 165, y);
+  doc.setFont(undefined, "normal");
+  doc.text("0001", 180, y);
   y += 6;
-  doc.text(`Período: ${fmtDate(balancete.period_start)} a ${fmtDate(balancete.period_end)}`, 14, y);
+  doc.setFont(undefined, "bold");
+  doc.text("C.N.P.J:", 14, y);
+  doc.setFont(undefined, "normal");
+  doc.text(String(balancete.client_cnpj || "-"), 34, y);
+  doc.setFont(undefined, "bold");
+  doc.text("Número livro:", 165, y);
+  doc.setFont(undefined, "normal");
+  doc.text("0001", 190, y);
+  y += 6;
+  doc.setFont(undefined, "bold");
+  doc.text("Endereço:", 14, y);
+  doc.setFont(undefined, "normal");
+  doc.text(String(balancete.client_address || "-").slice(0, 100), 34, y);
+  y += 6;
+  doc.setFont(undefined, "bold");
+  doc.text("Período:", 14, y);
+  doc.setFont(undefined, "normal");
+  doc.text(`${fmtDate(balancete.period_start)} - ${fmtDate(balancete.period_end)}`, 34, y);
   y += 9;
 
   doc.setFontSize(8);

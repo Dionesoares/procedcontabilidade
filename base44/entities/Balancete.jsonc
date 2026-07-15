@@ -10,6 +10,18 @@
       "type": "string",
       "title": "Nome do Cliente"
     },
+    "client_company_name": {
+      "type": "string",
+      "title": "Raz\u00e3o Social do Cliente"
+    },
+    "client_cnpj": {
+      "type": "string",
+      "title": "CNPJ do Cliente"
+    },
+    "client_address": {
+      "type": "string",
+      "title": "Endere\u00e7o do Cliente"
+    },
     "period_start": {
       "type": "string",
       "format": "date",

@@ -9,12 +9,12 @@ import BalanceteSummaryCards from "@/components/balancete/BalanceteSummaryCards"
 import BalanceteChart from "@/components/balancete/BalanceteChart";
 import BalanceteHierarchyTable from "@/components/balancete/BalanceteHierarchyTable";
 import BalanceteRelatorioGeral from "@/components/balancete/BalanceteRelatorioGeral";
+import BalanceteClientHeader from "@/components/balancete/BalanceteClientHeader";
 import BalanceteLancamentoDialog from "@/components/balancete/BalanceteLancamentoDialog";
 import { computeBalanceteTree } from "@/lib/balanceteCalc";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
 import { CATEGORIA_OPTIONS } from "@/lib/chartOfAccounts";
-
-const CATEGORIA_VALUES = CATEGORIA_OPTIONS.map((c) => c.value);
+import { mapDescricaoToCategoria } from "@/lib/balanceteCategoriaMap";
 
 const todayYear = new Date().getFullYear();
 
@@ -26,7 +26,7 @@ export default function AdminBalancete() {
   const [periodEnd, setPeriodEnd] = useState(`${todayYear}-12-31`);
   const [lancamentos, setLancamentos] = useState([]);
   const [saved, setSaved] = useState([]);
-  const [viewingTree, setViewingTree] = useState(null);
+  const [viewingBalancete, setViewingBalancete] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -44,10 +44,10 @@ export default function AdminBalancete() {
   const loadLancamentos = (id) => base44.entities.BalanceteLancamento.filter({ client_id: id }).then(setLancamentos);
 
   useEffect(() => {
-    if (!clientId) { setLancamentos([]); setSaved([]); setViewingTree(null); return; }
+    if (!clientId) { setLancamentos([]); setSaved([]); setViewingBalancete(null); return; }
     loadLancamentos(clientId);
     base44.entities.Balancete.filter({ client_id: clientId }, "-created_date").then(setSaved);
-    setViewingTree(null);
+    setViewingBalancete(null);
     const c = clients.find((cl) => cl.id === clientId);
     setSignatureCliente(c?.name || "");
   }, [clientId]);
@@ -55,7 +55,11 @@ export default function AdminBalancete() {
   const selectedClient = clients.find((c) => c.id === clientId);
   const categoriaLabel = (v) => CATEGORIA_OPTIONS.find((c) => c.value === v)?.label || v;
   const previewTree = useMemo(() => computeBalanceteTree(lancamentos, periodStart, periodEnd), [lancamentos, periodStart, periodEnd]);
-  const currentTree = viewingTree || previewTree;
+  const currentTree = viewingBalancete ? JSON.parse(viewingBalancete.tree || "[]") : previewTree;
+  const headerPeriodStart = viewingBalancete ? viewingBalancete.period_start : periodStart;
+  const headerPeriodEnd = viewingBalancete ? viewingBalancete.period_end : periodEnd;
+  const headerSignatureContador = viewingBalancete ? viewingBalancete.signature_contador : signatureContador;
+  const headerSignatureCliente = viewingBalancete ? viewingBalancete.signature_cliente : signatureCliente;
 
   const openNew = () => { setEditingLancamento(null); setDialogOpen(true); };
   const openEdit = (l) => { setEditingLancamento(l); setDialogOpen(true); };
@@ -95,6 +99,9 @@ export default function AdminBalancete() {
       const created = await base44.entities.Balancete.create({
         client_id: clientId,
         client_name: selectedClient?.name || "",
+        client_company_name: selectedClient?.company_name || selectedClient?.name || "",
+        client_cnpj: selectedClient?.cpf_cnpj || "",
+        client_address: selectedClient?.address || "",
         period_start: periodStart,
         period_end: periodEnd,
         tree: JSON.stringify(previewTree),
@@ -125,44 +132,59 @@ export default function AdminBalancete() {
         json_schema: {
           type: "object",
           properties: {
-            lancamentos: {
+            linhas: {
               type: "array",
+              description: "Uma linha para cada conta/lançamento da planilha (ignore linhas de título ou cabeçalho)",
               items: {
                 type: "object",
                 properties: {
-                  descricao: { type: "string", description: "Descrição da conta ou lançamento na planilha" },
-                  categoria: { type: "string", enum: CATEGORIA_VALUES, description: "Classifique a conta em uma destas categorias contábeis, com base na descrição: caixa_geral (Caixa/Disponível), duplicatas_receber (Clientes/Duplicatas a Receber), mercadorias_revenda (Estoque/Mercadorias), fornecedores (Fornecedores/Passivo), impostos_recolher (Impostos e Contribuições a Recolher), despesas_pessoal (Despesas com Pessoal/Salários), despesas_administrativas (Despesas Gerais/Administrativas), receita_vendas (Receita de Vendas/Serviços)" },
-                  tipo: { type: "string", enum: ["Débito", "Crédito"], description: "Tipo de lançamento, conforme a coluna de valor preenchida (Débito ou Crédito) na planilha" },
-                  amount: { type: "number", description: "Valor numérico do lançamento (débito ou crédito)" },
-                  due_date: { type: "string", description: "Data do lançamento no formato YYYY-MM-DD, se houver" },
+                  descricao: { type: "string", description: "Descrição da conta (coluna Descrição da conta)" },
+                  debito: { type: "number", description: "Valor da coluna Débito desta linha; use 0 se estiver vazia" },
+                  credito: { type: "number", description: "Valor da coluna Crédito desta linha; use 0 se estiver vazia" },
+                  data: { type: "string", description: "Data do lançamento no formato YYYY-MM-DD, se houver" },
                 },
-                required: ["descricao", "categoria", "tipo", "amount"],
+                required: ["descricao"],
               },
             },
           },
-          required: ["lancamentos"],
+          required: ["linhas"],
         },
       });
-      const items = result?.output?.lancamentos || [];
-      if (items.length === 0) {
-        toast({ title: "Nenhum lançamento identificado na planilha", variant: "destructive" });
+
+      if (result?.status === "error") {
+        toast({ title: "Erro ao importar planilha", description: result.details || "Não foi possível ler o arquivo.", variant: "destructive" });
         return;
       }
-      await base44.entities.BalanceteLancamento.bulkCreate(
-        items.map((it) => ({
+
+      const linhas = result?.output?.linhas || [];
+      const items = [];
+      linhas.forEach((linha) => {
+        const categoria = mapDescricaoToCategoria(linha.descricao);
+        if (!categoria) return; // linha de título/subtotal não reconhecida
+        const debito = Number(linha.debito) || 0;
+        const credito = Number(linha.credito) || 0;
+        if (debito === 0 && credito === 0) return;
+        items.push({
           client_id: clientId,
           client_name: selectedClient?.name || "",
-          categoria: it.categoria,
-          descricao: it.descricao,
-          tipo: it.tipo,
-          amount: Number(it.amount) || 0,
-          due_date: it.due_date || "",
-        }))
-      );
+          categoria,
+          descricao: linha.descricao,
+          tipo: debito > 0 ? "Débito" : "Crédito",
+          amount: debito > 0 ? debito : credito,
+          due_date: linha.data || "",
+        });
+      });
+
+      if (items.length === 0) {
+        toast({ title: "Nenhum lançamento reconhecido na planilha", description: "Verifique se as contas usam descrições contábeis reconhecíveis (ex: Caixa, Fornecedores, Salários...).", variant: "destructive" });
+        return;
+      }
+
+      await base44.entities.BalanceteLancamento.bulkCreate(items);
       toast({ title: "Planilha importada!", description: `${items.length} lançamento(s) adicionado(s).` });
       loadLancamentos(clientId);
-    } catch {
-      toast({ title: "Erro ao importar planilha", variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erro ao importar planilha", description: err?.message || "Verifique o formato do arquivo e tente novamente.", variant: "destructive" });
     } finally {
       setUploadingExcel(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -174,7 +196,7 @@ export default function AdminBalancete() {
     try {
       await base44.entities.Balancete.delete(b.id);
       setSaved((prev) => prev.filter((s) => s.id !== b.id));
-      setViewingTree(null);
+      setViewingBalancete(null);
       toast({ title: "Balancete excluído!" });
     } catch {
       toast({ title: "Erro ao excluir", variant: "destructive" });
@@ -271,17 +293,18 @@ export default function AdminBalancete() {
             </table>
           </div>
 
-          {viewingTree && (
+          {viewingBalancete && (
             <div className="mb-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-700">
               <span>Visualizando um balancete já gerado.</span>
-              <button onClick={() => setViewingTree(null)} className="font-medium hover:underline">Voltar à pré-visualização atual</button>
+              <button onClick={() => setViewingBalancete(null)} className="font-medium hover:underline">Voltar à pré-visualização atual</button>
             </div>
           )}
           <div className="space-y-6">
+            <BalanceteClientHeader client={selectedClient} periodStart={headerPeriodStart} periodEnd={headerPeriodEnd} />
             <BalanceteSummaryCards tree={currentTree} />
             <BalanceteChart tree={currentTree} />
             <BalanceteHierarchyTable tree={currentTree} />
-            <BalanceteRelatorioGeral tree={currentTree} clientName={selectedClient?.name} signatureContador={signatureContador} signatureCliente={signatureCliente} />
+            <BalanceteRelatorioGeral tree={currentTree} clientName={selectedClient?.name} signatureContador={headerSignatureContador} signatureCliente={headerSignatureCliente} />
           </div>
 
           <div className="mt-8">
@@ -304,7 +327,7 @@ export default function AdminBalancete() {
                         <td className="px-4 py-3 text-slate-700">{new Date(b.period_start + "T00:00:00").toLocaleDateString("pt-BR")} - {new Date(b.period_end + "T00:00:00").toLocaleDateString("pt-BR")}</td>
                         <td className="px-4 py-3 text-slate-500">{new Date(b.created_date).toLocaleDateString("pt-BR")}</td>
                         <td className="px-4 py-3 text-right">
-                          <button onClick={() => setViewingTree(JSON.parse(b.tree || "[]"))} title="Visualizar" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Eye className="w-4 h-4" /></button>
+                          <button onClick={() => setViewingBalancete(b)} title="Visualizar" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Eye className="w-4 h-4" /></button>
                           <button onClick={() => generateBalancetePdf(b)} title="Baixar PDF" className="p-1.5 text-slate-400 hover:text-blue-600 rounded"><Download className="w-4 h-4" /></button>
                           <button onClick={() => handleDeleteBalancete(b)} title="Excluir" className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
                         </td>

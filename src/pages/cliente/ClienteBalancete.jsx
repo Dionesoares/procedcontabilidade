@@ -8,20 +8,23 @@ import BalanceteSummaryCards from "@/components/balancete/BalanceteSummaryCards"
 import BalanceteChart from "@/components/balancete/BalanceteChart";
 import BalanceteHierarchyTable from "@/components/balancete/BalanceteHierarchyTable";
 import BalanceteRelatorioGeral from "@/components/balancete/BalanceteRelatorioGeral";
+import BalanceteClientHeader from "@/components/balancete/BalanceteClientHeader";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
 
 export default function ClienteBalancete() {
   const [loading, setLoading] = useState(true);
   const [balancetes, setBalancetes] = useState([]);
   const [selectedId, setSelectedId] = useState("");
+  const [client, setClient] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       try {
         const user = await base44.auth.me();
-        const client = await getMyClient(user);
-        if (client) {
-          const data = await base44.entities.Balancete.filter({ client_id: client.id }, "-created_date");
+        const clientData = await getMyClient(user);
+        if (clientData) {
+          setClient(clientData);
+          const data = await base44.entities.Balancete.filter({ client_id: clientData.id }, "-created_date");
           setBalancetes(data);
           if (data.length > 0) setSelectedId(data[0].id);
         }
@@ -69,6 +72,7 @@ export default function ClienteBalancete() {
         <div className="text-center py-16 text-slate-400">Nenhum balancete disponível ainda. Seu contador irá gerá-lo em breve.</div>
       ) : (
         <div className="space-y-6">
+          <BalanceteClientHeader client={client} periodStart={selected.period_start} periodEnd={selected.period_end} />
           <BalanceteSummaryCards tree={tree} />
           <BalanceteChart tree={tree} />
           <BalanceteHierarchyTable tree={tree} />
