@@ -49,5 +49,43 @@ export function generateBalancetePdf(balancete) {
     y += 6;
   });
 
+  const [ativo, passivo, despesas, receitas] = tree;
+  const resultado = (receitas?.saldoAtualRaw || 0) - (despesas?.saldoAtualRaw || 0);
+
+  if (y > 240) {
+    doc.addPage();
+    y = 18;
+  }
+  y += 6;
+  doc.setFontSize(10);
+  doc.setFont(undefined, "bold");
+  doc.text("RELATÓRIO GERAL", 14, y);
+  y += 7;
+  doc.setFontSize(9);
+  doc.setFont(undefined, "normal");
+  doc.text(`Total do Ativo: ${fmtRaw(ativo?.saldoAtualRaw)}`, 14, y);
+  doc.text(`Total do Passivo: ${fmtRaw(passivo?.saldoAtualRaw)}`, 90, y);
+  y += 6;
+  doc.text(`Total de Despesas: ${fmtRaw(despesas?.saldoAtualRaw)}`, 14, y);
+  doc.text(`Total de Receitas: ${fmtRaw(receitas?.saldoAtualRaw)}`, 90, y);
+  y += 6;
+  doc.text(`Resultado do Período: R$ ${Math.abs(resultado).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} ${resultado >= 0 ? "(Lucro)" : "(Prejuízo)"}`, 14, y);
+
+  y += 24;
+  if (y > 285) {
+    doc.addPage();
+    y = 40;
+  }
+  doc.line(20, y, 90, y);
+  doc.line(120, y, 190, y);
+  y += 5;
+  doc.setFontSize(9);
+  doc.text(balancete.signature_contador || "", 20, y);
+  doc.text(balancete.signature_cliente || balancete.client_name || "", 120, y);
+  y += 5;
+  doc.setFontSize(8);
+  doc.text("Contador Responsável", 20, y);
+  doc.text("Cliente / Sócio Proprietário", 120, y);
+
   doc.save(`balancete-${(balancete.client_name || "cliente").replace(/\s+/g, "-").toLowerCase()}.pdf`);
 }

@@ -7,6 +7,7 @@ import { getMyClient } from "@/lib/clientLookup";
 import BalanceteSummaryCards from "@/components/balancete/BalanceteSummaryCards";
 import BalanceteChart from "@/components/balancete/BalanceteChart";
 import BalanceteHierarchyTable from "@/components/balancete/BalanceteHierarchyTable";
+import BalanceteRelatorioGeral from "@/components/balancete/BalanceteRelatorioGeral";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
 
 export default function ClienteBalancete() {
@@ -71,6 +72,7 @@ export default function ClienteBalancete() {
           <BalanceteSummaryCards tree={tree} />
           <BalanceteChart tree={tree} />
           <BalanceteHierarchyTable tree={tree} />
+          <BalanceteRelatorioGeral tree={tree} clientName={selected.client_name} signatureContador={selected.signature_contador} signatureCliente={selected.signature_cliente} />
         </div>
       )}
     </div>

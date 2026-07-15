@@ -1,17 +1,20 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { FileBarChart, Download, Trash2, Eye, Plus, Pencil } from "lucide-react";
+import { FileBarChart, Download, Trash2, Eye, Plus, Pencil, Upload } from "lucide-react";
 import BalanceteSummaryCards from "@/components/balancete/BalanceteSummaryCards";
 import BalanceteChart from "@/components/balancete/BalanceteChart";
 import BalanceteHierarchyTable from "@/components/balancete/BalanceteHierarchyTable";
+import BalanceteRelatorioGeral from "@/components/balancete/BalanceteRelatorioGeral";
 import BalanceteLancamentoDialog from "@/components/balancete/BalanceteLancamentoDialog";
 import { computeBalanceteTree } from "@/lib/balanceteCalc";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
 import { CATEGORIA_OPTIONS } from "@/lib/chartOfAccounts";
+
+const CATEGORIA_VALUES = CATEGORIA_OPTIONS.map((c) => c.value);
 
 const todayYear = new Date().getFullYear();
 
@@ -28,9 +31,14 @@ export default function AdminBalancete() {
   const [generating, setGenerating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingLancamento, setEditingLancamento] = useState(null);
+  const [signatureContador, setSignatureContador] = useState("");
+  const [signatureCliente, setSignatureCliente] = useState("");
+  const [uploadingExcel, setUploadingExcel] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     base44.entities.Client.list().then(setClients).finally(() => setLoading(false));
+    base44.auth.me().then((u) => setSignatureContador(u?.full_name || "")).catch(() => {});
   }, []);
 
   const loadLancamentos = (id) => base44.entities.BalanceteLancamento.filter({ client_id: id }).then(setLancamentos);
@@ -40,6 +48,8 @@ export default function AdminBalancete() {
     loadLancamentos(clientId);
     base44.entities.Balancete.filter({ client_id: clientId }, "-created_date").then(setSaved);
     setViewingTree(null);
+    const c = clients.find((cl) => cl.id === clientId);
+    setSignatureCliente(c?.name || "");
   }, [clientId]);
 
   const selectedClient = clients.find((c) => c.id === clientId);
@@ -92,6 +102,8 @@ export default function AdminBalancete() {
         passivo_saldo: passivo.saldoAtualRaw,
         despesas_saldo: despesas.saldoAtualRaw,
         receitas_saldo: receitas.saldoAtualRaw,
+        signature_contador: signatureContador,
+        signature_cliente: signatureCliente,
       });
       toast({ title: "Balancete gerado!", description: "Já está disponível no portal do cliente." });
       setSaved((prev) => [created, ...prev]);
@@ -99,6 +111,61 @@ export default function AdminBalancete() {
       toast({ title: "Erro ao gerar balancete", variant: "destructive" });
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !clientId) return;
+    setUploadingExcel(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url,
+        json_schema: {
+          type: "object",
+          properties: {
+            lancamentos: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  descricao: { type: "string", description: "Descrição da conta ou lançamento na planilha" },
+                  categoria: { type: "string", enum: CATEGORIA_VALUES, description: "Classifique a conta em uma destas categorias contábeis, com base na descrição: caixa_geral (Caixa/Disponível), duplicatas_receber (Clientes/Duplicatas a Receber), mercadorias_revenda (Estoque/Mercadorias), fornecedores (Fornecedores/Passivo), impostos_recolher (Impostos e Contribuições a Recolher), despesas_pessoal (Despesas com Pessoal/Salários), despesas_administrativas (Despesas Gerais/Administrativas), receita_vendas (Receita de Vendas/Serviços)" },
+                  tipo: { type: "string", enum: ["Débito", "Crédito"], description: "Tipo de lançamento, conforme a coluna de valor preenchida (Débito ou Crédito) na planilha" },
+                  amount: { type: "number", description: "Valor numérico do lançamento (débito ou crédito)" },
+                  due_date: { type: "string", description: "Data do lançamento no formato YYYY-MM-DD, se houver" },
+                },
+                required: ["descricao", "categoria", "tipo", "amount"],
+              },
+            },
+          },
+          required: ["lancamentos"],
+        },
+      });
+      const items = result?.output?.lancamentos || [];
+      if (items.length === 0) {
+        toast({ title: "Nenhum lançamento identificado na planilha", variant: "destructive" });
+        return;
+      }
+      await base44.entities.BalanceteLancamento.bulkCreate(
+        items.map((it) => ({
+          client_id: clientId,
+          client_name: selectedClient?.name || "",
+          categoria: it.categoria,
+          descricao: it.descricao,
+          tipo: it.tipo,
+          amount: Number(it.amount) || 0,
+          due_date: it.due_date || "",
+        }))
+      );
+      toast({ title: "Planilha importada!", description: `${items.length} lançamento(s) adicionado(s).` });
+      loadLancamentos(clientId);
+    } catch {
+      toast({ title: "Erro ao importar planilha", variant: "destructive" });
+    } finally {
+      setUploadingExcel(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -143,8 +210,20 @@ export default function AdminBalancete() {
           <label className="text-xs font-medium text-slate-500 mb-1 block">Fim do Período</label>
           <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
         </div>
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Assinatura do Contador</label>
+          <Input value={signatureContador} onChange={(e) => setSignatureContador(e.target.value)} placeholder="Nome do contador" className="w-48" />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-slate-500 mb-1 block">Assinatura do Cliente/Sócio</label>
+          <Input value={signatureCliente} onChange={(e) => setSignatureCliente(e.target.value)} placeholder="Nome do sócio proprietário" className="w-48" />
+        </div>
         <Button onClick={handleGerar} disabled={!clientId || generating} className="bg-blue-700 hover:bg-blue-800">
           {generating ? "Gerando..." : "Gerar Balancete"}
+        </Button>
+        <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleExcelUpload} />
+        <Button type="button" variant="outline" disabled={!clientId || uploadingExcel} onClick={() => fileInputRef.current?.click()}>
+          <Upload className="w-4 h-4 mr-1" /> {uploadingExcel ? "Importando..." : "Carregar Excel"}
         </Button>
       </div>
 
@@ -202,6 +281,7 @@ export default function AdminBalancete() {
             <BalanceteSummaryCards tree={currentTree} />
             <BalanceteChart tree={currentTree} />
             <BalanceteHierarchyTable tree={currentTree} />
+            <BalanceteRelatorioGeral tree={currentTree} clientName={selectedClient?.name} signatureContador={signatureContador} signatureCliente={signatureCliente} />
           </div>
 
           <div className="mt-8">
