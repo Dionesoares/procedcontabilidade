@@ -14,7 +14,7 @@ import BalanceteHeaderEditDialog from "@/components/balancete/BalanceteHeaderEdi
 import BalanceteLancamentoDialog from "@/components/balancete/BalanceteLancamentoDialog";
 import { computeBalanceteTree, buildTreeFromFlatRows, getTotals } from "@/lib/balanceteCalc";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
-import { buildCategoriaOptions } from "@/lib/chartOfAccounts";
+import { resolveCategoriaLabel } from "@/lib/chartOfAccounts";
 
 const todayYear = new Date().getFullYear();
 
@@ -45,9 +45,11 @@ export default function AdminBalancete() {
 
   useEffect(() => {
     base44.entities.Client.list().then(setClients).finally(() => setLoading(false));
-    base44.entities.ContaContabil.list().then(setCustomAccounts);
+    reloadCustomAccounts();
     base44.auth.me().then((u) => setSignatureContador(u?.full_name || "")).catch(() => {});
   }, []);
+
+  const reloadCustomAccounts = () => base44.entities.ContaContabil.list().then(setCustomAccounts);
 
   const loadLancamentos = (id) => base44.entities.BalanceteLancamento.filter({ client_id: id }).then(setLancamentos);
 
@@ -80,7 +82,7 @@ export default function AdminBalancete() {
   }, [viewingBalancete]);
 
   const selectedClient = clients.find((c) => c.id === clientId);
-  const categoriaLabel = (v) => buildCategoriaOptions(customAccounts).find((c) => c.value === v)?.label || v;
+  const categoriaLabel = (v) => resolveCategoriaLabel(v, customAccounts);
   const previewTree = useMemo(() => computeBalanceteTree(lancamentos, periodStart, periodEnd, customAccounts), [lancamentos, periodStart, periodEnd, customAccounts]);
   const currentTree = viewingBalancete ? JSON.parse(viewingBalancete.tree || "[]") : previewTree;
   const headerPeriodStart = viewingBalancete ? viewingBalancete.period_start : periodStart;
@@ -493,6 +495,7 @@ export default function AdminBalancete() {
         onSave={handleSaveLancamento}
         customAccounts={customAccounts}
         onAccountCreated={(conta) => setCustomAccounts((prev) => [...prev, conta])}
+        onAccountsChanged={reloadCustomAccounts}
       />
       <BalanceteHeaderEditDialog open={headerDialogOpen} onOpenChange={setHeaderDialogOpen} data={headerData} onSave={handleSaveHeader} />
     </div>

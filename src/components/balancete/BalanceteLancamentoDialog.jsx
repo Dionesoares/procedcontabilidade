@@ -5,14 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSeparator } from "@/components/ui/select";
 import { buildCategoriaOptions } from "@/lib/chartOfAccounts";
 import NovaContaDialog from "@/components/balancete/NovaContaDialog";
+import GerenciarContasDialog from "@/components/balancete/GerenciarContasDialog";
+import { Settings } from "lucide-react";
 
 const emptyForm = { categoria: "", descricao: "", tipo: "Débito", amount: "", due_date: "" };
 const NEW_ACCOUNT_VALUE = "__nova_conta__";
 
-export default function BalanceteLancamentoDialog({ open, onOpenChange, lancamento, onSave, customAccounts = [], onAccountCreated }) {
+export default function BalanceteLancamentoDialog({ open, onOpenChange, lancamento, onSave, customAccounts = [], onAccountCreated, onAccountsChanged }) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [novaContaOpen, setNovaContaOpen] = useState(false);
+  const [gerenciarOpen, setGerenciarOpen] = useState(false);
 
   useEffect(() => {
     if (open) setForm(lancamento ? { ...emptyForm, ...lancamento } : emptyForm);
@@ -47,7 +50,12 @@ export default function BalanceteLancamentoDialog({ open, onOpenChange, lancamen
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Conta Contábil*</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm font-medium text-slate-700 block">Conta Contábil*</label>
+                <button type="button" onClick={() => setGerenciarOpen(true)} className="text-xs text-blue-700 hover:underline flex items-center gap-1">
+                  <Settings className="w-3.5 h-3.5" /> Gerenciar contas
+                </button>
+              </div>
               <Select value={form.categoria} onValueChange={handleCategoriaChange}>
                 <SelectTrigger><SelectValue placeholder="Selecione a conta" /></SelectTrigger>
                 <SelectContent>
@@ -89,6 +97,7 @@ export default function BalanceteLancamentoDialog({ open, onOpenChange, lancamen
         </DialogContent>
       </Dialog>
       <NovaContaDialog open={novaContaOpen} onOpenChange={setNovaContaOpen} onCreated={handleContaCreated} />
+      <GerenciarContasDialog open={gerenciarOpen} onOpenChange={setGerenciarOpen} customAccounts={customAccounts} onAccountsChanged={onAccountsChanged} />
     </>
   );
 }
