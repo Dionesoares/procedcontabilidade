@@ -63,7 +63,7 @@ export function generateBalancetePdf(balancete) {
     }
     const isLeaf = !r.children || r.children.length === 0;
     doc.setFont(undefined, isLeaf ? "normal" : "bold");
-    doc.text(String(r.code), 14, y);
+    doc.text(String(r.code || "").startsWith("custom-") ? "" : String(r.code), 14, y);
     doc.text(String(r.label).slice(0, 42), 30 + r.depth * 3, y);
     doc.text(fmtRawPlain(r.saldoAnteriorRaw), 105, y);
     doc.text(fmtMoneyPlain(r.debito), 138, y);

@@ -23,7 +23,7 @@ export default function BalanceteHierarchyTable({ tree }) {
               const isLeaf = !r.children || r.children.length === 0;
               return (
                 <tr key={i} className={isLeaf ? "" : "bg-slate-50/60"}>
-                  <td className="px-2 py-2 text-slate-400">{r.code}</td>
+                  <td className="px-2 py-2 text-slate-400">{String(r.code || "").startsWith("custom-") ? "" : r.code}</td>
                   <td className={`px-2 py-2 ${isLeaf ? "text-slate-600" : "font-semibold text-slate-900"}`} style={{ paddingLeft: `${8 + r.depth * 18}px` }}>
                     {r.label}
                   </td>
