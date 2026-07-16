@@ -95,7 +95,7 @@ export function buildTreeFromFlatRows(rows) {
   (rows || []).forEach((r) => {
     const nivel = Number(r.nivel) || 0;
     const node = {
-      code: String(r.code || ""),
+      code: String(r.codigo || ""),
       label: String(r.descricao || "").trim(),
       saldoAnteriorRaw: Number(r.saldo_anterior) || 0,
       debito: Number(r.debito) || 0,

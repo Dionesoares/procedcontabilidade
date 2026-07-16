@@ -208,7 +208,7 @@ export default function AdminBalancete() {
               items: {
                 type: "object",
                 properties: {
-                  code: { type: "string", description: "Código da conta (coluna Código)" },
+                  codigo: { type: "string", description: "Código da conta (coluna Código)" },
                   descricao: { type: "string", description: "Descrição da conta, sem os espaços de indentação à esquerda" },
                   nivel: { type: "integer", description: "Nível hierárquico da conta, começando em 0 para as contas de nível mais alto (ATIVO, PASSIVO...), com base na indentação/espaços à esquerda da descrição original" },
                   saldo_anterior: { type: "number", description: "Valor numérico do Saldo Anterior; NEGATIVO se o sufixo for 'c' (credor), POSITIVO se for 'd' (devedor)" },
