@@ -1,4 +1,4 @@
-import { CHART_OF_ACCOUNTS } from "@/lib/chartOfAccounts";
+import { buildChartWithCustom } from "@/lib/chartOfAccounts";
 
 const getDate = (r) => new Date(r.due_date ? r.due_date + "T00:00:00" : r.created_date);
 
@@ -38,8 +38,8 @@ function buildNode(node, records, periodStart, periodEnd) {
   };
 }
 
-export function computeBalanceteTree(records, periodStart, periodEnd) {
-  return CHART_OF_ACCOUNTS.map((n) => buildNode(n, records, periodStart, periodEnd));
+export function computeBalanceteTree(records, periodStart, periodEnd, customAccounts = []) {
+  return buildChartWithCustom(customAccounts).map((n) => buildNode(n, records, periodStart, periodEnd));
 }
 
 export function flattenTree(tree, depth = 0, out = []) {

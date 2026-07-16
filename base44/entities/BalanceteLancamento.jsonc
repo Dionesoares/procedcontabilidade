@@ -12,16 +12,6 @@
     },
     "categoria": {
       "type": "string",
-      "enum": [
-        "caixa_geral",
-        "duplicatas_receber",
-        "mercadorias_revenda",
-        "fornecedores",
-        "impostos_recolher",
-        "despesas_pessoal",
-        "despesas_administrativas",
-        "receita_vendas"
-      ],
       "title": "Categoria Cont\u00e1bil"
     },
     "descricao": {

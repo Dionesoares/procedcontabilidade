@@ -14,13 +14,14 @@ import BalanceteHeaderEditDialog from "@/components/balancete/BalanceteHeaderEdi
 import BalanceteLancamentoDialog from "@/components/balancete/BalanceteLancamentoDialog";
 import { computeBalanceteTree, buildTreeFromFlatRows, getTotals } from "@/lib/balanceteCalc";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
-import { CATEGORIA_OPTIONS } from "@/lib/chartOfAccounts";
+import { buildCategoriaOptions } from "@/lib/chartOfAccounts";
 
 const todayYear = new Date().getFullYear();
 
 export default function AdminBalancete() {
   const { toast } = useToast();
   const [clients, setClients] = useState([]);
+  const [customAccounts, setCustomAccounts] = useState([]);
   const [clientId, setClientId] = useState("");
   const [periodStart, setPeriodStart] = useState(`${todayYear}-01-01`);
   const [periodEnd, setPeriodEnd] = useState(`${todayYear}-12-31`);
@@ -44,6 +45,7 @@ export default function AdminBalancete() {
 
   useEffect(() => {
     base44.entities.Client.list().then(setClients).finally(() => setLoading(false));
+    base44.entities.ContaContabil.list().then(setCustomAccounts);
     base44.auth.me().then((u) => setSignatureContador(u?.full_name || "")).catch(() => {});
   }, []);
 
@@ -78,8 +80,8 @@ export default function AdminBalancete() {
   }, [viewingBalancete]);
 
   const selectedClient = clients.find((c) => c.id === clientId);
-  const categoriaLabel = (v) => CATEGORIA_OPTIONS.find((c) => c.value === v)?.label || v;
-  const previewTree = useMemo(() => computeBalanceteTree(lancamentos, periodStart, periodEnd), [lancamentos, periodStart, periodEnd]);
+  const categoriaLabel = (v) => buildCategoriaOptions(customAccounts).find((c) => c.value === v)?.label || v;
+  const previewTree = useMemo(() => computeBalanceteTree(lancamentos, periodStart, periodEnd, customAccounts), [lancamentos, periodStart, periodEnd, customAccounts]);
   const currentTree = viewingBalancete ? JSON.parse(viewingBalancete.tree || "[]") : previewTree;
   const headerPeriodStart = viewingBalancete ? viewingBalancete.period_start : periodStart;
   const headerPeriodEnd = viewingBalancete ? viewingBalancete.period_end : periodEnd;
@@ -484,7 +486,14 @@ export default function AdminBalancete() {
         </>
       )}
 
-      <BalanceteLancamentoDialog open={dialogOpen} onOpenChange={setDialogOpen} lancamento={editingLancamento} onSave={handleSaveLancamento} />
+      <BalanceteLancamentoDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        lancamento={editingLancamento}
+        onSave={handleSaveLancamento}
+        customAccounts={customAccounts}
+        onAccountCreated={(conta) => setCustomAccounts((prev) => [...prev, conta])}
+      />
       <BalanceteHeaderEditDialog open={headerDialogOpen} onOpenChange={setHeaderDialogOpen} data={headerData} onSave={handleSaveHeader} />
     </div>
   );

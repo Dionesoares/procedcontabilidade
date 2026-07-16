@@ -1,0 +1,30 @@
+{
+  "name": "ContaContabil",
+  "type": "object",
+  "properties": {
+    "label": {
+      "type": "string",
+      "title": "Nome da Conta"
+    },
+    "grupo": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "passivo",
+        "despesas",
+        "receitas"
+      ],
+      "title": "Grupo Cont\u00e1bil"
+    }
+  },
+  "required": [
+    "label",
+    "grupo"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
+}

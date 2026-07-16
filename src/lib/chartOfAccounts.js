@@ -59,3 +59,33 @@ export const CATEGORIA_OPTIONS = [
   { value: "despesas_administrativas", label: "Despesas Administrativas Gerais" },
   { value: "receita_vendas", label: "Receita de Vendas/Serviços" },
 ];
+
+// Maps a ContaContabil's "grupo" to the label of its top-level branch in
+// CHART_OF_ACCOUNTS, so custom accounts created by the user can be attached
+// to the correct section of the tree.
+export const GRUPO_LABELS = {
+  ativo: "ATIVO",
+  passivo: "PASSIVO",
+  despesas: "CONTAS DE RESULTADOS - CUSTOS E DESPESAS",
+  receitas: "CONTAS DE RESULTADO - RECEITAS",
+};
+
+// Returns CHART_OF_ACCOUNTS with each custom account (from the ContaContabil
+// entity) appended as a leaf under its chosen group.
+export function buildChartWithCustom(customAccounts = []) {
+  const tree = JSON.parse(JSON.stringify(CHART_OF_ACCOUNTS));
+  (customAccounts || []).forEach((c) => {
+    const groupNode = tree.find((n) => n.label === GRUPO_LABELS[c.grupo]);
+    if (groupNode) {
+      groupNode.children = groupNode.children || [];
+      groupNode.children.push({ code: `custom-${c.id}`, label: c.label, categoria: `custom_${c.id}` });
+    }
+  });
+  return tree;
+}
+
+// Returns CATEGORIA_OPTIONS plus one option per custom account, for use in
+// the "Conta Contábil" select and for resolving labels in tables/reports.
+export function buildCategoriaOptions(customAccounts = []) {
+  return [...CATEGORIA_OPTIONS, ...(customAccounts || []).map((c) => ({ value: `custom_${c.id}`, label: c.label }))];
+}
