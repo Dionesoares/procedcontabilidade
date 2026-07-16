@@ -36,7 +36,7 @@ export default function BalanceteClientHeader({
           <p><span className="font-semibold text-slate-700">Endereço: </span><span className="text-slate-600">{address || "-"}</span></p>
           <p><span className="font-semibold text-slate-700">Período: </span><span className="text-slate-600">{fmtDate(periodStart)} - {fmtDate(periodEnd)}</span></p>
         </div>
-        <div className="space-y-1 sm:text-right">
+        <div className={`space-y-1 sm:text-right ${onEdit ? "sm:pt-9" : ""}`}>
           <p><span className="font-semibold text-slate-700">Folha: </span><span className="text-slate-600">{folha || "0001"}</span></p>
           <p><span className="font-semibold text-slate-700">Número livro: </span><span className="text-slate-600">{numeroLivro || "0001"}</span></p>
         </div>
