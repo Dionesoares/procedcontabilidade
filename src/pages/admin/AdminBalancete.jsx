@@ -190,53 +190,71 @@ export default function AdminBalancete() {
     setUploadingExcel(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
+
+      // Duas extrações separadas e simples (em vez de um único schema grande e
+      // aninhado) para evitar erros internos de geração de SQL do serviço de
+      // extração ao processar planilhas grandes.
+      const linhasResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
         file_url,
         json_schema: {
           type: "object",
           properties: {
-            empresa: { type: "string", description: "Nome/razão social da empresa. Fica no cabeçalho institucional, nas primeiras 7 linhas da planilha (linha 'Empresa'), ANTES da tabela de contas." },
-            cnpj: { type: "string", description: "CNPJ da empresa, no cabeçalho institucional (primeiras 7 linhas)." },
-            endereco: { type: "string", description: "Endereço da empresa, no cabeçalho institucional (primeiras 7 linhas)." },
-            folha: { type: "string", description: "Número da folha, se houver, no cabeçalho institucional (primeiras 7 linhas)." },
-            numero_livro: { type: "string", description: "Número do livro, se houver, no cabeçalho institucional (primeiras 7 linhas)." },
-            periodo_inicio: { type: "string", description: "Data de início do período no formato YYYY-MM-DD, no cabeçalho institucional." },
-            periodo_fim: { type: "string", description: "Data de fim do período no formato YYYY-MM-DD, no cabeçalho institucional." },
             linhas: {
               type: "array",
-              description: "A tabela de contas do balancete SEMPRE começa na linha 8 da planilha, onde estão os títulos das colunas (Código, Descrição, Saldo Anterior, Débito, Crédito, Saldo Atual). IGNORE completamente as linhas 1 a 7 (cabeçalho institucional com empresa/CNPJ/endereço) ao montar esta lista - elas não são contas. A partir da linha 8, mapeie exatamente: coluna A = código da conta, coluna B = descrição da conta, coluna C é uma coluna VAZIA de espaçamento visual e deve ser ignorada, coluna D = saldo anterior, coluna E é uma coluna VAZIA de espaçamento visual e deve ser ignorada, coluna F = débito, coluna G = crédito, coluna H = saldo atual. Gere uma linha para CADA conta da tabela, na MESMA ordem em que aparecem, incluindo tanto as contas sintéticas/de grupo (ex: 1 - ATIVO, 2 - ATIVO CIRCULANTE) quanto as contas analíticas finais (ex: 5 - CAIXA GERAL). Não pule nenhuma linha da tabela e não invente colunas que não existem.",
+              description: "A tabela de contas do balancete começa na linha 8 da planilha (títulos: Código, Descrição, Saldo Anterior, Débito, Crédito, Saldo Atual). Ignore as linhas 1 a 7 (cabeçalho institucional com empresa/CNPJ/endereço), elas não são contas. A partir da linha 8: coluna A = código, coluna B = descrição, coluna C é vazia (ignorar), coluna D = saldo anterior, coluna E é vazia (ignorar), coluna F = débito, coluna G = crédito, coluna H = saldo atual. Uma linha para CADA conta, na mesma ordem da planilha, incluindo contas de grupo (ex: 1 - ATIVO) e contas analíticas finais (ex: 5 - CAIXA GERAL).",
               items: {
                 type: "object",
                 properties: {
-                  codigo: { type: "string", description: "Código da conta, exatamente como está na coluna A (Código) da linha da tabela." },
-                  descricao: { type: "string", description: "Descrição da conta, exatamente como está na coluna B (Descrição), sem os espaços de indentação à esquerda." },
-                  nivel: { type: "integer", description: "Nível hierárquico da conta, começando em 0 para as contas de nível mais alto (ATIVO, PASSIVO...), com base no código e na indentação/espaços à esquerda da descrição original." },
-                  saldo_anterior: { type: "number", description: "Valor numérico da coluna D (Saldo Anterior); NEGATIVO se o sufixo for 'c' (credor), POSITIVO se for 'd' (devedor)." },
-                  debito: { type: "number", description: "Valor numérico da coluna F (Débito). A coluna E é vazia e deve ser ignorada." },
-                  credito: { type: "number", description: "Valor numérico da coluna G (Crédito)." },
-                  saldo_atual: { type: "number", description: "Valor numérico da coluna H (Saldo Atual); NEGATIVO se o sufixo for 'c' (credor), POSITIVO se for 'd' (devedor)." },
+                  codigo: { type: "string", description: "Coluna A (Código)." },
+                  descricao: { type: "string", description: "Coluna B (Descrição), sem espaços de indentação à esquerda." },
+                  nivel: { type: "integer", description: "Nível hierárquico da conta (0 para ATIVO/PASSIVO, aumentando conforme a indentação da descrição)." },
+                  saldo_anterior: { type: "number", description: "Coluna D (Saldo Anterior); negativo se sufixo 'c', positivo se 'd'." },
+                  debito: { type: "number", description: "Coluna F (Débito)." },
+                  credito: { type: "number", description: "Coluna G (Crédito)." },
+                  saldo_atual: { type: "number", description: "Coluna H (Saldo Atual); negativo se sufixo 'c', positivo se 'd'." },
                 },
                 required: ["descricao", "nivel"],
               },
             },
-            assinatura_cliente_nome: { type: "string", description: "Nome de quem assina pelo cliente (primeiro bloco de assinatura)" },
-            assinatura_cliente_cargo: { type: "string", description: "Cargo de quem assina pelo cliente, ex: ADMINISTRADOR" },
-            assinatura_cliente_cpf: { type: "string", description: "CPF de quem assina pelo cliente" },
-            assinatura_contador_nome: { type: "string", description: "Nome do contador responsável" },
-            assinatura_contador_crc: { type: "string", description: "Número de registro no CRC do contador" },
-            assinatura_contador_cpf: { type: "string", description: "CPF do contador" },
           },
           required: ["linhas"],
         },
       });
 
-      if (result?.status === "error") {
-        toast({ title: "Erro ao importar planilha", description: result.details || "Não foi possível ler o arquivo.", variant: "destructive" });
+      if (linhasResult?.status === "error") {
+        toast({ title: "Erro ao importar planilha", description: linhasResult.details || "Não foi possível ler o arquivo.", variant: "destructive" });
         return;
       }
 
-      const out = result?.output || {};
-      const linhas = out.linhas || [];
+      const linhas = linhasResult?.output?.linhas || [];
+
+      let out = {};
+      try {
+        const headerResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
+          file_url,
+          json_schema: {
+            type: "object",
+            properties: {
+              empresa: { type: "string", description: "Nome/razão social da empresa, no cabeçalho institucional (primeiras 7 linhas da planilha)." },
+              cnpj: { type: "string", description: "CNPJ da empresa, no cabeçalho institucional (primeiras 7 linhas)." },
+              endereco: { type: "string", description: "Endereço da empresa, no cabeçalho institucional (primeiras 7 linhas)." },
+              folha: { type: "string", description: "Número da folha, se houver." },
+              numero_livro: { type: "string", description: "Número do livro, se houver." },
+              periodo_inicio: { type: "string", description: "Data de início do período (YYYY-MM-DD)." },
+              periodo_fim: { type: "string", description: "Data de fim do período (YYYY-MM-DD)." },
+              assinatura_cliente_nome: { type: "string", description: "Nome de quem assina pelo cliente." },
+              assinatura_cliente_cargo: { type: "string", description: "Cargo de quem assina pelo cliente, ex: ADMINISTRADOR." },
+              assinatura_cliente_cpf: { type: "string", description: "CPF de quem assina pelo cliente." },
+              assinatura_contador_nome: { type: "string", description: "Nome do contador responsável." },
+              assinatura_contador_crc: { type: "string", description: "Número de registro no CRC do contador." },
+              assinatura_contador_cpf: { type: "string", description: "CPF do contador." },
+            },
+          },
+        });
+        if (headerResult?.status !== "error") out = headerResult?.output || {};
+      } catch {
+        // Cabeçalho é apenas complementar; se falhar, seguimos com os dados já digitados no formulário.
+      }
       if (linhas.length === 0) {
         toast({ title: "Nenhuma conta reconhecida na planilha", description: "Verifique se o arquivo segue o modelo de balancete (Código, Descrição, Saldo Anterior, Débito, Crédito, Saldo Atual).", variant: "destructive" });
         return;
