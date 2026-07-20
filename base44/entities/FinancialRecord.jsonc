@@ -33,6 +33,14 @@
       ],
       "default": "Pendente",
       "title": "Status"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Cliente ID"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nome do Cliente"
     }
   },
   "required": [

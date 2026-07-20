@@ -6,12 +6,15 @@ import { useToast } from "@/components/ui/use-toast";
 import FinanceiroFormDialog from "@/components/financeiro/FinanceiroFormDialog";
 import FinanceiroSummaryCards from "@/components/financeiro/FinanceiroSummaryCards";
 import FinanceiroReportChart from "@/components/financeiro/FinanceiroReportChart";
+import NovaCobrancaDialog from "@/components/financeiro/NovaCobrancaDialog";
 
 export default function AdminFinanceiro() {
   const { toast } = useToast();
   const [records, setRecords] = useState([]);
+  const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [cobrancaOpen, setCobrancaOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
   const load = async () => {
@@ -21,7 +24,21 @@ export default function AdminFinanceiro() {
       setRecords(data);
     } catch {} finally { setLoading(false); }
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    base44.entities.Client.list().then(setClients).catch(() => {});
+  }, []);
+
+  const handleSaveCobranca = async (data) => {
+    try {
+      await base44.entities.FinancialRecord.create(data);
+      toast({ title: "Cobrança criada!" });
+      setCobrancaOpen(false);
+      load();
+    } catch {
+      toast({ title: "Erro ao criar cobrança", variant: "destructive" });
+    }
+  };
 
   const openNew = () => { setEditing(null); setDialogOpen(true); };
   const openEdit = (r) => { setEditing(r); setDialogOpen(true); };
@@ -71,6 +88,9 @@ export default function AdminFinanceiro() {
         <div className="flex items-center gap-3">
           <Button onClick={openNew} className="bg-blue-700 hover:bg-blue-800">
             <Plus className="w-4 h-4 mr-1" /> Novo Lançamento
+          </Button>
+          <Button onClick={() => setCobrancaOpen(true)} variant="outline">
+            <Plus className="w-4 h-4 mr-1" /> Nova Cobrança
           </Button>
         </div>
       </div>
@@ -127,6 +147,7 @@ export default function AdminFinanceiro() {
       )}
 
       <FinanceiroFormDialog open={dialogOpen} onOpenChange={setDialogOpen} record={editing} onSave={handleSave} />
+      <NovaCobrancaDialog open={cobrancaOpen} onOpenChange={setCobrancaOpen} clients={clients} onSave={handleSaveCobranca} />
     </div>
   );
 }
