@@ -41,6 +41,11 @@
     "client_name": {
       "type": "string",
       "title": "Nome do Cliente"
+    },
+    "read_by_client": {
+      "type": "boolean",
+      "default": false,
+      "title": "Lida pelo Cliente"
     }
   },
   "required": [

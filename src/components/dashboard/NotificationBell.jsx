@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, Inbox, MessageSquare, Mail } from "lucide-react";
+import { Bell, Inbox, MessageSquare, Mail, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function NotificationBell({ isAdmin }) {
@@ -28,8 +28,15 @@ export default function NotificationBell({ isAdmin }) {
           const clients = await base44.entities.Client.filter({ user_id: user.id });
           if (clients.length > 0) {
             const clientId = clients[0].id;
-            const msgs = await base44.entities.Message.filter({ client_id: clientId, is_read: false, sender_type: "admin" });
-            setNotifications(msgs.map(m => ({ id: m.id, type: "message", title: "Nova mensagem do contador", desc: m.content?.slice(0, 50), link: "/cliente/mensagens", icon: MessageSquare })));
+            const [msgs, cobrancas] = await Promise.all([
+              base44.entities.Message.filter({ client_id: clientId, is_read: false, sender_type: "admin" }),
+              base44.entities.FinancialRecord.filter({ client_id: clientId, read_by_client: false }),
+            ]);
+            const list = [
+              ...msgs.map(m => ({ id: m.id, type: "message", title: "Nova mensagem do contador", desc: m.content?.slice(0, 50), link: "/cliente/mensagens", icon: MessageSquare })),
+              ...cobrancas.map(c => ({ id: c.id, type: "cobranca", title: "Nova cobrança", desc: `${c.description} - R$ ${Number(c.amount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, link: "/cliente", icon: DollarSign })),
+            ];
+            setNotifications(list);
           }
         }
       } catch {}
@@ -62,7 +69,14 @@ export default function NotificationBell({ isAdmin }) {
             <div className="px-4 py-8 text-center text-sm text-slate-400">Sem novas notificações</div>
           ) : (
             notifications.map(n => (
-              <Link key={`${n.type}-${n.id}`} to={n.link} onClick={() => setOpen(false)} className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0">
+              <Link
+                key={`${n.type}-${n.id}`}
+                to={n.link}
+                onClick={() => {
+                  setOpen(false);
+                  if (n.type === "cobranca") base44.entities.FinancialRecord.update(n.id, { read_by_client: true }).catch(() => {});
+                }}
+                className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
                   <n.icon className="w-4 h-4 text-blue-600" />
                 </div>
