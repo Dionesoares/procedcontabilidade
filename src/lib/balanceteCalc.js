@@ -78,8 +78,11 @@ export function fmtMoneyPlain(v) {
 // relying on array position - required because a fully imported balancete tree
 // can have a different number/order of top-level branches (e.g. Contas de Apuração).
 export function getTotals(tree) {
-  const nodes = tree || [];
-  const find = (test) => nodes.find((n) => test((n.label || "").toUpperCase()));
+  // Searches every node at any depth (not just the top level) because an
+  // imported balancete's Despesas/Receitas groups may be nested (e.g. under a
+  // "Contas de Resultado" branch) instead of sitting at the tree's root.
+  const flat = flattenTree(tree);
+  const find = (test) => flat.find((n) => test((n.label || "").toUpperCase()));
   const ativo = find((l) => l === "ATIVO" || l.startsWith("ATIVO "));
   const passivo = find((l) => l === "PASSIVO" || l.startsWith("PASSIVO "));
   const despesas = find((l) => l.includes("DESPESA"));
