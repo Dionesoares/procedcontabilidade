@@ -28,10 +28,11 @@ export default function NotificationBell({ isAdmin }) {
           const clients = await base44.entities.Client.filter({ user_id: user.id });
           if (clients.length > 0) {
             const clientId = clients[0].id;
-            const [msgs, cobrancas] = await Promise.all([
+            const [msgs, cobrancasRaw] = await Promise.all([
               base44.entities.Message.filter({ client_id: clientId, is_read: false, sender_type: "admin" }),
               base44.entities.FinancialRecord.filter({ client_id: clientId, read_by_client: false }),
             ]);
+            const cobrancas = cobrancasRaw.filter(c => c.status !== "Pago");
             const list = [
               ...msgs.map(m => ({ id: m.id, type: "message", title: "Nova mensagem do contador", desc: m.content?.slice(0, 50), link: "/cliente/mensagens", icon: MessageSquare })),
               ...cobrancas.map(c => ({ id: c.id, type: "cobranca", title: "Nova cobrança", desc: `${c.description} - R$ ${Number(c.amount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, link: "/cliente", icon: DollarSign })),
