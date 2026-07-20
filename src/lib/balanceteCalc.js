@@ -74,6 +74,16 @@ export function fmtMoneyPlain(v) {
   return Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 }
 
+// Sums the saldoAtualRaw of a node's leaf accounts only (not the group rows
+// themselves), so the total is always the real sum of the underlying accounts
+// - imported spreadsheets sometimes leave a group row's own value at 0 even
+// though its child accounts carry the real balances.
+function sumLeavesRaw(node) {
+  if (!node) return 0;
+  if (!node.children || node.children.length === 0) return Number(node.saldoAtualRaw) || 0;
+  return node.children.reduce((s, c) => s + sumLeavesRaw(c), 0);
+}
+
 // Finds the top-level Ativo/Passivo/Despesas/Receitas nodes by label instead of
 // relying on array position - required because a fully imported balancete tree
 // can have a different number/order of top-level branches (e.g. Contas de Apuração).
@@ -83,11 +93,12 @@ export function getTotals(tree) {
   // "Contas de Resultado" branch) instead of sitting at the tree's root.
   const flat = flattenTree(tree);
   const find = (test) => flat.find((n) => test((n.label || "").toUpperCase()));
+  const withTotal = (node) => (node ? { ...node, saldoAtualRaw: sumLeavesRaw(node) } : node);
   const ativo = find((l) => l === "ATIVO" || l.startsWith("ATIVO "));
   const passivo = find((l) => l === "PASSIVO" || l.startsWith("PASSIVO "));
   const despesas = find((l) => l.includes("DESPESA"));
   const receitas = find((l) => l.includes("RECEITA"));
-  return { ativo, passivo, despesas, receitas };
+  return { ativo: withTotal(ativo), passivo: withTotal(passivo), despesas: withTotal(despesas), receitas: withTotal(receitas) };
 }
 
 // Rebuilds a nested account tree from a flat list of rows extracted from an
