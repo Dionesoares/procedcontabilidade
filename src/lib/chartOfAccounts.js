@@ -10,9 +10,27 @@ export const CHART_OF_ACCOUNTS = [
         { code: "12", label: "CLIENTES", children: [
           { code: "13", label: "DUPLICATAS A RECEBER", categoria: "duplicatas_receber" },
         ]},
+        { code: "18", label: "OUTROS CRÉDITOS", children: [
+          { code: "28", label: "TRIBUTOS A RECUPERAR/COMPENSAR", children: [
+            { code: "38", label: "INSS A COMPENSAR", categoria: "inss_a_compensar" },
+          ]},
+        ]},
         { code: "53", label: "ESTOQUE", children: [
           { code: "54", label: "MERCADORIAS, PRODUTOS E INSUMOS", children: [
             { code: "55", label: "MERCADORIAS PARA REVENDA", categoria: "mercadorias_revenda" },
+          ]},
+        ]},
+      ]},
+      { code: "501", label: "ATIVO NÃO-CIRCULANTE", children: [
+        { code: "111", label: "IMOBILIZADO", children: [
+          { code: "112", label: "IMÓVEIS", children: [
+            { code: "113", label: "TERRENOS", categoria: "terrenos" },
+          ]},
+          { code: "118", label: "MÁQUINAS, EQUIPAMENTOS E FERRAMENTAS", children: [
+            { code: "119", label: "MÁQUINAS E EQUIPAMENTOS", categoria: "maquinas_equipamentos" },
+          ]},
+          { code: "120", label: "VEÍCULOS", children: [
+            { code: "121", label: "VEÍCULOS", categoria: "veiculos" },
           ]},
         ]},
       ]},
@@ -21,9 +39,42 @@ export const CHART_OF_ACCOUNTS = [
   {
     code: "149", label: "PASSIVO", children: [
       { code: "150", label: "PASSIVO CIRCULANTE", children: [
-        { code: "164", label: "FORNECEDORES", categoria: "fornecedores" },
+        { code: "164", label: "FORNECEDORES", children: [
+          { code: "165", label: "FORNECEDORES", categoria: "fornecedores" },
+        ]},
         { code: "169", label: "OBRIGAÇÕES TRIBUTÁRIAS", children: [
-          { code: "170", label: "IMPOSTOS E CONTRIBUIÇÕES A RECOLHER", categoria: "impostos_recolher" },
+          { code: "170", label: "IMPOSTOS E CONTRIBUIÇÕES A RECOLHER", children: [
+            { code: "178", label: "IRRF A RECOLHER", categoria: "irrf_a_recolher" },
+            { code: "479", label: "SIMPLES NACIONAL A RECOLHER", categoria: "simples_nacional_recolher" },
+          ]},
+        ]},
+        { code: "185", label: "OBRIGAÇÕES TRABALHISTA E PREVIDENCIÁRIA", children: [
+          { code: "186", label: "OBRIGAÇÕES COM O PESSOAL", children: [
+            { code: "187", label: "SALÁRIOS E ORDENADOS A PAGAR", categoria: "salarios_a_pagar" },
+            { code: "188", label: "PRÓ-LABORE A PAGAR", categoria: "pro_labore_a_pagar" },
+          ]},
+          { code: "190", label: "OBRIGAÇÕES SOCIAIS", children: [
+            { code: "191", label: "INSS A RECOLHER", categoria: "inss_a_recolher" },
+            { code: "192", label: "FGTS A RECOLHER", categoria: "fgts_a_recolher" },
+          ]},
+          { code: "193", label: "PROVISÕES", children: [
+            { code: "194", label: "PROVISÕES PARA FÉRIAS", categoria: "provisoes_ferias" },
+            { code: "195", label: "PROVISÕES PARA 13º SALÁRIO", categoria: "provisoes_13" },
+            { code: "197", label: "INSS SOBRE PROVISÕES PARA 13º SALÁRIO", categoria: "inss_sobre_provisoes" },
+            { code: "199", label: "FGTS SOBRE PROVISÕES PARA 13º SALÁRIO", categoria: "fgts_sobre_provisoes" },
+          ]},
+        ]},
+      ]},
+      { code: "242", label: "PATRIMÔNIO LÍQUIDO", children: [
+        { code: "243", label: "CAPITAL SOCIAL", children: [
+          { code: "244", label: "CAPITAL SUBSCRITO", children: [
+            { code: "245", label: "CAPITAL SOCIAL", categoria: "capital_social" },
+          ]},
+        ]},
+        { code: "264", label: "LUCROS OU PREJUÍZOS ACUMULADOS", children: [
+          { code: "265", label: "LUCROS OU PREJUÍZOS ACUMULADOS", children: [
+            { code: "266", label: "LUCROS ACUMULADOS", categoria: "lucros_acumulados" },
+          ]},
         ]},
       ]},
     ],
@@ -31,9 +82,24 @@ export const CHART_OF_ACCOUNTS = [
   {
     code: "269", label: "CONTAS DE RESULTADOS - CUSTOS E DESPESAS", children: [
       { code: "295", label: "DESPESAS OPERACIONAIS", children: [
+        { code: "296", label: "DESPESAS COM VENDAS", children: [
+          { code: "319", label: "DESPESAS GERAIS", children: [
+            { code: "320", label: "ALUGUÉIS", categoria: "alugueis" },
+            { code: "325", label: "SERVIÇOS PRESTADOS POR TERCEIROS", categoria: "servicos_terceiros" },
+          ]},
+        ]},
         { code: "329", label: "DESPESAS ADMINISTRATIVAS", children: [
-          { code: "330", label: "DESPESAS COM PESSOAL", categoria: "despesas_pessoal" },
-          { code: "353", label: "DESPESAS GERAIS", categoria: "despesas_administrativas" },
+          { code: "330", label: "DESPESAS COM PESSOAL", children: [
+            { code: "331", label: "SALÁRIOS E ORDENADOS", categoria: "despesas_salarios" },
+            { code: "336", label: "INSS", categoria: "despesas_inss" },
+            { code: "337", label: "FGTS", categoria: "despesas_fgts" },
+          ]},
+          { code: "353", label: "DESPESAS GERAIS", children: [
+            { code: "354", label: "ENERGIA ELÉTRICA", categoria: "energia_eletrica" },
+            { code: "355", label: "ÁGUA E ESGOTO", categoria: "agua_esgoto" },
+            { code: "359", label: "USO E CONSUMO", categoria: "uso_consumo" },
+            { code: "361", label: "ASSISTÊNCIA CONTÁBIL", categoria: "assistencia_contabil" },
+          ]},
         ]},
       ]},
     ],
@@ -42,7 +108,14 @@ export const CHART_OF_ACCOUNTS = [
     code: "402", label: "CONTAS DE RESULTADO - RECEITAS", children: [
       { code: "403", label: "RECEITAS OPERACIONAIS", children: [
         { code: "404", label: "RECEITA BRUTA DE VENDAS E SERVIÇOS", children: [
-          { code: "408", label: "VENDA DE MERCADORIAS", categoria: "receita_vendas" },
+          { code: "410", label: "RECEITA DE PRESTAÇÃO DE SERVIÇOS", children: [
+            { code: "411", label: "SERVIÇOS PRESTADOS", categoria: "servicos_prestados" },
+          ]},
+        ]},
+        { code: "413", label: "(-) DEDUÇÕES DA RECEITA BRUTA", children: [
+          { code: "424", label: "(-) IMPOSTOS SOBRE VENDAS E SERVIÇOS", children: [
+            { code: "480", label: "(-) SIMPLES NACIONAL", categoria: "deducao_simples_nacional" },
+          ]},
         ]},
       ]},
     ],
@@ -52,12 +125,35 @@ export const CHART_OF_ACCOUNTS = [
 export const CATEGORIA_OPTIONS = [
   { value: "caixa_geral", label: "Caixa Geral (Disponível)" },
   { value: "duplicatas_receber", label: "Duplicatas a Receber (Clientes)" },
+  { value: "inss_a_compensar", label: "INSS a Compensar (Outros Créditos)" },
   { value: "mercadorias_revenda", label: "Mercadorias para Revenda (Estoque)" },
+  { value: "terrenos", label: "Terrenos (Imobilizado)" },
+  { value: "maquinas_equipamentos", label: "Máquinas e Equipamentos (Imobilizado)" },
+  { value: "veiculos", label: "Veículos (Imobilizado)" },
   { value: "fornecedores", label: "Fornecedores (Passivo)" },
-  { value: "impostos_recolher", label: "Impostos e Contribuições a Recolher" },
-  { value: "despesas_pessoal", label: "Despesas com Pessoal" },
-  { value: "despesas_administrativas", label: "Despesas Administrativas Gerais" },
-  { value: "receita_vendas", label: "Receita de Vendas/Serviços" },
+  { value: "irrf_a_recolher", label: "IRRF a Recolher" },
+  { value: "simples_nacional_recolher", label: "Simples Nacional a Recolher" },
+  { value: "salarios_a_pagar", label: "Salários e Ordenados a Pagar" },
+  { value: "pro_labore_a_pagar", label: "Pró-labore a Pagar" },
+  { value: "inss_a_recolher", label: "INSS a Recolher" },
+  { value: "fgts_a_recolher", label: "FGTS a Recolher" },
+  { value: "provisoes_ferias", label: "Provisões para Férias" },
+  { value: "provisoes_13", label: "Provisões para 13º Salário" },
+  { value: "inss_sobre_provisoes", label: "INSS sobre Provisões para 13º Salário" },
+  { value: "fgts_sobre_provisoes", label: "FGTS sobre Provisões para 13º Salário" },
+  { value: "capital_social", label: "Capital Social (Patrimônio Líquido)" },
+  { value: "lucros_acumulados", label: "Lucros Acumulados (Patrimônio Líquido)" },
+  { value: "alugueis", label: "Aluguéis (Despesas com Vendas)" },
+  { value: "servicos_terceiros", label: "Serviços Prestados por Terceiros (Despesas com Vendas)" },
+  { value: "despesas_salarios", label: "Salários e Ordenados (Despesas com Pessoal)" },
+  { value: "despesas_inss", label: "INSS (Despesas com Pessoal)" },
+  { value: "despesas_fgts", label: "FGTS (Despesas com Pessoal)" },
+  { value: "energia_eletrica", label: "Energia Elétrica (Despesas Gerais)" },
+  { value: "agua_esgoto", label: "Água e Esgoto (Despesas Gerais)" },
+  { value: "uso_consumo", label: "Uso e Consumo (Despesas Gerais)" },
+  { value: "assistencia_contabil", label: "Assistência Contábil (Despesas Gerais)" },
+  { value: "servicos_prestados", label: "Serviços Prestados (Receita Bruta)" },
+  { value: "deducao_simples_nacional", label: "(-) Simples Nacional (Dedução da Receita Bruta)" },
 ];
 
 // Maps a ContaContabil's "grupo" to the label of its top-level branch in
@@ -75,12 +171,35 @@ export const GRUPO_LABELS = {
 export const BASE_ACCOUNT_GRUPO = {
   caixa_geral: "ativo",
   duplicatas_receber: "ativo",
+  inss_a_compensar: "ativo",
   mercadorias_revenda: "ativo",
+  terrenos: "ativo",
+  maquinas_equipamentos: "ativo",
+  veiculos: "ativo",
   fornecedores: "passivo",
-  impostos_recolher: "passivo",
-  despesas_pessoal: "despesas",
-  despesas_administrativas: "despesas",
-  receita_vendas: "receitas",
+  irrf_a_recolher: "passivo",
+  simples_nacional_recolher: "passivo",
+  salarios_a_pagar: "passivo",
+  pro_labore_a_pagar: "passivo",
+  inss_a_recolher: "passivo",
+  fgts_a_recolher: "passivo",
+  provisoes_ferias: "passivo",
+  provisoes_13: "passivo",
+  inss_sobre_provisoes: "passivo",
+  fgts_sobre_provisoes: "passivo",
+  capital_social: "passivo",
+  lucros_acumulados: "passivo",
+  alugueis: "despesas",
+  servicos_terceiros: "despesas",
+  despesas_salarios: "despesas",
+  despesas_inss: "despesas",
+  despesas_fgts: "despesas",
+  energia_eletrica: "despesas",
+  agua_esgoto: "despesas",
+  uso_consumo: "despesas",
+  assistencia_contabil: "despesas",
+  servicos_prestados: "receitas",
+  deducao_simples_nacional: "receitas",
 };
 
 function findNodeByCategoria(tree, categoria) {

@@ -15,6 +15,7 @@ import BalanceteLancamentoDialog from "@/components/balancete/BalanceteLancament
 import { computeBalanceteTree, buildTreeFromFlatRows, getTotals } from "@/lib/balanceteCalc";
 import { generateBalancetePdf } from "@/lib/balancetePdf";
 import { resolveCategoriaLabel } from "@/lib/chartOfAccounts";
+import { parseBalanceteCsv } from "@/lib/balanceteCsvParser";
 
 const todayYear = new Date().getFullYear();
 
@@ -39,6 +40,8 @@ export default function AdminBalancete() {
   const [signatureClienteRole, setSignatureClienteRole] = useState("Sócio Proprietário");
   const [signatureClienteCpf, setSignatureClienteCpf] = useState("");
   const [uploadingExcel, setUploadingExcel] = useState(false);
+  const [importedTree, setImportedTree] = useState(null);
+  const [savingImport, setSavingImport] = useState(false);
   const fileInputRef = useRef(null);
   const [headerData, setHeaderData] = useState({ companyName: "", cnpj: "", address: "", folha: "0001", numeroLivro: "0001" });
   const [headerDialogOpen, setHeaderDialogOpen] = useState(false);
@@ -54,10 +57,11 @@ export default function AdminBalancete() {
   const loadLancamentos = (id) => base44.entities.BalanceteLancamento.filter({ client_id: id }).then(setLancamentos);
 
   useEffect(() => {
-    if (!clientId) { setLancamentos([]); setSaved([]); setViewingBalancete(null); return; }
+    if (!clientId) { setLancamentos([]); setSaved([]); setViewingBalancete(null); setImportedTree(null); return; }
     loadLancamentos(clientId);
     base44.entities.Balancete.filter({ client_id: clientId }, "-created_date").then(setSaved);
     setViewingBalancete(null);
+    setImportedTree(null);
     const c = clients.find((cl) => cl.id === clientId);
     setSignatureCliente(c?.name || "");
     setHeaderData({
@@ -84,7 +88,7 @@ export default function AdminBalancete() {
   const selectedClient = clients.find((c) => c.id === clientId);
   const categoriaLabel = (v) => resolveCategoriaLabel(v, customAccounts);
   const previewTree = useMemo(() => computeBalanceteTree(lancamentos, periodStart, periodEnd, customAccounts), [lancamentos, periodStart, periodEnd, customAccounts]);
-  const currentTree = viewingBalancete ? JSON.parse(viewingBalancete.tree || "[]") : previewTree;
+  const currentTree = viewingBalancete ? JSON.parse(viewingBalancete.tree || "[]") : (importedTree || previewTree);
   const headerPeriodStart = viewingBalancete ? viewingBalancete.period_start : periodStart;
   const headerPeriodEnd = viewingBalancete ? viewingBalancete.period_end : periodEnd;
   const headerSignatureContador = viewingBalancete ? viewingBalancete.signature_contador : signatureContador;
@@ -192,6 +196,35 @@ export default function AdminBalancete() {
       return;
     }
     setUploadingExcel(true);
+
+    // CSV files are parsed directly in the browser (deterministic, exact match
+    // to the source spreadsheet) instead of relying on AI extraction.
+    if (/\.csv$/i.test(file.name)) {
+      try {
+        const text = await file.text();
+        const parsed = parseBalanceteCsv(text);
+        if (!parsed) {
+          toast({ title: "Não foi possível ler a planilha", description: "Verifique se o arquivo segue o modelo de balancete (colunas Código, Descrição, Saldo Anterior, Débito, Crédito, Saldo Atual).", variant: "destructive" });
+          return;
+        }
+        setImportedTree(parsed.tree);
+        setViewingBalancete(null);
+        if (parsed.signature_cliente) setSignatureCliente(parsed.signature_cliente);
+        if (parsed.signature_cliente_role) setSignatureClienteRole(parsed.signature_cliente_role);
+        if (parsed.signature_cliente_cpf) setSignatureClienteCpf(parsed.signature_cliente_cpf);
+        if (parsed.signature_contador) setSignatureContador(parsed.signature_contador);
+        if (parsed.signature_contador_crc) setSignatureContadorCrc(parsed.signature_contador_crc);
+        if (parsed.signature_contador_cpf) setSignatureContadorCpf(parsed.signature_contador_cpf);
+        toast({ title: "Planilha carregada!", description: "Revise os dados abaixo e clique em Salvar Balancete." });
+      } catch (err) {
+        toast({ title: "Erro ao ler a planilha", description: err?.message || "Verifique o formato do arquivo e tente novamente.", variant: "destructive" });
+      } finally {
+        setUploadingExcel(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+      return;
+    }
+
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
@@ -265,34 +298,25 @@ export default function AdminBalancete() {
       }
 
       const tree = buildTreeFromFlatRows(linhas);
-      const { ativo, passivo, despesas, receitas } = getTotals(tree);
 
-      const created = await base44.entities.Balancete.create({
-        client_id: clientId,
-        client_name: selectedClient?.name || "",
-        client_company_name: out.empresa || headerData.companyName || selectedClient?.company_name || selectedClient?.name || "",
-        client_cnpj: out.cnpj || headerData.cnpj || selectedClient?.cpf_cnpj || "",
-        client_address: out.endereco || headerData.address || selectedClient?.address || "",
-        folha: out.folha || headerData.folha || "0001",
-        numero_livro: out.numero_livro || headerData.numeroLivro || "0001",
-        period_start: out.periodo_inicio || periodStart,
-        period_end: out.periodo_fim || periodEnd,
-        tree: JSON.stringify(tree),
-        ativo_saldo: ativo?.saldoAtualRaw || 0,
-        passivo_saldo: passivo?.saldoAtualRaw || 0,
-        despesas_saldo: despesas?.saldoAtualRaw || 0,
-        receitas_saldo: receitas?.saldoAtualRaw || 0,
-        signature_contador: out.assinatura_contador_nome || signatureContador,
-        signature_contador_crc: out.assinatura_contador_crc || signatureContadorCrc,
-        signature_contador_cpf: out.assinatura_contador_cpf || signatureContadorCpf,
-        signature_cliente: out.assinatura_cliente_nome || signatureCliente,
-        signature_cliente_role: out.assinatura_cliente_cargo || signatureClienteRole,
-        signature_cliente_cpf: out.assinatura_cliente_cpf || signatureClienteCpf,
+      setImportedTree(tree);
+      setViewingBalancete(null);
+      setHeaderData({
+        companyName: out.empresa || headerData.companyName,
+        cnpj: out.cnpj || headerData.cnpj,
+        address: out.endereco || headerData.address,
+        folha: out.folha || headerData.folha,
+        numeroLivro: out.numero_livro || headerData.numeroLivro,
       });
-
-      setSaved((prev) => [created, ...prev]);
-      setViewingBalancete(created);
-      toast({ title: "Balancete importado!", description: "A árvore completa da planilha foi recriada e já está disponível no portal do cliente." });
+      if (out.periodo_inicio) setPeriodStart(out.periodo_inicio);
+      if (out.periodo_fim) setPeriodEnd(out.periodo_fim);
+      if (out.assinatura_contador_nome) setSignatureContador(out.assinatura_contador_nome);
+      if (out.assinatura_contador_crc) setSignatureContadorCrc(out.assinatura_contador_crc);
+      if (out.assinatura_contador_cpf) setSignatureContadorCpf(out.assinatura_contador_cpf);
+      if (out.assinatura_cliente_nome) setSignatureCliente(out.assinatura_cliente_nome);
+      if (out.assinatura_cliente_cargo) setSignatureClienteRole(out.assinatura_cliente_cargo);
+      if (out.assinatura_cliente_cpf) setSignatureClienteCpf(out.assinatura_cliente_cpf);
+      toast({ title: "Planilha carregada!", description: "Revise os dados abaixo e clique em Salvar Balancete." });
     } catch (err) {
       const msg = /unsupported file type/i.test(err?.message || "")
         ? "Formato de arquivo não suportado. Use .xlsx ou .csv."
@@ -301,6 +325,44 @@ export default function AdminBalancete() {
     } finally {
       setUploadingExcel(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSalvarImportado = async () => {
+    if (!importedTree || !clientId) return;
+    setSavingImport(true);
+    try {
+      const { ativo, passivo, despesas, receitas } = getTotals(importedTree);
+      const created = await base44.entities.Balancete.create({
+        client_id: clientId,
+        client_name: selectedClient?.name || "",
+        client_company_name: headerData.companyName || selectedClient?.company_name || selectedClient?.name || "",
+        client_cnpj: headerData.cnpj || selectedClient?.cpf_cnpj || "",
+        client_address: headerData.address || selectedClient?.address || "",
+        folha: headerData.folha || "0001",
+        numero_livro: headerData.numeroLivro || "0001",
+        period_start: periodStart,
+        period_end: periodEnd,
+        tree: JSON.stringify(importedTree),
+        ativo_saldo: ativo?.saldoAtualRaw || 0,
+        passivo_saldo: passivo?.saldoAtualRaw || 0,
+        despesas_saldo: despesas?.saldoAtualRaw || 0,
+        receitas_saldo: receitas?.saldoAtualRaw || 0,
+        signature_contador: signatureContador,
+        signature_contador_crc: signatureContadorCrc,
+        signature_contador_cpf: signatureContadorCpf,
+        signature_cliente: signatureCliente,
+        signature_cliente_role: signatureClienteRole,
+        signature_cliente_cpf: signatureClienteCpf,
+      });
+      setSaved((prev) => [created, ...prev]);
+      setImportedTree(null);
+      setViewingBalancete(created);
+      toast({ title: "Balancete salvo!", description: "Já está disponível no portal do cliente." });
+    } catch {
+      toast({ title: "Erro ao salvar balancete", variant: "destructive" });
+    } finally {
+      setSavingImport(false);
     }
   };
 
@@ -376,6 +438,11 @@ export default function AdminBalancete() {
         <Button type="button" variant="outline" disabled={!clientId || uploadingExcel} onClick={() => fileInputRef.current?.click()}>
           <Upload className="w-4 h-4 mr-1" /> {uploadingExcel ? "Importando..." : "Carregar Excel (.xlsx/.csv)"}
         </Button>
+        {importedTree && (
+          <Button type="button" onClick={handleSalvarImportado} disabled={savingImport} className="bg-green-700 hover:bg-green-800">
+            {savingImport ? "Salvando..." : "Salvar Balancete"}
+          </Button>
+        )}
       </div>
 
       {!clientId ? (
@@ -426,6 +493,12 @@ export default function AdminBalancete() {
             <div className="mb-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-700">
               <span>Visualizando um balancete já gerado.</span>
               <button onClick={() => setViewingBalancete(null)} className="font-medium hover:underline">Voltar à pré-visualização atual</button>
+            </div>
+          )}
+          {importedTree && (
+            <div className="mb-4 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-sm text-amber-700">
+              <span>Planilha importada — ainda não salva. Revise os dados e clique em "Salvar Balancete".</span>
+              <button onClick={() => setImportedTree(null)} className="font-medium hover:underline">Descartar importação</button>
             </div>
           )}
           <div className="space-y-6">
