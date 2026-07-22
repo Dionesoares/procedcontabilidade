@@ -39,12 +39,12 @@ export default function AdminDashboard() {
   }, []);
 
   const cards = [
-    { icon: Users, label: "Clientes", value: stats.clients, color: "bg-blue-50 text-blue-600" },
-    { icon: ListTodo, label: "Tarefas", value: stats.tasks, color: "bg-amber-50 text-amber-600" },
-    { icon: FileText, label: "Documentos", value: stats.documents, color: "bg-purple-50 text-purple-600" },
-    { icon: Inbox, label: "Solicitações", value: stats.requests, color: "bg-blue-50 text-blue-600" },
-    { icon: AlertCircle, label: "Tarefas Pendentes", value: stats.pendingTasks, color: "bg-red-50 text-red-600" },
-    { icon: TrendingUp, label: "Novas Solicitações", value: stats.newRequests, color: "bg-cyan-50 text-cyan-600" },
+    { icon: Users, label: "Clientes", value: stats.clients, color: "bg-blue-50 text-blue-600", to: "/admin/clientes" },
+    { icon: ListTodo, label: "Tarefas", value: stats.tasks, color: "bg-amber-50 text-amber-600", to: "/admin/tarefas" },
+    { icon: FileText, label: "Documentos", value: stats.documents, color: "bg-purple-50 text-purple-600", to: "/admin/documentos" },
+    { icon: Inbox, label: "Solicitações", value: stats.requests, color: "bg-blue-50 text-blue-600", to: "/admin/solicitacoes" },
+    { icon: AlertCircle, label: "Tarefas Pendentes", value: stats.pendingTasks, color: "bg-red-50 text-red-600", to: "/admin/tarefas" },
+    { icon: TrendingUp, label: "Novas Solicitações", value: stats.newRequests, color: "bg-cyan-50 text-cyan-600", to: "/admin/solicitacoes" },
   ];
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
@@ -67,15 +67,16 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-white rounded-xl border border-slate-200 p-5"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 rounded-lg ${c.color} flex items-center justify-center`}>
-                <c.icon className="w-5 h-5" />
+            <Link to={c.to} className="block bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-300 hover:shadow-md transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-10 h-10 rounded-lg ${c.color} flex items-center justify-center`}>
+                  <c.icon className="w-5 h-5" />
+                </div>
               </div>
-            </div>
-            <p className="text-2xl font-bold text-slate-900">{c.value}</p>
-            <p className="text-sm text-slate-500">{c.label}</p>
+              <p className="text-2xl font-bold text-slate-900">{c.value}</p>
+              <p className="text-sm text-slate-500">{c.label}</p>
+            </Link>
           </motion.div>
         ))}
       </div>
