@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Pencil, Plus, Check, TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronDown, Pencil, Plus, Check, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 
 const DEFAULTS = [
   { label: "Receita", classification: "Receita" },
@@ -50,6 +50,16 @@ export default function TipoSelect({ value, label, onChange }) {
       onChange({ type: editClassification, type_label: editLabel });
     }
     setEditingId(null);
+  };
+
+  const handleDelete = async (t) => {
+    if (!confirm(`Excluir o tipo "${t.label}"?`)) return;
+    await base44.entities.TipoLancamento.delete(t.id);
+    const remaining = types.filter(x => x.id !== t.id);
+    setTypes(remaining);
+    if (selectedLabel === t.label && remaining.length > 0) {
+      handleSelect(remaining[0]);
+    }
   };
 
   const saveNew = async () => {
@@ -106,6 +116,9 @@ export default function TipoSelect({ value, label, onChange }) {
                   </button>
                   <button type="button" onClick={() => startEdit(t)} className="p-1.5 text-slate-400 hover:text-blue-600 rounded">
                     <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button type="button" onClick={() => handleDelete(t)} className="p-1.5 text-slate-400 hover:text-red-600 rounded">
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </>
               )}
