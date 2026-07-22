@@ -1,0 +1,19 @@
+{
+  "name": "DescricaoLancamento",
+  "type": "object",
+  "properties": {
+    "label": {
+      "type": "string",
+      "title": "Descri\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "label"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
+}

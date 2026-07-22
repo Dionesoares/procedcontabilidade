@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TipoSelect from "@/components/financeiro/TipoSelect";
+import DescricaoSelect from "@/components/financeiro/DescricaoSelect";
 
 const emptyForm = { description: "", type: "Receita", type_label: "Receita", amount: "", due_date: "", status: "Pendente" };
 
@@ -33,7 +34,7 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-sm font-medium text-slate-700 mb-1 block">Descrição*</label>
-            <Input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} required placeholder="Ex: Honorários contábeis" />
+            <DescricaoSelect value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
