@@ -11,12 +11,10 @@ import AdminMensagens from "@/pages/admin/AdminMensagens";
 import AdminContatos from "@/pages/admin/AdminContatos";
 import AdminContadores from "@/pages/admin/AdminContadores";
 import AdminFinanceiro from "@/pages/admin/AdminFinanceiro";
-import AdminBalancete from "@/pages/admin/AdminBalancete";
 import ClienteDashboard from "@/pages/cliente/ClienteDashboard";
 import ClienteDocumentos from "@/pages/cliente/ClienteDocumentos";
 import ClienteSolicitacoes from "@/pages/cliente/ClienteSolicitacoes";
 import ClienteMensagens from "@/pages/cliente/ClienteMensagens";
-import ClienteBalancete from "@/pages/cliente/ClienteBalancete";
 
 export function AdminRouter() {
   const [user, setUser] = useState(null);
@@ -42,7 +40,6 @@ export function AdminRouter() {
         <Route path="contatos-recebidos" element={<AdminContatos />} />
         <Route path="contadores" element={<AdminContadores />} />
         <Route path="financeiro" element={<AdminFinanceiro />} />
-        <Route path="balancete" element={<AdminBalancete />} />
       </Route>
     </Routes>
   );
@@ -67,7 +64,6 @@ export function ClienteRouter() {
         <Route path="documentos" element={<ClienteDocumentos />} />
         <Route path="solicitacoes" element={<ClienteSolicitacoes />} />
         <Route path="mensagens" element={<ClienteMensagens />} />
-        <Route path="balancete" element={<ClienteBalancete />} />
       </Route>
     </Routes>
   );
