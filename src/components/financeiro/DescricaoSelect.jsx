@@ -5,18 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Pencil, Trash2, Save, Check } from "lucide-react";
 
-export default function DescricaoSelect({ value, onChange }) {
+export default function DescricaoSelect({ value, onChange, scope = "lancamento" }) {
   const [items, setItems] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editLabel, setEditLabel] = useState("");
 
   const load = async () => {
-    const list = await base44.entities.DescricaoLancamento.list();
+    const list = await base44.entities.DescricaoLancamento.filter({ scope });
     setItems(list);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [scope]);
 
   const handleSelect = (item) => {
     onChange(item.label);
@@ -45,7 +45,7 @@ export default function DescricaoSelect({ value, onChange }) {
     const label = (value || "").trim();
     if (!label) return;
     if (items.some(i => i.label.toLowerCase() === label.toLowerCase())) return;
-    const created = await base44.entities.DescricaoLancamento.create({ label });
+    const created = await base44.entities.DescricaoLancamento.create({ label, scope });
     setItems([...items, created]);
   };
 

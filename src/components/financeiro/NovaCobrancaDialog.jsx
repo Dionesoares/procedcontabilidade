@@ -49,7 +49,7 @@ export default function NovaCobrancaDialog({ open, onOpenChange, clients, onSave
           </div>
           <div>
             <label className="text-sm font-medium text-slate-700 mb-1 block">Descrição</label>
-            <DescricaoSelect value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
+            <DescricaoSelect value={form.description} onChange={(v) => setForm({ ...form, description: v })} scope="cobranca" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

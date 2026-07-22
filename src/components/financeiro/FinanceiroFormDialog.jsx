@@ -34,7 +34,7 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-sm font-medium text-slate-700 mb-1 block">Descrição*</label>
-            <DescricaoSelect value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
+            <DescricaoSelect value={form.description} onChange={(v) => setForm({ ...form, description: v })} scope="lancamento" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
