@@ -46,6 +46,10 @@
       "type": "boolean",
       "default": false,
       "title": "Lida pelo Cliente"
+    },
+    "type_label": {
+      "type": "string",
+      "title": "Tipo (detalhado)"
     }
   },
   "required": [

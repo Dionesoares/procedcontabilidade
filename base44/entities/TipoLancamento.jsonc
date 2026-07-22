@@ -1,0 +1,29 @@
+{
+  "name": "TipoLancamento",
+  "type": "object",
+  "properties": {
+    "label": {
+      "type": "string",
+      "title": "Nome do Tipo"
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "Receita",
+        "Despesa"
+      ],
+      "default": "Receita",
+      "title": "Classifica\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "label",
+    "classification"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
+}

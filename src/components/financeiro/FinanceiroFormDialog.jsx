@@ -3,8 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import TipoSelect from "@/components/financeiro/TipoSelect";
 
-const emptyForm = { description: "", type: "Receita", amount: "", due_date: "", status: "Pendente" };
+const emptyForm = { description: "", type: "Receita", type_label: "Receita", amount: "", due_date: "", status: "Pendente" };
 
 export default function FinanceiroFormDialog({ open, onOpenChange, record, onSave }) {
   const [form, setForm] = useState(emptyForm);
@@ -37,13 +38,11 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Tipo*</label>
-              <Select value={form.type} onValueChange={v => setForm({ ...form, type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Receita">Receita</SelectItem>
-                  <SelectItem value="Despesa">Despesa</SelectItem>
-                </SelectContent>
-              </Select>
+              <TipoSelect
+                value={form.type}
+                label={form.type_label}
+                onChange={({ type, type_label }) => setForm({ ...form, type, type_label })}
+              />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Valor*</label>
