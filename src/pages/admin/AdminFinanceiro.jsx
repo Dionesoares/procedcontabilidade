@@ -47,6 +47,20 @@ export default function AdminFinanceiro() {
     });
   }, [records, filters]);
 
+  const clientById = useMemo(() => {
+    const map = {};
+    clients.forEach((c) => { map[c.id] = c; });
+    return map;
+  }, [clients]);
+
+  const getClientInfo = (record) => {
+    const client = clientById[record.client_id];
+    if (client) return { company_name: client.company_name || "", client_name: client.name || "" };
+    return { company_name: "", client_name: record.client_name || "" };
+  };
+
+  const recordsForExport = () => filteredRecords.map((r) => ({ ...r, ...getClientInfo(r) }));
+
   const handleSaveCobranca = async (data) => {
     try {
       await base44.entities.FinancialRecord.create(data);
@@ -110,10 +124,10 @@ export default function AdminFinanceiro() {
           <Button onClick={() => setCobrancaOpen(true)} variant="outline">
             <Plus className="w-4 h-4 mr-1" /> Nova Cobrança
           </Button>
-          <Button variant="outline" onClick={() => exportFinanceiroPdf(filteredRecords)}>
+          <Button variant="outline" onClick={() => exportFinanceiroPdf(recordsForExport())}>
             <FileDown className="w-4 h-4 mr-1" /> PDF
           </Button>
-          <Button variant="outline" onClick={() => exportFinanceiroExcel(filteredRecords)}>
+          <Button variant="outline" onClick={() => exportFinanceiroExcel(recordsForExport())}>
             <FileSpreadsheet className="w-4 h-4 mr-1" /> Excel
           </Button>
         </div>
