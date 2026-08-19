@@ -33,6 +33,7 @@ export default function FinanceiroFiltros({ filters, onChange, clients }) {
               <SelectItem value="Pendente">Pendente</SelectItem>
               <SelectItem value="Pago">Pago</SelectItem>
               <SelectItem value="Atrasado">Atrasado</SelectItem>
+              <SelectItem value="Parcial">Parcial</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -42,7 +43,7 @@ export default function FinanceiroFiltros({ filters, onChange, clients }) {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="Todos">Todos</SelectItem>
-              {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Pencil, TrendingUp, TrendingDown, FileDown, FileSpreadsheet } from "lucide-react";
+import { FinancialRecord, Client } from "@/api/entities";
+import { Plus, Trash2, Pencil, TrendingUp, TrendingDown, FileDown, FileSpreadsheet, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import FinanceiroFormDialog from "@/components/financeiro/FinanceiroFormDialog";
@@ -10,8 +10,35 @@ import FinanceiroPieChart from "@/components/financeiro/FinanceiroPieChart";
 import FinanceiroFiltros from "@/components/financeiro/FinanceiroFiltros";
 import NovaCobrancaDialog from "@/components/financeiro/NovaCobrancaDialog";
 import { exportFinanceiroPdf, exportFinanceiroExcel } from "@/lib/financeiroExport";
+import { sortClientsByName } from "@/lib/clientLookup";
 
 const emptyFilters = { type: "Todos", status: "Todos", clientId: "Todos", dateFrom: "", dateTo: "", search: "" };
+
+function addInterval(dateStr, frequency, times) {
+  const date = new Date(dateStr + "T00:00:00");
+  if (frequency === "Semanal") date.setDate(date.getDate() + 7 * times);
+  else if (frequency === "Anual") date.setFullYear(date.getFullYear() + times);
+  else date.setMonth(date.getMonth() + times); // Mensal (default)
+  return date.toISOString().slice(0, 10);
+}
+
+function buildRecurrenceRows(data) {
+  const { is_recurring, recurrence_frequency, recurrence_count, ...base } = data;
+  const count = Math.max(1, Number(recurrence_count) || 1);
+  if (!is_recurring || !base.due_date || count <= 1) {
+    return [{ ...base, is_recurring: false, recurrence_frequency: null, recurrence_group_id: null }];
+  }
+  const groupId = crypto.randomUUID();
+  return Array.from({ length: count }, (_, i) => ({
+    ...base,
+    due_date: i === 0 ? base.due_date : addInterval(base.due_date, recurrence_frequency, i),
+    is_recurring: true,
+    recurrence_frequency,
+    recurrence_group_id: groupId,
+    amount_paid: i === 0 ? Number(base.amount_paid || 0) : 0,
+    status: i === 0 ? base.status : "Pendente",
+  }));
+}
 
 export default function AdminFinanceiro() {
   const { toast } = useToast();
@@ -26,13 +53,13 @@ export default function AdminFinanceiro() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await base44.entities.FinancialRecord.list("-due_date");
+      const data = await FinancialRecord.list("-due_date");
       setRecords(data);
     } catch {} finally { setLoading(false); }
   };
   useEffect(() => {
     load();
-    base44.entities.Client.list().then(setClients).catch(() => {});
+    Client.list().then((c) => setClients(sortClientsByName(c))).catch(() => {});
   }, []);
 
   const filteredRecords = useMemo(() => {
@@ -53,17 +80,29 @@ export default function AdminFinanceiro() {
     return map;
   }, [clients]);
 
+  // Shows the client's company name (Razão Social) before their name, e.g.
+  // "Contabilidade XP Ltda - João Silva", so the table identifies the
+  // business the launch belongs to, not just the contact person.
+  const getClientLabel = (record) => {
+    const client = clientById[record.client_id];
+    const name = client?.name || record.client_name || "";
+    const companyName = client?.company_name;
+    if (!name) return "";
+    return companyName ? `${companyName} - ${name}` : name;
+  };
+
+  // Reports (PDF/Excel) show Empresa and Nome as separate columns instead of
+  // one combined string — a long "Empresa - Nome" text was overlapping the
+  // Tipo column in the PDF table.
   const getClientInfo = (record) => {
     const client = clientById[record.client_id];
     if (client) return { company_name: client.company_name || "", client_name: client.name || "" };
     return { company_name: "", client_name: record.client_name || "" };
   };
 
-  const recordsForExport = () => filteredRecords.map((r) => ({ ...r, ...getClientInfo(r) }));
-
   const handleSaveCobranca = async (data) => {
     try {
-      await base44.entities.FinancialRecord.create(data);
+      await FinancialRecord.create(data);
       toast({ title: "Cobrança criada!" });
       setCobrancaOpen(false);
       load();
@@ -78,11 +117,18 @@ export default function AdminFinanceiro() {
   const handleSave = async (data) => {
     try {
       if (editing) {
-        await base44.entities.FinancialRecord.update(editing.id, data);
+        const { is_recurring, recurrence_frequency, recurrence_count, ...rest } = data;
+        await FinancialRecord.update(editing.id, rest);
         toast({ title: "Lançamento atualizado!" });
       } else {
-        await base44.entities.FinancialRecord.create(data);
-        toast({ title: "Lançamento criado!" });
+        const rows = buildRecurrenceRows(data);
+        if (rows.length > 1) {
+          await FinancialRecord.bulkCreate(rows);
+          toast({ title: `${rows.length} lançamentos recorrentes criados!` });
+        } else {
+          await FinancialRecord.create(rows[0]);
+          toast({ title: "Lançamento criado!" });
+        }
       }
       setDialogOpen(false);
       load();
@@ -94,7 +140,7 @@ export default function AdminFinanceiro() {
   const handleDelete = async (r) => {
     if (!confirm("Excluir este lançamento?")) return;
     try {
-      await base44.entities.FinancialRecord.delete(r.id);
+      await FinancialRecord.delete(r.id);
       toast({ title: "Lançamento excluído!" });
       load();
     } catch {
@@ -106,6 +152,7 @@ export default function AdminFinanceiro() {
     Pago: "bg-green-100 text-green-700",
     Pendente: "bg-amber-100 text-amber-700",
     Atrasado: "bg-red-100 text-red-700",
+    Parcial: "bg-sky-100 text-sky-700",
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
@@ -124,10 +171,10 @@ export default function AdminFinanceiro() {
           <Button onClick={() => setCobrancaOpen(true)} variant="outline">
             <Plus className="w-4 h-4 mr-1" /> Nova Cobrança
           </Button>
-          <Button variant="outline" onClick={() => exportFinanceiroPdf(recordsForExport())}>
+          <Button variant="outline" onClick={() => exportFinanceiroPdf(filteredRecords.map(r => ({ ...r, ...getClientInfo(r) })))}>
             <FileDown className="w-4 h-4 mr-1" /> PDF
           </Button>
-          <Button variant="outline" onClick={() => exportFinanceiroExcel(recordsForExport())}>
+          <Button variant="outline" onClick={() => exportFinanceiroExcel(filteredRecords.map(r => ({ ...r, ...getClientInfo(r) })))}>
             <FileSpreadsheet className="w-4 h-4 mr-1" /> Excel
           </Button>
         </div>
@@ -156,6 +203,7 @@ export default function AdminFinanceiro() {
                 <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                   <tr>
                     <th className="text-left px-4 py-3">Descrição</th>
+                    <th className="text-left px-4 py-3 hidden lg:table-cell">Cliente</th>
                     <th className="text-left px-4 py-3">Tipo</th>
                     <th className="text-left px-4 py-3">Valor</th>
                     <th className="text-left px-4 py-3 hidden md:table-cell">Vencimento</th>
@@ -166,7 +214,13 @@ export default function AdminFinanceiro() {
                 <tbody className="divide-y divide-slate-100">
                   {filteredRecords.map(r => (
                     <tr key={r.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-slate-900">{r.description}</td>
+                      <td className="px-4 py-3 font-medium text-slate-900">
+                        <span className="inline-flex items-center gap-1.5">
+                          {r.description}
+                          {r.is_recurring && <Repeat className="w-3.5 h-3.5 text-slate-400" title="Lançamento recorrente" />}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">{getClientLabel(r) || "—"}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${r.type === "Receita" ? "bg-blue-100 text-blue-700" : "bg-slate-200 text-slate-700"}`}>
                           {r.type === "Receita" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -174,7 +228,14 @@ export default function AdminFinanceiro() {
                         </span>
                       </td>
                       <td className={`px-4 py-3 font-medium ${r.type === "Receita" ? "text-blue-700" : "text-slate-700"}`}>
-                        R$ {Number(r.amount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        <div>R$ {Number(r.amount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</div>
+                        {r.status === "Parcial" && Number(r.amount_paid || 0) > 0 && (
+                          <div className="text-[11px] font-normal text-slate-400">
+                            Recebido R$ {Number(r.amount_paid).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            {" · "}
+                            Resta R$ {Math.max(0, Number(r.amount || 0) - Number(r.amount_paid || 0)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{r.due_date ? new Date(r.due_date + "T00:00:00").toLocaleDateString("pt-BR") : "—"}</td>
                       <td className="px-4 py-3">
@@ -193,7 +254,7 @@ export default function AdminFinanceiro() {
         )}
       </div>
 
-      <FinanceiroFormDialog open={dialogOpen} onOpenChange={setDialogOpen} record={editing} onSave={handleSave} />
+      <FinanceiroFormDialog open={dialogOpen} onOpenChange={setDialogOpen} record={editing} onSave={handleSave} clients={clients} />
       <NovaCobrancaDialog open={cobrancaOpen} onOpenChange={setCobrancaOpen} clients={clients} onSave={handleSaveCobranca} />
     </div>
   );

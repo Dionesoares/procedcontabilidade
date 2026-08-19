@@ -90,16 +90,23 @@ export function exportFinanceiroPdf(records) {
 }
 
 export function exportFinanceiroExcel(records) {
-  const header = ["Descrição", "Empresa", "Nome", "Tipo", "Valor", "Vencimento", "Status"];
-  const rows = records.map((r) => [
-    r.description || "",
-    r.company_name || "",
-    r.client_name || "",
-    r.type || "",
-    Number(r.amount || 0).toFixed(2).replace(".", ","),
-    fmtDate(r.due_date),
-    r.status || "",
-  ]);
+  const header = ["Descrição", "Empresa", "Nome", "Tipo", "Valor", "Valor recebido", "Restante", "Vencimento", "Status"];
+  const rows = records.map((r) => {
+    const amount = Number(r.amount || 0);
+    const paid = r.status === "Pago" ? amount : Number(r.amount_paid || 0);
+    const remaining = r.status === "Pago" ? 0 : Math.max(0, amount - paid);
+    return [
+      r.description || "",
+      r.company_name || "",
+      r.client_name || "",
+      r.type || "",
+      amount.toFixed(2).replace(".", ","),
+      paid.toFixed(2).replace(".", ","),
+      remaining.toFixed(2).replace(".", ","),
+      fmtDate(r.due_date),
+      r.status || "",
+    ];
+  });
   const escape = (v) => `"${String(v).replace(/"/g, '""')}"`;
   const csv = [header, ...rows].map((row) => row.map(escape).join(";")).join("\r\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
