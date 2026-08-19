@@ -1,52 +1,36 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Calculator } from "lucide-react";
+import { Calculator, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { base44 } from "@/api/base44Client";
+import { auth } from "@/api/auth";
 
 export default function Register() {
   const [step, setStep] = useState("register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resent, setResent] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) { setError("As senhas não coincidem."); return; }
     setLoading(true); setError("");
     try {
-      await base44.auth.register({ email, password });
-      setStep("otp");
+      await auth.register({ email, password });
+      setStep("sent");
     } catch (err) {
-      setError(err?.response?.data?.message || err?.message || "Erro ao criar conta. Tente novamente.");
-    } finally { setLoading(false); }
-  };
-
-  const handleVerify = async (e) => {
-    e.preventDefault();
-    setLoading(true); setError("");
-    try {
-      const { access_token } = await base44.auth.verifyOtp({ email, otpCode });
-      base44.auth.setToken(access_token);
-      try {
-        const res = await base44.functions.invoke('applyContadorInvite', { email });
-        if (res?.data?.applied) {
-          window.location.href = "/admin";
-          return;
-        }
-      } catch {}
-      window.location.href = "/cliente";
-    } catch {
-      setError("Código inválido.");
+      setError(err?.message || "Erro ao criar conta. Tente novamente.");
     } finally { setLoading(false); }
   };
 
   const handleResend = async () => {
-    try { await base44.auth.resendOtp(email); } catch {}
+    try {
+      await auth.resendConfirmation(email);
+      setResent(true);
+    } catch {}
   };
 
   return (
@@ -62,10 +46,10 @@ export default function Register() {
             </span>
           </Link>
           <h1 className="font-heading font-bold text-2xl text-slate-900 mb-1">
-            {step === "register" ? "Criar Conta" : "Verificar Email"}
+            {step === "register" ? "Criar Conta" : "Verifique seu Email"}
           </h1>
           <p className="text-slate-500 text-sm">
-            {step === "register" ? "Crie sua conta para acessar os serviços." : "Digite o código enviado para seu email."}
+            {step === "register" ? "Crie sua conta para acessar os serviços." : "Enviamos um link de confirmação para o seu email."}
           </p>
         </div>
 
@@ -80,27 +64,28 @@ export default function Register() {
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1.5 block">Senha</label>
-                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
+                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} placeholder="••••••••" />
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1.5 block">Confirmar Senha</label>
-                <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required placeholder="••••••••" />
+                <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} placeholder="••••••••" />
               </div>
               <Button type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 h-11">
                 {loading ? "Criando..." : "Criar Conta"}
               </Button>
             </form>
           ) : (
-            <form onSubmit={handleVerify} className="space-y-5">
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-1.5 block">Código de Verificação</label>
-                <Input value={otpCode} onChange={e => setOtpCode(e.target.value)} required placeholder="000000" className="text-center text-lg tracking-widest" />
+            <div className="text-center space-y-4">
+              <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mx-auto">
+                <MailCheck className="w-7 h-7 text-blue-600" />
               </div>
-              <Button type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 h-11">
-                {loading ? "Verificando..." : "Verificar"}
-              </Button>
-              <button type="button" onClick={handleResend} className="w-full text-sm text-blue-600 hover:underline">Reenviar código</button>
-            </form>
+              <p className="text-slate-600 text-sm">
+                Enviamos um link de confirmação para <strong>{email}</strong>. Abra seu email e clique no link para ativar sua conta.
+              </p>
+              <button type="button" onClick={handleResend} className="text-sm text-blue-600 hover:underline">
+                {resent ? "Email reenviado!" : "Reenviar email"}
+              </button>
+            </div>
           )}
 
           <div className="text-center mt-5">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { TipoLancamento } from "@/api/entities";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,9 @@ export default function TipoSelect({ value, label, onChange }) {
   const [newClassification, setNewClassification] = useState("Receita");
 
   const load = async () => {
-    let list = await base44.entities.TipoLancamento.list();
+    let list = await TipoLancamento.list();
     if (list.length === 0) {
-      list = await base44.entities.TipoLancamento.bulkCreate(DEFAULTS);
+      list = await TipoLancamento.bulkCreate(DEFAULTS);
     }
     setTypes(list);
   };
@@ -44,7 +44,7 @@ export default function TipoSelect({ value, label, onChange }) {
   };
 
   const saveEdit = async () => {
-    const updated = await base44.entities.TipoLancamento.update(editingId, { label: editLabel, classification: editClassification });
+    const updated = await TipoLancamento.update(editingId, { label: editLabel, classification: editClassification });
     setTypes(types.map(t => t.id === editingId ? updated : t));
     if (selectedLabel === types.find(t => t.id === editingId)?.label) {
       onChange({ type: editClassification, type_label: editLabel });
@@ -54,7 +54,7 @@ export default function TipoSelect({ value, label, onChange }) {
 
   const handleDelete = async (t) => {
     if (!confirm(`Excluir o tipo "${t.label}"?`)) return;
-    await base44.entities.TipoLancamento.delete(t.id);
+    await TipoLancamento.delete(t.id);
     const remaining = types.filter(x => x.id !== t.id);
     setTypes(remaining);
     if (selectedLabel === t.label && remaining.length > 0) {
@@ -64,7 +64,7 @@ export default function TipoSelect({ value, label, onChange }) {
 
   const saveNew = async () => {
     if (!newLabel.trim()) return;
-    const created = await base44.entities.TipoLancamento.create({ label: newLabel.trim(), classification: newClassification });
+    const created = await TipoLancamento.create({ label: newLabel.trim(), classification: newClassification });
     setTypes([...types, created]);
     setCreating(false);
     setNewLabel("");

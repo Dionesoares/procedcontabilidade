@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { Task, Client } from "@/api/entities";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +23,7 @@ export default function AdminTarefas() {
   const load = async () => {
     setLoading(true);
     try {
-      const [t, c] = await Promise.all([base44.entities.Task.list("-created_date"), base44.entities.Client.list()]);
+      const [t, c] = await Promise.all([Task.list("-created_date"), Client.list()]);
       setTasks(t); setClients(c);
     } catch {} finally { setLoading(false); }
   };
@@ -37,8 +37,8 @@ export default function AdminTarefas() {
   const handleSave = async (e) => {
     e.preventDefault(); setSaving(true);
     try {
-      if (editing) await base44.entities.Task.update(editing.id, form);
-      else await base44.entities.Task.create(form);
+      if (editing) await Task.update(editing.id, form);
+      else await Task.create(form);
       toast({ title: editing ? "Tarefa atualizada!" : "Tarefa criada!" });
       setDialogOpen(false); load();
     } catch { toast({ title: "Erro", variant: "destructive" }); } finally { setSaving(false); }
@@ -46,7 +46,7 @@ export default function AdminTarefas() {
 
   const handleDelete = async (id) => {
     if (!confirm("Excluir?")) return;
-    try { await base44.entities.Task.delete(id); load(); } catch {}
+    try { await Task.delete(id); load(); } catch {}
   };
 
   const priorityColor = { Baixa: "bg-slate-100 text-slate-600", Média: "bg-blue-100 text-blue-700", Alta: "bg-amber-100 text-amber-700", Urgente: "bg-red-100 text-red-700" };

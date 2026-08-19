@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { invokeFunction } from "@/api/functions";
+import { ContadorInvite } from "@/api/entities";
 import { Send, KeyRound, UserCog, Trash2, Pencil } from "lucide-react";
 import EditarContadorDialog from "@/components/admin/EditarContadorDialog";
 import { Button } from "@/components/ui/button";
@@ -20,9 +21,9 @@ export default function AdminContadores() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await base44.functions.invoke('manageContadores', { action: 'list' });
+      const res = await invokeFunction('manage-users', { action: 'list', role: 'contador' });
       setContadores(res?.data?.contadores || []);
-      const invites = await base44.entities.ContadorInvite.list();
+      const invites = await ContadorInvite.list();
       setPendingInvites(invites);
     } catch {} finally { setLoading(false); }
   };
@@ -31,7 +32,7 @@ export default function AdminContadores() {
   const openNew = () => { setForm({ name: "", email: "", phone: "", password: "" }); setDialogOpen(true); };
 
   const findUserByEmail = async (email) => {
-    const res = await base44.functions.invoke('manageContadores', { action: 'findByEmail', email });
+    const res = await invokeFunction('manage-users', { action: 'findByEmail', email });
     return res?.data?.user || null;
   };
 
@@ -42,15 +43,15 @@ export default function AdminContadores() {
       const existing = await findUserByEmail(form.email);
       if (existing && existing.full_name) {
         // Já possui conta ativa: apenas concede o acesso de contador.
-        await base44.functions.invoke('manageContadores', { action: 'grantAccess', userId: existing.id, name: form.name, phone: form.phone });
+        await invokeFunction('manage-users', { action: 'grantAccess', role: 'contador', userId: existing.id, name: form.name, phone: form.phone });
         toast({ title: "Contador atualizado!", description: "O acesso ao painel do contador foi concedido." });
       } else {
         // Ainda não tem conta: cria/atualiza um convite pendente que será aplicado no cadastro.
-        const invites = await base44.entities.ContadorInvite.filter({ email: form.email });
+        const invites = await ContadorInvite.filter({ email: form.email });
         if (invites.length > 0) {
-          await base44.entities.ContadorInvite.update(invites[0].id, { name: form.name, phone: form.phone });
+          await ContadorInvite.update(invites[0].id, { name: form.name, phone: form.phone });
         } else {
-          await base44.entities.ContadorInvite.create({ name: form.name, email: form.email, phone: form.phone });
+          await ContadorInvite.create({ name: form.name, email: form.email, phone: form.phone });
         }
         toast({ title: "Convite criado!", description: "Envie o link pelo WhatsApp para o contador se cadastrar." });
       }
@@ -65,7 +66,7 @@ export default function AdminContadores() {
   const handleDelete = async (c) => {
     if (!confirm("Excluir este contador? O usuário será removido do sistema, permitindo novo cadastro com o mesmo email.")) return;
     try {
-      await base44.functions.invoke('manageContadores', { action: 'delete', userId: c.id });
+      await invokeFunction('manage-users', { action: 'delete', userId: c.id });
       toast({ title: "Contador excluído do sistema!" });
       load();
     } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
@@ -74,7 +75,7 @@ export default function AdminContadores() {
   const handleDeleteInvite = async (invite) => {
     if (!confirm("Cancelar este convite pendente?")) return;
     try {
-      await base44.entities.ContadorInvite.delete(invite.id);
+      await ContadorInvite.delete(invite.id);
       toast({ title: "Convite cancelado!" });
       load();
     } catch { toast({ title: "Erro ao cancelar convite", variant: "destructive" }); }

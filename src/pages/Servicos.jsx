@@ -1,6 +1,5 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { Building2, BookOpen, FileCheck, Calculator, Users, Lightbulb, CheckCircle2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, Clock, Send, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { base44 } from "@/api/base44Client";
+import { ContactSubmission } from "@/api/entities";
 import { useToast } from "@/components/ui/use-toast";
 
 const info = [
@@ -23,7 +23,7 @@ export default function Contato() {
     e.preventDefault();
     setLoading(true);
     try {
-      await base44.entities.ContactSubmission.create(form);
+      await ContactSubmission.create(form);
       toast({ title: "Mensagem enviada!", description: "Entraremos em contato em breve." });
       setForm({ name: "", email: "", phone: "", message: "" });
     } catch {

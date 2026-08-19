@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { Client, Task, Document, ServiceRequest } from "@/api/entities";
 import { Users, FileText, ListTodo, Inbox, TrendingUp, AlertCircle, Plus, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
@@ -18,10 +18,10 @@ export default function AdminDashboard() {
     const load = async () => {
       try {
         const [clients, tasksData, docs, requestsData] = await Promise.all([
-          base44.entities.Client.list(),
-          base44.entities.Task.list(),
-          base44.entities.Document.list(),
-          base44.entities.ServiceRequest.list(),
+          Client.list(),
+          Task.list(),
+          Document.list(),
+          ServiceRequest.list(),
         ]);
         setTasks(tasksData);
         setRequests(requestsData);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { ContactSubmission } from "@/api/entities";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -12,17 +12,17 @@ export default function AdminContatos() {
 
   const load = async () => {
     setLoading(true);
-    try { setContacts(await base44.entities.ContactSubmission.list("-created_date")); } catch {} finally { setLoading(false); }
+    try { setContacts(await ContactSubmission.list("-created_date")); } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
   const updateStatus = async (id, status) => {
-    try { await base44.entities.ContactSubmission.update(id, { status }); toast({ title: "Atualizado!" }); load(); } catch {}
+    try { await ContactSubmission.update(id, { status }); toast({ title: "Atualizado!" }); load(); } catch {}
   };
 
   const handleDelete = async (id) => {
     if (!confirm("Deseja excluir este contato?")) return;
-    try { await base44.entities.ContactSubmission.delete(id); toast({ title: "Contato excluído!" }); load(); } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
+    try { await ContactSubmission.delete(id); toast({ title: "Contato excluído!" }); load(); } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;

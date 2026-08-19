@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { Message, Client } from "@/api/entities";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ export default function AdminMensagens() {
   const load = async () => {
     setLoading(true);
     try {
-      const [m, c] = await Promise.all([base44.entities.Message.list("-created_date"), base44.entities.Client.list()]);
+      const [m, c] = await Promise.all([Message.list("-created_date"), Client.list()]);
       setMessages(m); setClients(c);
     } catch {} finally { setLoading(false); }
   };
@@ -32,7 +32,7 @@ export default function AdminMensagens() {
     if (!replyContent.trim()) return;
     setSending(true);
     try {
-      await base44.entities.Message.create({ client_id: replyTo.client_id, content: replyContent, sender_type: "admin", sender_name: "Proced", subject: "RE: " + (replyTo.subject || "") });
+      await Message.create({ client_id: replyTo.client_id, content: replyContent, sender_type: "admin", sender_name: "Proced", subject: "RE: " + (replyTo.subject || "") });
       toast({ title: "Resposta enviada!" });
       setReplyTo(null); setReplyContent(""); load();
     } catch {} finally { setSending(false); }
@@ -43,7 +43,7 @@ export default function AdminMensagens() {
     if (!newMsg.client_id || !newMsg.content) return;
     setSending(true);
     try {
-      await base44.entities.Message.create({ ...newMsg, sender_type: "admin", sender_name: "Proced" });
+      await Message.create({ ...newMsg, sender_type: "admin", sender_name: "Proced" });
       toast({ title: "Mensagem enviada!" });
       setNewMsg({ client_id: "", subject: "", content: "" }); load();
     } catch {} finally { setSending(false); }
@@ -61,7 +61,7 @@ export default function AdminMensagens() {
         <div className="grid sm:grid-cols-2 gap-3">
           <Select value={newMsg.client_id} onValueChange={v => setNewMsg({...newMsg, client_id: v})}>
             <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
-            <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+            <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}</SelectContent>
           </Select>
           <Input value={newMsg.subject} onChange={e => setNewMsg({...newMsg, subject: e.target.value})} placeholder="Assunto" />
         </div>

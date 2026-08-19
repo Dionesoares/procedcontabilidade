@@ -18,15 +18,16 @@ export default function NovaCobrancaDialog({ open, onOpenChange, clients, onSave
   const handleSubmit = async (e) => {
     e.preventDefault();
     const client = clients.find((c) => c.id === form.client_id);
+    const clientLabel = client ? (client.company_name || client.name) : "";
     setSaving(true);
     await onSave({
-      description: form.description || `Cobrança - ${client?.name || ""}`,
+      description: form.description || `Cobrança - ${clientLabel}`,
       type: "Receita",
       amount: Number(form.amount) || 0,
       due_date: form.due_date,
       status: form.status,
       client_id: form.client_id,
-      client_name: client?.name || "",
+      client_name: clientLabel,
     });
     setSaving(false);
   };
@@ -39,11 +40,11 @@ export default function NovaCobrancaDialog({ open, onOpenChange, clients, onSave
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-slate-700 mb-1 block">Cliente*</label>
+            <label className="text-sm font-medium text-slate-700 mb-1 block">Empresa*</label>
             <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
               <SelectContent>
-                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

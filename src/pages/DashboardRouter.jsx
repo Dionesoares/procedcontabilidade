@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { auth } from "@/api/auth";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminClientes from "@/pages/admin/AdminClientes";
@@ -21,7 +21,7 @@ export function AdminRouter() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
+    auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="fixed inset-0 flex items-center justify-center"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;
@@ -50,7 +50,7 @@ export function ClienteRouter() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
+    auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="fixed inset-0 flex items-center justify-center"><div className="w-8 h-8 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin" /></div>;

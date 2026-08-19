@@ -1,6 +1,7 @@
 import React from "react";
 import { FileText } from "lucide-react";
 import { format } from "date-fns";
+import { resolveDocumentUrl } from "@/api/entities";
 
 export default function DocumentsTable({ docs, selected, onToggle, onToggleAll, clientName, showClientColumn }) {
   const allChecked = docs.length > 0 && selected.length === docs.length;
@@ -26,9 +27,18 @@ export default function DocumentsTable({ docs, selected, onToggle, onToggleAll, 
             <tr key={d.id} className="border-b border-slate-50 hover:bg-slate-50">
               <td className="px-3 py-2"><input type="checkbox" checked={selected.includes(d.id)} onChange={() => onToggle(d.id)} /></td>
               <td className="px-3 py-2">
-                <a href={d.file_url || "#"} target="_blank" rel="noopener" className="flex items-center gap-2 text-blue-600 hover:underline">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const url = await resolveDocumentUrl(d);
+                      if (url) window.open(url, "_blank");
+                    } catch {}
+                  }}
+                  className="flex items-center gap-2 text-blue-600 hover:underline text-left"
+                >
                   <FileText className="w-4 h-4 text-purple-500" /> {d.title}
-                </a>
+                </button>
               </td>
               <td className="px-3 py-2 text-slate-600">{d.description || "—"}</td>
               <td className="px-3 py-2 text-slate-600">{d.created_date ? format(new Date(d.created_date), "dd/MM/yyyy") : "—"}</td>

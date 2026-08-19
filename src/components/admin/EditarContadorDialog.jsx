@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { invokeFunction } from "@/api/functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -22,7 +22,7 @@ export default function EditarContadorDialog({ open, onOpenChange, contador, onS
     e.preventDefault();
     setSaving(true);
     try {
-      await base44.functions.invoke('manageContadores', { action: 'update', userId: contador.id, name, phone });
+      await invokeFunction('manage-users', { action: 'update', userId: contador.id, name, phone });
       toast({ title: "Dados atualizados!" });
       onOpenChange(false);
       onSaved && onSaved();

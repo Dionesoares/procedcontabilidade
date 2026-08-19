@@ -2,33 +2,24 @@
 
 ## Project Context
 
-This is a Base44 app repository. Treat it as user-owned application code, keep changes focused on the user's request, and preserve existing project conventions.
+This is the Proced Contabilidade application repository: a React/Vite frontend backed by Supabase (database, auth, storage) and deployed on Vercel (static hosting + serverless functions). Treat it as user-owned application code, keep changes focused on the user's request, and preserve existing project conventions.
 
-Start with `README.md` for local setup, environment variables, and publish workflow.
-
-## Base44 References
-
-- CLI overview: https://docs.base44.com/developers/references/cli/get-started/overview.md
-- Agent skills: https://docs.base44.com/developers/backend/overview/skills.md
-
-If your agent supports Agent Skills, install or update Base44 skills before Base44-specific work:
-
-```bash
-npx skills add base44/skills
-```
+Start with `README.md` for local setup, environment variables, and the deploy workflow.
 
 ## Key Files
 
 - `src/`: frontend application source.
-- `src/api/base44Client.js`: frontend Base44 SDK client.
-- `vite.config.js`: Vite config and Base44 Vite plugin setup.
-- `.env.local`: local-only environment values; never commit secrets.
+- `src/api/supabaseClient.js`: frontend Supabase client (anon key).
+- `src/api/entities.js`: `list/filter/get/create/update/delete` wrapper per table, plus Storage helpers for the `documents` bucket.
+- `src/api/auth.js`: auth helpers (login, signup, password reset, session).
+- `api/`: Vercel Serverless Functions for privileged operations (using the Supabase service role key). Never import `api/_lib/supabaseAdmin.js` from frontend code.
+- `supabase/migrations/`: Postgres schema, RLS policies, and storage bucket setup.
+- `vite.config.js`: Vite config, including the `@/*` -> `src/*` path alias.
+- `.env.local`: local-only environment values (Supabase URL/keys); never commit secrets.
 
 ## Working Notes
 
-- Use `base44 dev` as the default local development command when you need the local Base44 backend. It can run the backend and frontend together.
-- When docs or code mention the frontend being started automatically, that usually means the Base44 project config includes `site.serveCommand`, for example `"serveCommand": "npm run dev"` in `base44/config.jsonc`.
-- Use `npm run dev` only for frontend-only work against the hosted Base44 backend.
-- Prefer the existing Base44 CLI workflow over adding new npm scripts for Base44-specific tasks.
-- Reuse the existing SDK client and Vite plugin patterns before adding new Base44 integration paths.
-- Run the relevant checks from `package.json` before finishing code changes.
+- Run the full local dev server with `npm run dev` (frontend against the hosted Supabase project). Use `vercel dev` if you need to exercise the `/api/*` serverless functions locally.
+- Apply database schema changes via `supabase/migrations/` and `supabase db push`; never edit the remote schema by hand.
+- Keep privileged operations (user management, service-role queries) inside `api/` serverless functions — never expose the Supabase service role key to frontend code.
+- Run the relevant checks from `package.json` (`npm run lint`, `npm run build`, `npm run typecheck`) before finishing code changes.

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { auth } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,7 +15,7 @@ export default function EditarDadosUsuarioDialog({ open, onOpenChange, user, onS
     e.preventDefault();
     setSaving(true);
     try {
-      await base44.auth.updateMe({ phone, display_name: name });
+      await auth.updateMe({ phone, display_name: name });
       toast({ title: "Dados atualizados!" });
       onOpenChange(false);
       onSaved && onSaved();

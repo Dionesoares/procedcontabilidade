@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { auth } from "@/api/auth";
+import { Document, DocumentFolder, resolveDocumentUrl } from "@/api/entities";
 import { getMyClient } from "@/lib/clientLookup";
 import FolderSidebar from "@/components/documents/FolderSidebar";
 import DocumentsToolbar from "@/components/documents/DocumentsToolbar";
@@ -20,16 +21,16 @@ export default function ClienteDocumentos() {
 
   const load = async () => {
     try {
-      const user = await base44.auth.me();
+      const user = await auth.me();
       const cl = await getMyClient(user);
       setClient(cl);
       if (cl) {
         const [d, f] = await Promise.all([
-          base44.entities.Document.filter({ client_id: cl.id }, "-created_date"),
-          base44.entities.DocumentFolder.filter({ client_id: cl.id }, "-created_date"),
+          Document.filter({ client_id: cl.id }, "-created_date"),
+          DocumentFolder.filter({ client_id: cl.id }, "-created_date"),
         ]);
         if (f.length === 0) {
-          const created = await Promise.all(DEFAULT_FOLDERS.map(name => base44.entities.DocumentFolder.create({ name, client_id: cl.id })));
+          const created = await Promise.all(DEFAULT_FOLDERS.map(name => DocumentFolder.create({ name, client_id: cl.id })));
           setFolders(created);
         } else {
           setFolders(f);
@@ -51,10 +52,15 @@ export default function ClienteDocumentos() {
   const toggleSelect = (id) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
   const toggleAll = () => setSelected(s => s.length === visibleDocs.length ? [] : visibleDocs.map(d => d.id));
 
-  const handleDownloadSelected = () => {
-    const toDownload = visibleDocs.filter(d => selected.includes(d.id) && d.file_url);
+  const handleDownloadSelected = async () => {
+    const toDownload = visibleDocs.filter(d => selected.includes(d.id) && (d.storage_path || d.file_url));
     if (toDownload.length === 0) { toast({ title: "Selecione ao menos um documento com arquivo" }); return; }
-    toDownload.forEach(d => window.open(d.file_url, "_blank"));
+    for (const d of toDownload) {
+      try {
+        const url = await resolveDocumentUrl(d);
+        if (url) window.open(url, "_blank");
+      } catch {}
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;

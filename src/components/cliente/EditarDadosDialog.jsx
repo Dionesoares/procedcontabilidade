@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { Client } from "@/api/entities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -18,7 +18,7 @@ export default function EditarDadosDialog({ open, onOpenChange, client, onSaved 
     e.preventDefault();
     setSaving(true);
     try {
-      await base44.entities.Client.update(client.id, form);
+      await Client.update(client.id, form);
       toast({ title: "Dados atualizados!" });
       onOpenChange(false);
       onSaved && onSaved();

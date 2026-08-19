@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { auth } from "@/api/auth";
+import { Document, ServiceRequest, Message } from "@/api/entities";
 import { FileText, Inbox, MessageSquare, TrendingUp, Pencil, MessageCircle, KeyRound, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -21,14 +22,14 @@ export default function ClienteDashboard() {
   useEffect(() => {
     const load = async () => {
       try {
-        const user = await base44.auth.me();
+        const user = await auth.me();
         const cl = await getMyClient(user);
         setClient(cl);
         if (cl) {
           const [docs, reqs, msgs] = await Promise.all([
-            base44.entities.Document.filter({ client_id: cl.id }),
-            base44.entities.ServiceRequest.filter({ client_id: cl.id }),
-            base44.entities.Message.filter({ client_id: cl.id }),
+            Document.filter({ client_id: cl.id }),
+            ServiceRequest.filter({ client_id: cl.id }),
+            Message.filter({ client_id: cl.id }),
           ]);
           setRequests(reqs);
           setStats({ docs: docs.length, requests: reqs.length, messages: msgs.length, unread: msgs.filter(m => m.sender_type === "admin" && !m.is_read).length });

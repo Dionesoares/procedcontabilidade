@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
-import { Plus, Search, Edit, Trash2, X, KeyRound, FileSignature } from "lucide-react";
+import { Client, Contract } from "@/api/entities";
+import { invokeFunction } from "@/api/functions";
+import { Plus, Search, Edit, Trash2, KeyRound, FileSignature } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,7 +27,7 @@ export default function AdminClientes() {
 
   const load = async () => {
     setLoading(true);
-    try { setClients(await base44.entities.Client.filter({}, "-created_date", 10000)); } catch {} finally { setLoading(false); }
+    try { setClients(await Client.filter({}, "-created_date", 10000)); } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
@@ -36,7 +37,7 @@ export default function AdminClientes() {
     setForm({ name: c.name || "", email: c.email || "", phone: c.phone || "", cpf_cnpj: c.cpf_cnpj || "", company_name: c.company_name || "", company_type: c.company_type || "", address: c.address || "", notes: c.notes || "", status: c.status || "Ativo" });
     setContract(null);
     try {
-      const existing = await base44.entities.Contract.filter({ client_id: c.id });
+      const existing = await Contract.filter({ client_id: c.id });
       if (existing.length) setContract(existing[0]);
     } catch {}
     setDialogOpen(true);
@@ -46,9 +47,9 @@ export default function AdminClientes() {
     if (!contract?.content) return;
     const data = { client_id: clientId, client_name: form.name, content: contract.content, signature_name: contract.signature_name || "", status: contract.status || "Pendente", signed_at: contract.signed_at || "" };
     if (contract.id) {
-      await base44.entities.Contract.update(contract.id, data);
+      await Contract.update(contract.id, data);
     } else {
-      await base44.entities.Contract.create(data);
+      await Contract.create(data);
     }
   };
 
@@ -57,19 +58,19 @@ export default function AdminClientes() {
     setSaving(true);
     try {
       if (editing) {
-        await base44.entities.Client.update(editing.id, form);
+        await Client.update(editing.id, form);
         await saveContractForClient(editing.id);
         toast({ title: "Cliente atualizado!" });
       } else {
-        const newClient = await base44.entities.Client.create(form);
+        const newClient = await Client.create(form);
         await saveContractForClient(newClient.id);
         try {
-          const existingUsers = await base44.entities.User.list();
-          const existing = existingUsers.find(u => u.email?.toLowerCase() === form.email.toLowerCase());
+          const findRes = await invokeFunction('manage-users', { action: 'findByEmail', email: form.email });
+          const existing = findRes?.data?.user || null;
           if (existing) {
-            await base44.entities.User.update(existing.id, { role: "user" });
+            await invokeFunction('manage-users', { action: 'grantAccess', role: 'user', userId: existing.id, name: existing.display_name, phone: existing.phone });
           } else {
-            await base44.users.inviteUser(form.email, "user");
+            await invokeFunction('manage-users', { action: 'invite', role: 'user', email: form.email, name: form.name, phone: form.phone });
           }
           toast({ title: "Cliente criado!", description: "Um e-mail foi enviado para o cliente criar a senha de acesso." });
         } catch {
@@ -86,8 +87,8 @@ export default function AdminClientes() {
   const handleDelete = async (c) => {
     if (!confirm("Excluir este cliente? O usuário será removido do sistema, permitindo novo cadastro com o mesmo email.")) return;
     try {
-      if (c.user_id) { try { await base44.entities.User.delete(c.user_id); } catch {} }
-      await base44.entities.Client.delete(c.id);
+      if (c.user_id) { try { await invokeFunction('manage-users', { action: 'delete', userId: c.user_id }); } catch {} }
+      await Client.delete(c.id);
       toast({ title: "Cliente excluído do sistema!" });
       load();
     } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
@@ -103,11 +104,13 @@ export default function AdminClientes() {
     toast({ title: "WhatsApp aberto!", description: "Envie o link para o cliente criar a senha de acesso." });
   };
 
-  const filtered = clients.filter(c =>
-    c.name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase()) ||
-    c.cpf_cnpj?.includes(search)
-  );
+  const filtered = clients
+    .filter(c =>
+      c.name?.toLowerCase().includes(search.toLowerCase()) ||
+      c.email?.toLowerCase().includes(search.toLowerCase()) ||
+      c.cpf_cnpj?.includes(search)
+    )
+    .sort((a, b) => (a.name || "").localeCompare(b.name || "", "pt-BR", { sensitivity: "base" }));
 
   const statusColor = { Ativo: "bg-blue-100 text-blue-700", Inativo: "bg-slate-100 text-slate-600", Pendente: "bg-amber-100 text-amber-700" };
 
@@ -136,10 +139,10 @@ export default function AdminClientes() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
                 <tr>
-                  <th className="text-left px-4 py-3">Nome</th>
+                  <th className="text-left px-4 py-3">Empresa</th>
                   <th className="text-left px-4 py-3 hidden md:table-cell">Email</th>
                   <th className="text-left px-4 py-3 hidden lg:table-cell">CPF/CNPJ</th>
-                  <th className="text-left px-4 py-3 hidden lg:table-cell">Empresa</th>
+                  <th className="text-left px-4 py-3 hidden lg:table-cell">Nome</th>
                   <th className="text-left px-4 py-3">Status</th>
                   <th className="text-right px-4 py-3">Ações</th>
                 </tr>
@@ -147,10 +150,10 @@ export default function AdminClientes() {
               <tbody className="divide-y divide-slate-100">
                 {filtered.map(c => (
                   <tr key={c.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-900">{c.name}</td>
+                    <td className="px-4 py-3 font-medium text-slate-900">{c.company_name || "—"}</td>
                     <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{c.email}</td>
                     <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">{c.cpf_cnpj}</td>
-                    <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">{c.company_name || "—"}</td>
+                    <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">{c.name}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusColor[c.status] || "bg-slate-100 text-slate-600"}`}>{c.status}</span>
                     </td>
@@ -174,14 +177,6 @@ export default function AdminClientes() {
           <DialogHeader><DialogTitle>{editing ? "Editar Cliente" : "Novo Cliente"}</DialogTitle></DialogHeader>
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="text-sm font-medium text-slate-700 mb-1 block">Nome*</label><Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} required /></div>
-              <div><label className="text-sm font-medium text-slate-700 mb-1 block">Email*</label><Input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required /></div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><label className="text-sm font-medium text-slate-700 mb-1 block">CPF/CNPJ*</label><Input value={form.cpf_cnpj} onChange={e => setForm({...form, cpf_cnpj: e.target.value})} required /></div>
-              <div><label className="text-sm font-medium text-slate-700 mb-1 block">Telefone</label><Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div><label className="text-sm font-medium text-slate-700 mb-1 block">Razão Social</label><Input value={form.company_name} onChange={e => setForm({...form, company_name: e.target.value})} /></div>
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">Tipo de Empresa</label>
@@ -190,6 +185,14 @@ export default function AdminClientes() {
                   <SelectContent>{["MEI","ME","EPP","LTDA","SA","Outro"].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-sm font-medium text-slate-700 mb-1 block">CPF/CNPJ*</label><Input value={form.cpf_cnpj} onChange={e => setForm({...form, cpf_cnpj: e.target.value})} required /></div>
+              <div><label className="text-sm font-medium text-slate-700 mb-1 block">Telefone</label><Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-sm font-medium text-slate-700 mb-1 block">Nome*</label><Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} required /></div>
+              <div><label className="text-sm font-medium text-slate-700 mb-1 block">Email*</label><Input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required /></div>
             </div>
             <div><label className="text-sm font-medium text-slate-700 mb-1 block">Endereço</label><Input value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
             <div>

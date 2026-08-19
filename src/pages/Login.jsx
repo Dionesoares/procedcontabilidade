@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Calculator, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { base44 } from "@/api/base44Client";
+import { auth } from "@/api/auth";
 
 export default function Login() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -19,17 +19,17 @@ export default function Login() {
     setLoading(true);
     setError("");
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
-      const currentUser = await base44.auth.me();
+      await auth.loginViaEmailPassword(email, password);
+      const currentUser = await auth.me();
       if (isAdminLogin && currentUser.role !== "admin" && currentUser.role !== "contador") {
         setError("Esta conta não tem permissão de administrador.");
-        base44.auth.logout();
+        auth.logout();
         setLoading(false);
         return;
       }
       window.location.href = (currentUser.role === "admin" || currentUser.role === "contador") ? "/admin" : "/cliente";
     } catch (err) {
-      setError(err?.response?.data?.message || err?.message || "Email ou senha incorretos.");
+      setError(err?.message || "Email ou senha incorretos.");
       setLoading(false);
     }
   };

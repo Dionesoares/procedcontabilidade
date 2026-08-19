@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { DescricaoLancamento } from "@/api/entities";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ export default function DescricaoSelect({ value, onChange, scope = "lancamento" 
   const [editLabel, setEditLabel] = useState("");
 
   const load = async () => {
-    const list = await base44.entities.DescricaoLancamento.filter({ scope });
+    const list = await DescricaoLancamento.filter({ scope });
     setItems(list);
   };
 
@@ -29,7 +29,7 @@ export default function DescricaoSelect({ value, onChange, scope = "lancamento" 
   };
 
   const saveEdit = async () => {
-    const updated = await base44.entities.DescricaoLancamento.update(editingId, { label: editLabel });
+    const updated = await DescricaoLancamento.update(editingId, { label: editLabel });
     setItems(items.map(i => i.id === editingId ? updated : i));
     if (value === items.find(i => i.id === editingId)?.label) onChange(editLabel);
     setEditingId(null);
@@ -37,7 +37,7 @@ export default function DescricaoSelect({ value, onChange, scope = "lancamento" 
 
   const handleDelete = async (item) => {
     if (!confirm(`Excluir a descrição "${item.label}"?`)) return;
-    await base44.entities.DescricaoLancamento.delete(item.id);
+    await DescricaoLancamento.delete(item.id);
     setItems(items.filter(i => i.id !== item.id));
   };
 
@@ -45,7 +45,7 @@ export default function DescricaoSelect({ value, onChange, scope = "lancamento" 
     const label = (value || "").trim();
     if (!label) return;
     if (items.some(i => i.label.toLowerCase() === label.toLowerCase())) return;
-    const created = await base44.entities.DescricaoLancamento.create({ label, scope });
+    const created = await DescricaoLancamento.create({ label, scope });
     setItems([...items, created]);
   };
 

@@ -29,4 +29,9 @@ dist-ssr
 
 .env
 .vite
-base44/.app.jsonc
+
+# One-off Base44 -> Supabase data migration exports (contains PII, never commit)
+migration-data/
+
+.vercel
+.env*

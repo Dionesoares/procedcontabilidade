@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { base44 } from "@/api/base44Client";
+import { ServiceRequest } from "@/api/entities";
 import { useToast } from "@/components/ui/use-toast";
 
 const serviceTypes = [
@@ -27,7 +27,7 @@ export default function FalarConosco() {
     e.preventDefault();
     setLoading(true);
     try {
-      await base44.entities.ServiceRequest.create(form);
+      await ServiceRequest.create(form);
       toast({ title: "Solicitação enviada!", description: "Nosso especialista entrará em contato em breve." });
       setForm({ client_name: "", client_email: "", client_phone: "", service_type: "", description: "" });
     } catch {

@@ -1,77 +1,80 @@
-# Base44 Project
+# Proced Contabilidade
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
-
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+Frontend React/Vite app backed by [Supabase](https://supabase.com) (database, auth, storage) and deployed on [Vercel](https://vercel.com) (static hosting + serverless functions).
 
 ## Prerequisites
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
+1. Clone the repository.
+2. Install dependencies: `npm install`.
+3. (Optional) Install the [Supabase CLI](https://supabase.com/docs/guides/cli) and [Vercel CLI](https://vercel.com/docs/cli) if you need to manage the backend or deploy from your machine:
+   ```bash
+   npm install -g supabase vercel
+   ```
 
-See the [Base44 CLI docs](https://docs.base44.com/developers/references/cli/get-started/overview) if you want to run Base44 commands directly.
+## Environment Variables
 
-## Run Locally
-
-Run the full local development environment from the project root:
+Create a `.env.local` file in the project root (never commit it):
 
 ```bash
-base44 dev
+# Public — safe to expose to the browser bundle
+VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-key>
+
+# Server-side only (used by /api serverless functions). Never expose to the frontend bundle.
+SUPABASE_URL=https://<your-project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 ```
 
-`base44 dev` starts the local Base44 development backend and, when this app is configured for it, also starts the frontend dev server for you. Use the frontend URL printed by the command.
+You can find these values in the Supabase dashboard under **Project Settings → API**.
 
-For example, when the Base44 project config includes a `serveCommand`, `base44 dev` can launch the frontend too:
+When deploying to Vercel, set the same four variables in **Project Settings → Environment Variables**.
 
-```json5
-{
-  "site": {
-    "serveCommand": "npm run dev"
-  }
-}
-```
-
-In a Base44 project this lives in `base44/config.jsonc`.
-
-## Run Only The Frontend
-
-If you only want to work on the frontend against the hosted Base44 backend, run:
+## Run Locally
 
 ```bash
 npm run dev
 ```
 
-Open the local URL printed by Vite.
-
-## Use The Hosted Backend
-
-For frontend-only development, create or update `.env.local` in the project root:
+This starts the Vite dev server against your Supabase project. Note that the `/api/*` serverless functions (`api/manage-users.js`, `api/apply-contador-invite.js`) only run on Vercel — use `vercel dev` instead if you need to exercise those locally:
 
 ```bash
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=https://your-app.base44.app
+vercel dev
 ```
 
-`VITE_BASE44_APP_ID` identifies the Base44 app.
+## Database Schema & Migrations
 
-`VITE_BASE44_APP_BASE_URL` tells the Base44 Vite plugin where to send local `/api` requests. Point it at your deployed Base44 app URL when you want the local frontend to use the hosted backend.
-
-When you use `base44 dev`, the command injects the local Base44 values for you, so `.env.local` is mainly needed for frontend-only workflows.
-
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
+The Postgres schema, RLS policies, and storage bucket setup live in `supabase/migrations/`. Apply them to a Supabase project with:
 
 ```bash
-base44 dashboard open
+supabase link --project-ref <your-project-ref>
+supabase db push
 ```
 
-## Docs & Support
+## Build
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+```bash
+npm run build
+```
 
-Base44 CLI command reference: [https://docs.base44.com/developers/references/cli/commands/introduction](https://docs.base44.com/developers/references/cli/commands/introduction)
+## Lint & Typecheck
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+```bash
+npm run lint
+npm run typecheck
+```
+
+## Deploy
+
+The app is deployed on Vercel at [vercel.com/prced-contabil/procedcontabilidade](https://vercel.com/prced-contabil/procedcontabilidade). Pushing to the linked branch triggers a deployment, or deploy manually with:
+
+```bash
+vercel --prod
+```
+
+## Architecture Notes
+
+- `src/api/supabaseClient.js` — Supabase client used by the frontend (anon key).
+- `src/api/entities.js` — thin wrapper exposing `list/filter/get/create/update/delete` per table, plus Storage helpers for the `documents` bucket.
+- `src/api/auth.js` — auth helpers (login, signup, password reset, session).
+- `api/_lib/supabaseAdmin.js` — shared helper for Vercel serverless functions using the **service role key** (never imported from frontend code).
+- `api/manage-users.js`, `api/apply-contador-invite.js` — privileged operations (inviting/promoting/deleting users) that must run server-side.

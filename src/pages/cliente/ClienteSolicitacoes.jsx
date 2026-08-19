@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
-import { Plus, Send, Trash2 } from "lucide-react";
+import { auth } from "@/api/auth";
+import { ServiceRequest } from "@/api/entities";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -23,10 +23,10 @@ export default function ClienteSolicitacoes() {
   useEffect(() => {
     const load = async () => {
       try {
-        const user = await base44.auth.me();
+        const user = await auth.me();
         const cl = await getMyClient(user);
         setClient(cl);
-        if (cl) setRequests(await base44.entities.ServiceRequest.filter({ client_id: cl.id }, "-created_date"));
+        if (cl) setRequests(await ServiceRequest.filter({ client_id: cl.id }, "-created_date"));
       } catch {} finally { setLoading(false); }
     };
     load();
@@ -35,20 +35,20 @@ export default function ClienteSolicitacoes() {
   const handleSubmit = async (e) => {
     e.preventDefault(); setSaving(true);
     try {
-      await base44.entities.ServiceRequest.create({ ...form, client_id: client.id, client_name: client.name, client_email: client.email, client_phone: client.phone });
+      await ServiceRequest.create({ ...form, client_id: client.id, client_name: client.name, client_email: client.email, client_phone: client.phone });
       toast({ title: "Solicitação enviada!" });
       setDialogOpen(false);
       setForm({ service_type: "", description: "" });
-      setRequests(await base44.entities.ServiceRequest.filter({ client_id: client.id }, "-created_date"));
+      setRequests(await ServiceRequest.filter({ client_id: client.id }, "-created_date"));
     } catch { toast({ title: "Erro", variant: "destructive" }); } finally { setSaving(false); }
   };
 
   const handleDelete = async (id) => {
     if (!confirm("Excluir esta solicitação?")) return;
     try {
-      await base44.entities.ServiceRequest.delete(id);
+      await ServiceRequest.delete(id);
       toast({ title: "Solicitação excluída!" });
-      setRequests(await base44.entities.ServiceRequest.filter({ client_id: client.id }, "-created_date"));
+      setRequests(await ServiceRequest.filter({ client_id: client.id }, "-created_date"));
     } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
   };
 

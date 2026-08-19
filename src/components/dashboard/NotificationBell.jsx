@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { auth } from "@/api/auth";
+import { ServiceRequest, ContactSubmission, Message, Client, FinancialRecord } from "@/api/entities";
 import { Bell, Inbox, MessageSquare, Mail, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -13,9 +14,9 @@ export default function NotificationBell({ isAdmin }) {
       try {
         if (isAdmin) {
           const [reqs, contacts, msgs] = await Promise.all([
-            base44.entities.ServiceRequest.filter({ status: "Novo" }),
-            base44.entities.ContactSubmission.filter({ status: "Novo" }),
-            base44.entities.Message.filter({ is_read: false, sender_type: "client" }),
+            ServiceRequest.filter({ status: "Novo" }),
+            ContactSubmission.filter({ status: "Novo" }),
+            Message.filter({ is_read: false, sender_type: "client" }),
           ]);
           const list = [
             ...reqs.map(r => ({ id: r.id, type: "request", title: `Nova solicitação: ${r.service_type}`, desc: r.client_name, link: "/admin/solicitacoes", icon: Inbox })),
@@ -24,15 +25,37 @@ export default function NotificationBell({ isAdmin }) {
           ];
           setNotifications(list);
         } else {
-          const user = await base44.auth.me();
-          const clients = await base44.entities.Client.filter({ user_id: user.id });
+          const user = await auth.me();
+          const clients = await Client.filter({ user_id: user.id });
           if (clients.length > 0) {
             const clientId = clients[0].id;
             const [msgs, cobrancasRaw] = await Promise.all([
-              base44.entities.Message.filter({ client_id: clientId, is_read: false, sender_type: "admin" }),
-              base44.entities.FinancialRecord.filter({ client_id: clientId, read_by_client: false }),
+              Message.filter({ client_id: clientId, is_read: false, sender_type: "admin" }),
+              FinancialRecord.filter({ client_id: clientId, read_by_client: false }),
             ]);
-            const cobrancas = cobrancasRaw.filter(c => c.status !== "Pago");
+            // Only surface the current month's due charge and overdue
+            // installments — a recurring launch (e.g. 12 monthly fees
+            // created at once) would otherwise flood the client with one
+            // notification per future installment. Uses local date parts
+            // (not toISOString, which is UTC and can shift the calendar day
+            // near midnight in Brazil) and is wrapped in its own try/catch
+            // so a single malformed due_date can't zero out the whole list.
+            let cobrancas;
+            try {
+              const now = new Date();
+              const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+              const currentMonth = todayStr.slice(0, 7);
+              cobrancas = cobrancasRaw.filter(c => {
+                if (c.status === "Pago") return false;
+                const dueDate = c.due_date ? String(c.due_date).slice(0, 10) : "";
+                if (!dueDate) return true;
+                const isCurrentMonth = dueDate.slice(0, 7) === currentMonth;
+                const isOverdue = dueDate < todayStr;
+                return isCurrentMonth || isOverdue;
+              });
+            } catch {
+              cobrancas = cobrancasRaw.filter(c => c.status !== "Pago");
+            }
             const list = [
               ...msgs.map(m => ({ id: m.id, type: "message", title: "Nova mensagem do contador", desc: m.content?.slice(0, 50), link: "/cliente/mensagens", icon: MessageSquare })),
               ...cobrancas.map(c => ({ id: c.id, type: "cobranca", title: "Nova cobrança", desc: `${c.description} - R$ ${Number(c.amount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, link: "/cliente", icon: DollarSign })),
@@ -75,7 +98,7 @@ export default function NotificationBell({ isAdmin }) {
                 to={n.link}
                 onClick={() => {
                   setOpen(false);
-                  if (n.type === "cobranca") base44.entities.FinancialRecord.update(n.id, { read_by_client: true }).catch(() => {});
+                  if (n.type === "cobranca") FinancialRecord.update(n.id, { read_by_client: true }).catch(() => {});
                 }}
                 className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 border-b border-slate-50 last:border-0">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">

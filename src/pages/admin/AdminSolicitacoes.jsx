@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { ServiceRequest } from "@/api/entities";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Trash2 } from "lucide-react";
@@ -11,17 +11,17 @@ export default function AdminSolicitacoes() {
 
   const load = async () => {
     setLoading(true);
-    try { setItems(await base44.entities.ServiceRequest.list("-created_date")); } catch {} finally { setLoading(false); }
+    try { setItems(await ServiceRequest.list("-created_date")); } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
 
   const updateStatus = async (id, status) => {
-    try { await base44.entities.ServiceRequest.update(id, { status }); toast({ title: "Status atualizado!" }); load(); } catch {}
+    try { await ServiceRequest.update(id, { status }); toast({ title: "Status atualizado!" }); load(); } catch {}
   };
 
   const handleDelete = async (id) => {
     if (!confirm("Deseja excluir esta solicitação?")) return;
-    try { await base44.entities.ServiceRequest.delete(id); toast({ title: "Solicitação excluída!" }); load(); } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
+    try { await ServiceRequest.delete(id); toast({ title: "Solicitação excluída!" }); load(); } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
   };
 
   const statusColor = { Novo: "bg-blue-100 text-blue-700", "Em Análise": "bg-amber-100 text-amber-700", "Em Andamento": "bg-purple-100 text-purple-700", Concluído: "bg-blue-100 text-blue-700", Cancelado: "bg-red-100 text-red-700" };

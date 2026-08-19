@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import { auth } from "@/api/auth";
+import { Message } from "@/api/entities";
 import { Send, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +18,10 @@ export default function ClienteMensagens() {
 
   const load = async () => {
     try {
-      const user = await base44.auth.me();
+      const user = await auth.me();
       const cl = await getMyClient(user);
       setClient(cl);
-      if (cl) setMessages(await base44.entities.Message.filter({ client_id: cl.id }, "-created_date"));
+      if (cl) setMessages(await Message.filter({ client_id: cl.id }, "-created_date"));
     } catch {} finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -28,9 +29,9 @@ export default function ClienteMensagens() {
   const handleDelete = async (id) => {
     if (!confirm("Excluir esta mensagem?")) return;
     try {
-      await base44.entities.Message.delete(id);
+      await Message.delete(id);
       toast({ title: "Mensagem excluída!" });
-      setMessages(await base44.entities.Message.filter({ client_id: client.id }, "-created_date"));
+      setMessages(await Message.filter({ client_id: client.id }, "-created_date"));
     } catch { toast({ title: "Erro ao excluir", variant: "destructive" }); }
   };
 
@@ -39,10 +40,10 @@ export default function ClienteMensagens() {
     if (!form.content.trim() || !client) return;
     setSending(true);
     try {
-      await base44.entities.Message.create({ client_id: client.id, content: form.content, subject: form.subject, sender_type: "client", sender_name: client.name });
+      await Message.create({ client_id: client.id, content: form.content, subject: form.subject, sender_type: "client", sender_name: client.name });
       toast({ title: "Mensagem enviada!" });
       setForm({ subject: "", content: "" });
-      setMessages(await base44.entities.Message.filter({ client_id: client.id }, "-created_date"));
+      setMessages(await Message.filter({ client_id: client.id }, "-created_date"));
     } catch {} finally { setSending(false); }
   };
 

@@ -8,9 +8,10 @@ import Sobre from "@/pages/Sobre";
 import Servicos from "@/pages/Servicos";
 import Beneficios from "@/pages/Beneficios";
 import Contato from "@/pages/Contato";
+import procedLogo from "@/assets/proced-logo.png";
 
 const WHATSAPP_LINK = "https://wa.me/5563992544417";
-const HERO_ILLUSTRATION = "https://media.base44.com/images/public/6a47fd721adb1f32b231e32a/df1a64d05_Designsemnome2.png";
+const HERO_ILLUSTRATION = procedLogo;
 
 export default function Home() {
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="hidden lg:block"
             >
-              <img src={HERO_ILLUSTRATION} alt="Ilustração de crescimento contábil" className="w-full max-w-lg mx-auto" />
+              <img src={HERO_ILLUSTRATION} alt="Proced Contabilidade" className="w-full max-w-md mx-auto rounded-2xl shadow-2xl shadow-black/30" />
             </motion.div>
           </div>
         </div>

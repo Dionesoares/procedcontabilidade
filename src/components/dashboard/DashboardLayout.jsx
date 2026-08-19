@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { Outlet, Link, useLocation } from "react-router-dom";
+import { auth } from "@/api/auth";
 import {
   LayoutDashboard, Users, FileText, ListTodo, MessageSquare, Inbox,
-  LogOut, Menu, X, ChevronRight, FolderOpen, Settings, UserCog, Pencil, KeyRound, Wallet
+  LogOut, Menu, X, ChevronRight, FolderOpen, UserCog, Pencil, KeyRound, Wallet
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/dashboard/NotificationBell";
 import EditarDadosUsuarioDialog from "@/components/dashboard/EditarDadosUsuarioDialog";
 import { useToast } from "@/components/ui/use-toast";
@@ -37,14 +36,16 @@ export default function DashboardLayout({ user, isAdmin }) {
   const links = isAdmin ? adminLinks : clientLinks;
 
   const handleLogout = () => {
-    base44.auth.logout("/");
+    auth.logout("/");
   };
 
   const handleChangePassword = async () => {
     try {
-      await base44.auth.resetPasswordRequest(user.email);
-    } catch {}
-    toast({ title: "Verifique seu e-mail", description: "Enviamos um link para você criar uma nova senha." });
+      await auth.resetPasswordRequest(user.email);
+      toast({ title: "Verifique seu e-mail", description: "Enviamos um link para você criar uma nova senha." });
+    } catch {
+      toast({ title: "Não foi possível enviar o email agora", description: "Tente novamente em alguns minutos.", variant: "destructive" });
+    }
   };
 
   return (
