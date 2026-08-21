@@ -17,7 +17,7 @@ export default function FinanceiroReportChart({ records }) {
   }, [records]);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <div className="bg-white rounded-xl border border-slate-200 p-5 min-w-0 overflow-hidden">
       <h3 className="font-heading font-semibold text-slate-900 mb-1">Evolução Mensal</h3>
       <p className="text-xs text-slate-400 mb-4">Entradas e saídas por mês</p>
       {data.length === 0 ? (

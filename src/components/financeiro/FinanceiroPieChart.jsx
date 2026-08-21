@@ -14,7 +14,7 @@ export default function FinanceiroPieChart({ records }) {
   }, [records]);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <div className="bg-white rounded-xl border border-slate-200 p-5 min-w-0 overflow-hidden">
       <h3 className="font-heading font-semibold text-slate-900 mb-1">Distribuição</h3>
       <p className="text-xs text-slate-400 mb-4">Entradas vs. Saídas</p>
       {data.length === 0 ? (

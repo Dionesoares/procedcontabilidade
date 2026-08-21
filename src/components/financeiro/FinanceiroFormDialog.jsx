@@ -49,6 +49,7 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
         ...emptyForm,
         ...record,
         client_id: record.client_id || "",
+        due_date: record.due_date ? String(record.due_date).slice(0, 10) : "",
         is_partial: partial,
         amount_paid: partial ? String(record.amount_paid ?? "") : "",
       });
@@ -88,7 +89,7 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
         type_label: form.type_label,
         amount,
         amount_paid: amountPaid,
-        due_date: form.due_date,
+        due_date: form.due_date || null,
         status,
         client_id: form.client_id || null,
         client_name: client ? (client.company_name || client.name) : null,
@@ -103,7 +104,7 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{record ? "Editar Lançamento" : "Novo Lançamento"}</DialogTitle>
         </DialogHeader>

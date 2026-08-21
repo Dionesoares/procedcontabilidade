@@ -49,7 +49,7 @@ export default function DashboardLayout({ user, isAdmin }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex overflow-x-hidden">
       {/* Sidebar overlay mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -147,7 +147,7 @@ export default function DashboardLayout({ user, isAdmin }) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
+        <main className="flex-1 p-4 lg:p-6 overflow-y-auto overflow-x-hidden min-w-0">
           <Outlet />
         </main>
       </div>

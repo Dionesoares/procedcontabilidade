@@ -11,6 +11,7 @@ import FinanceiroFiltros from "@/components/financeiro/FinanceiroFiltros";
 import NovaCobrancaDialog from "@/components/financeiro/NovaCobrancaDialog";
 import { exportFinanceiroPdf, exportFinanceiroExcel } from "@/lib/financeiroExport";
 import { sortClientsByName } from "@/lib/clientLookup";
+import { sanitizeFinancialRecord, saveFinancialRecord } from "@/lib/financialRecordPayload";
 
 const emptyFilters = { type: "Todos", status: "Todos", clientId: "Todos", dateFrom: "", dateTo: "", search: "" };
 
@@ -102,12 +103,14 @@ export default function AdminFinanceiro() {
 
   const handleSaveCobranca = async (data) => {
     try {
-      await FinancialRecord.create(data);
+      await saveFinancialRecord((includeAmountPaid) => (
+        FinancialRecord.create(sanitizeFinancialRecord(data, { includeAmountPaid }))
+      ));
       toast({ title: "Cobrança criada!" });
       setCobrancaOpen(false);
       load();
-    } catch {
-      toast({ title: "Erro ao criar cobrança", variant: "destructive" });
+    } catch (error) {
+      toast({ title: "Erro ao criar cobrança", description: error?.message, variant: "destructive" });
     }
   };
 
@@ -116,24 +119,32 @@ export default function AdminFinanceiro() {
 
   const handleSave = async (data) => {
     try {
-      if (editing) {
-        const { is_recurring, recurrence_frequency, recurrence_count, ...rest } = data;
-        await FinancialRecord.update(editing.id, rest);
-        toast({ title: "Lançamento atualizado!" });
-      } else {
-        const rows = buildRecurrenceRows(data);
+      let createdCount = 1;
+      await saveFinancialRecord(async (includeAmountPaid) => {
+        if (editing) {
+          const { is_recurring, recurrence_frequency, recurrence_count, ...rest } = data;
+          await FinancialRecord.update(editing.id, sanitizeFinancialRecord(rest, { includeAmountPaid }));
+          return;
+        }
+        const rows = buildRecurrenceRows(data).map((row) => sanitizeFinancialRecord(row, { includeAmountPaid }));
+        createdCount = rows.length;
         if (rows.length > 1) {
           await FinancialRecord.bulkCreate(rows);
-          toast({ title: `${rows.length} lançamentos recorrentes criados!` });
         } else {
           await FinancialRecord.create(rows[0]);
-          toast({ title: "Lançamento criado!" });
         }
-      }
+      });
+      toast({
+        title: editing
+          ? "Lançamento atualizado!"
+          : createdCount > 1
+            ? `${createdCount} lançamentos recorrentes criados!`
+            : "Lançamento criado!",
+      });
       setDialogOpen(false);
       load();
-    } catch {
-      toast({ title: "Erro ao salvar lançamento", variant: "destructive" });
+    } catch (error) {
+      toast({ title: "Erro ao salvar lançamento", description: error?.message, variant: "destructive" });
     }
   };
 
@@ -158,7 +169,7 @@ export default function AdminFinanceiro() {
   if (loading) return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin" /></div>;
 
   return (
-    <div>
+    <div className="min-w-0 max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-heading font-bold text-2xl text-slate-900">Financeiro</h1>
@@ -186,10 +197,10 @@ export default function AdminFinanceiro() {
         <FinanceiroSummaryCards records={filteredRecords} />
 
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 min-w-0">
             <FinanceiroReportChart records={filteredRecords} />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 min-w-0">
             <FinanceiroPieChart records={filteredRecords} />
           </div>
         </div>
@@ -215,9 +226,9 @@ export default function AdminFinanceiro() {
                   {filteredRecords.map(r => (
                     <tr key={r.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-medium text-slate-900">
-                        <span className="inline-flex items-center gap-1.5">
-                          {r.description}
-                          {r.is_recurring && <Repeat className="w-3.5 h-3.5 text-slate-400" title="Lançamento recorrente" />}
+                        <span className="inline-flex items-center gap-1.5 min-w-0">
+                          <span className="break-words">{r.description}</span>
+                          {r.is_recurring && <Repeat className="w-3.5 h-3.5 text-slate-400 shrink-0" title="Lançamento recorrente" />}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">{getClientLabel(r) || "—"}</td>

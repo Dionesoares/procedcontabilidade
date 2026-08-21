@@ -24,7 +24,7 @@ export default function NovaCobrancaDialog({ open, onOpenChange, clients, onSave
       description: form.description || `Cobrança - ${clientLabel}`,
       type: "Receita",
       amount: Number(form.amount) || 0,
-      due_date: form.due_date,
+      due_date: form.due_date || null,
       status: form.status,
       client_id: form.client_id,
       client_name: clientLabel,
@@ -34,7 +34,7 @@ export default function NovaCobrancaDialog({ open, onOpenChange, clients, onSave
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova Cobrança</DialogTitle>
         </DialogHeader>
