@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Repeat, CircleDollarSign } from "lucide-react";
 import TipoSelect from "@/components/financeiro/TipoSelect";
 import DescricaoSelect from "@/components/financeiro/DescricaoSelect";
+import { formatMoney } from "@/lib/financeiroAmounts";
 
 const emptyForm = {
   description: "",
@@ -26,10 +27,6 @@ function isPartialRecord(record) {
   const paid = Number(record?.amount_paid || 0);
   const amount = Number(record?.amount || 0);
   return record?.status === "Parcial" || (paid > 0 && amount > 0 && paid < amount);
-}
-
-function formatMoney(value) {
-  return Number(value || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 const NO_CLIENT = "__none__";
@@ -104,7 +101,7 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{record ? "Editar Lançamento" : "Novo Lançamento"}</DialogTitle>
         </DialogHeader>
@@ -128,7 +125,45 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          {showPartial && (
+            <div className="rounded-lg border border-slate-200 p-3 space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  checked={form.is_partial}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setForm({
+                      ...form,
+                      is_partial: checked,
+                      status: checked ? "Parcial" : (form.status === "Parcial" ? "Pendente" : form.status),
+                      amount_paid: checked ? form.amount_paid : "",
+                    });
+                  }}
+                />
+                <CircleDollarSign className="w-4 h-4 text-slate-500" />
+                Recebimento parcial
+              </label>
+              {form.is_partial && (
+                <p className="text-xs text-slate-500">
+                  Informe o valor total e o valor já recebido. O restante é calculado automaticamente.
+                </p>
+              )}
+              {form.is_partial && paidAmount > 0 && paidAmount >= billedAmount && (
+                <p className="text-xs text-amber-600">
+                  O valor parcial precisa ser menor que o valor total. Se o cliente pagou tudo, use o status Pago.
+                </p>
+              )}
+              {form.is_partial && form.is_recurring && !record && (
+                <p className="text-xs text-slate-400">
+                  O recebimento parcial vale só para o primeiro lançamento da recorrência. Os demais ficam como Pendente.
+                </p>
+              )}
+            </div>
+          )}
+
+          <div className={`grid gap-3 ${showPartial && form.is_partial ? "grid-cols-1" : "grid-cols-2"}`}>
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Tipo*</label>
               <TipoSelect
@@ -144,11 +179,34 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
                 })}
               />
             </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Valor*</label>
-              <Input type="number" step="0.01" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} required placeholder="0.00" />
+            <div className={`grid gap-3 ${showPartial && form.is_partial ? "grid-cols-2" : ""}`}>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">Valor*</label>
+                <Input type="number" step="0.01" min="0.01" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} required placeholder="0.00" />
+              </div>
+              {showPartial && form.is_partial && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-1 block">Valor parcial*</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={billedAmount > 0 ? billedAmount - 0.01 : undefined}
+                    value={form.amount_paid}
+                    onChange={(e) => setForm({ ...form, amount_paid: e.target.value })}
+                    required
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
             </div>
           </div>
+          {showPartial && form.is_partial && (
+            <div className="flex items-center justify-between rounded-md bg-sky-50 border border-sky-100 px-3 py-2 text-sm">
+              <span className="text-slate-600">Restante a receber</span>
+              <span className="font-semibold text-sky-800">R$ {formatMoney(remainingAmount)}</span>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Vencimento</label>
@@ -181,62 +239,6 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
               </Select>
             </div>
           </div>
-
-          {showPartial && (
-            <div className="rounded-lg border border-slate-200 p-3 space-y-3">
-              <label className="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  checked={form.is_partial}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setForm({
-                      ...form,
-                      is_partial: checked,
-                      status: checked ? "Parcial" : (form.status === "Parcial" ? "Pendente" : form.status),
-                      amount_paid: checked ? form.amount_paid : "",
-                    });
-                  }}
-                />
-                <CircleDollarSign className="w-4 h-4 text-slate-500" />
-                Recebimento parcial
-              </label>
-
-              {form.is_partial && (
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-xs font-medium text-slate-600 mb-1 block">Valor recebido*</label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      max={billedAmount > 0 ? billedAmount - 0.01 : undefined}
-                      value={form.amount_paid}
-                      onChange={(e) => setForm({ ...form, amount_paid: e.target.value })}
-                      required
-                      placeholder="0.00"
-                    />
-                  </div>
-                  {billedAmount > 0 && paidAmount > 0 && paidAmount < billedAmount && (
-                    <p className="text-xs text-slate-500">
-                      Restante a receber: <span className="font-medium text-slate-700">R$ {formatMoney(remainingAmount)}</span>
-                    </p>
-                  )}
-                  {paidAmount > 0 && paidAmount >= billedAmount && (
-                    <p className="text-xs text-amber-600">
-                      O valor recebido precisa ser menor que o valor do lançamento. Se o cliente pagou tudo, use o status Pago.
-                    </p>
-                  )}
-                  {form.is_recurring && !record && (
-                    <p className="text-xs text-slate-400">
-                      O recebimento parcial vale só para o primeiro lançamento da recorrência. Os demais ficam como Pendente.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
 
           {!record && (
             <div className="rounded-lg border border-slate-200 p-3 space-y-3">

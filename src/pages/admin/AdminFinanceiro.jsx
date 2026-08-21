@@ -12,6 +12,7 @@ import NovaCobrancaDialog from "@/components/financeiro/NovaCobrancaDialog";
 import { exportFinanceiroPdf, exportFinanceiroExcel } from "@/lib/financeiroExport";
 import { sortClientsByName } from "@/lib/clientLookup";
 import { sanitizeFinancialRecord, saveFinancialRecord } from "@/lib/financialRecordPayload";
+import { formatMoney, recordPaidAmount, recordRemainingAmount, totalRemainingToReceive } from "@/lib/financeiroAmounts";
 
 const emptyFilters = { type: "Todos", status: "Todos", clientId: "Todos", dateFrom: "", dateTo: "", search: "" };
 
@@ -217,6 +218,8 @@ export default function AdminFinanceiro() {
                     <th className="text-left px-4 py-3 hidden lg:table-cell">Cliente</th>
                     <th className="text-left px-4 py-3">Tipo</th>
                     <th className="text-left px-4 py-3">Valor</th>
+                    <th className="text-left px-4 py-3 hidden sm:table-cell">Recebido</th>
+                    <th className="text-left px-4 py-3">Restante</th>
                     <th className="text-left px-4 py-3 hidden md:table-cell">Vencimento</th>
                     <th className="text-left px-4 py-3">Status</th>
                     <th className="text-right px-4 py-3">Ações</th>
@@ -239,14 +242,13 @@ export default function AdminFinanceiro() {
                         </span>
                       </td>
                       <td className={`px-4 py-3 font-medium ${r.type === "Receita" ? "text-blue-700" : "text-slate-700"}`}>
-                        <div>R$ {Number(r.amount || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</div>
-                        {r.status === "Parcial" && Number(r.amount_paid || 0) > 0 && (
-                          <div className="text-[11px] font-normal text-slate-400">
-                            Recebido R$ {Number(r.amount_paid).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                            {" · "}
-                            Resta R$ {Math.max(0, Number(r.amount || 0) - Number(r.amount_paid || 0)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                          </div>
-                        )}
+                        R$ {formatMoney(r.amount)}
+                      </td>
+                      <td className="px-4 py-3 text-slate-500 hidden sm:table-cell">
+                        {r.type === "Receita" ? `R$ ${formatMoney(recordPaidAmount(r))}` : "—"}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-sky-700">
+                        {r.type === "Receita" ? `R$ ${formatMoney(recordRemainingAmount(r))}` : "—"}
                       </td>
                       <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{r.due_date ? new Date(r.due_date + "T00:00:00").toLocaleDateString("pt-BR") : "—"}</td>
                       <td className="px-4 py-3">
@@ -260,6 +262,10 @@ export default function AdminFinanceiro() {
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div className="flex items-center justify-between gap-4 px-4 py-3 bg-sky-50 border-t border-sky-100">
+              <span className="text-sm font-medium text-slate-700">Total restante a receber</span>
+              <span className="text-sm font-bold text-sky-800">R$ {formatMoney(totalRemainingToReceive(filteredRecords))}</span>
             </div>
           </div>
         )}
