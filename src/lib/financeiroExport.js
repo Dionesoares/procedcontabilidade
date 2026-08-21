@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import { formatMoney, recordPaidAmount, recordRemainingAmount, totalRemainingToReceive } from "@/lib/financeiroAmounts";
+import { formatMoney, recordPaidAmount, recordPendingBalance, totalPendingBalance } from "@/lib/financeiroAmounts";
 
 const fmt = (v) => `R$ ${formatMoney(v)}`;
 const fmtDate = (d) => (d ? new Date(d + "T00:00:00").toLocaleDateString("pt-BR") : "—");
@@ -34,7 +34,7 @@ export function exportFinanceiroPdf(records) {
   const sorted = sortRecordsAlphabetically(records);
   const receitas = sorted.filter((r) => r.type === "Receita").reduce((s, r) => s + Number(r.amount || 0), 0);
   const despesas = sorted.filter((r) => r.type === "Despesa").reduce((s, r) => s + Number(r.amount || 0), 0);
-  const aReceber = totalRemainingToReceive(sorted);
+  const saldoPendente = totalPendingBalance(sorted);
 
   doc.setFontSize(16);
   doc.setTextColor(15, 23, 42);
@@ -47,7 +47,7 @@ export function exportFinanceiroPdf(records) {
   doc.setTextColor(15, 23, 42);
   doc.text(`Receitas: ${fmt(receitas)}`, 14, 34);
   doc.text(`Despesas: ${fmt(despesas)}`, 78, 34);
-  doc.text(`A receber: ${fmt(aReceber)}`, 142, 34);
+  doc.text(`Saldo pendente: ${fmt(saldoPendente)}`, 142, 34);
   doc.text(`Saldo: ${fmt(receitas - despesas)}`, 210, 34);
 
   const drawHeader = (y) => {
@@ -61,7 +61,7 @@ export function exportFinanceiroPdf(records) {
     doc.text("Tipo", COLS.tipo, y);
     doc.text("Valor", COLS.valor, y);
     doc.text("Recebido", COLS.recebido, y);
-    doc.text("Restante", COLS.restante, y);
+    doc.text("Pendente", COLS.restante, y);
     doc.text("Vencimento", COLS.vencimento, y);
     doc.text("Status", COLS.status, y);
   };
@@ -80,7 +80,7 @@ export function exportFinanceiroPdf(records) {
       doc.setTextColor(30, 41, 59);
     }
     const paid = recordPaidAmount(r);
-    const remaining = recordRemainingAmount(r);
+    const pending = recordPendingBalance(r);
     doc.setFontSize(8);
     doc.text(String(r.description || "").slice(0, 22), COLS.descricao, y);
     doc.text(String(r.company_name || "—").slice(0, 20), COLS.empresa, y);
@@ -88,7 +88,7 @@ export function exportFinanceiroPdf(records) {
     doc.text(r.type || "", COLS.tipo, y);
     doc.text(fmt(r.amount), COLS.valor, y);
     doc.text(r.type === "Receita" ? fmt(paid) : "—", COLS.recebido, y);
-    doc.text(r.type === "Receita" ? fmt(remaining) : "—", COLS.restante, y);
+    doc.text(pending > 0 ? fmt(pending) : "—", COLS.restante, y);
     doc.text(fmtDate(r.due_date), COLS.vencimento, y);
     doc.text(r.status || "", COLS.status, y);
     y += 7;
@@ -98,22 +98,22 @@ export function exportFinanceiroPdf(records) {
     doc.addPage();
     y = 20;
   }
-  doc.setFillColor(224, 242, 254);
+  doc.setFillColor(255, 251, 235);
   doc.rect(14, y - 5, TABLE_WIDTH, 8, "F");
   doc.setFontSize(9);
-  doc.setTextColor(7, 89, 133);
-  doc.text("Total restante a receber", COLS.descricao, y);
-  doc.text(fmt(aReceber), COLS.restante, y);
+  doc.setTextColor(146, 64, 14);
+  doc.text("Saldo pendente", COLS.descricao, y);
+  doc.text(fmt(saldoPendente), COLS.restante, y);
 
   doc.save(`relatorio-financeiro-${Date.now()}.pdf`);
 }
 
 export function exportFinanceiroExcel(records) {
-  const header = ["Descrição", "Empresa", "Nome", "Tipo", "Valor", "Valor recebido", "Restante", "Vencimento", "Status"];
+  const header = ["Descrição", "Empresa", "Nome", "Tipo", "Valor", "Valor recebido", "Saldo Pendente", "Vencimento", "Status"];
   const rows = records.map((r) => {
     const amount = Number(r.amount || 0);
     const paid = r.type === "Receita" ? recordPaidAmount(r) : 0;
-    const remaining = recordRemainingAmount(r);
+    const pending = recordPendingBalance(r);
     return [
       r.description || "",
       r.company_name || "",
@@ -121,13 +121,13 @@ export function exportFinanceiroExcel(records) {
       r.type || "",
       fmtCsv(amount),
       r.type === "Receita" ? fmtCsv(paid) : "",
-      r.type === "Receita" ? fmtCsv(remaining) : "",
+      pending > 0 ? fmtCsv(pending) : "",
       fmtDate(r.due_date),
       r.status || "",
     ];
   });
-  const remainingTotal = totalRemainingToReceive(records);
-  rows.push(["Total restante a receber", "", "", "", "", "", fmtCsv(remainingTotal), "", ""]);
+  const pendingTotal = totalPendingBalance(records);
+  rows.push(["Saldo pendente", "", "", "", "", "", fmtCsv(pendingTotal), "", ""]);
   const escape = (v) => `"${String(v).replace(/"/g, '""')}"`;
   const csv = [header, ...rows].map((row) => row.map(escape).join(";")).join("\r\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });

@@ -1,11 +1,11 @@
 import React from "react";
-import { TrendingUp, TrendingDown, Wallet, CircleDollarSign } from "lucide-react";
-import { formatMoney, totalRemainingToReceive } from "@/lib/financeiroAmounts";
+import { TrendingUp, TrendingDown, Wallet, Clock } from "lucide-react";
+import { formatMoney, totalPendingBalance } from "@/lib/financeiroAmounts";
 
 export default function FinanceiroSummaryCards({ records }) {
   const receitas = records.filter(r => r.type === "Receita").reduce((sum, r) => sum + Number(r.amount || 0), 0);
   const despesas = records.filter(r => r.type === "Despesa").reduce((sum, r) => sum + Number(r.amount || 0), 0);
-  const aReceber = totalRemainingToReceive(records);
+  const saldoPendente = totalPendingBalance(records);
   const saldo = receitas - despesas;
 
   const fmt = (v) => `R$ ${formatMoney(v)}`;
@@ -27,10 +27,10 @@ export default function FinanceiroSummaryCards({ records }) {
         </div>
       </div>
       <div className="rounded-xl border border-slate-200 bg-slate-900 p-5 flex items-center gap-4">
-        <div className="w-10 h-10 rounded-lg bg-sky-500/20 flex items-center justify-center"><CircleDollarSign className="w-5 h-5 text-sky-400" /></div>
+        <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center"><Clock className="w-5 h-5 text-amber-400" /></div>
         <div>
-          <p className="text-[11px] uppercase tracking-wider text-slate-400">A receber</p>
-          <p className="text-lg font-bold text-sky-300 font-mono">{fmt(aReceber)}</p>
+          <p className="text-[11px] uppercase tracking-wider text-slate-400">Saldo Pendente</p>
+          <p className="text-lg font-bold text-amber-300 font-mono">{fmt(saldoPendente)}</p>
         </div>
       </div>
       <div className="rounded-xl border border-slate-200 bg-slate-900 p-5 flex items-center gap-4">

@@ -12,7 +12,7 @@ import NovaCobrancaDialog from "@/components/financeiro/NovaCobrancaDialog";
 import { exportFinanceiroPdf, exportFinanceiroExcel } from "@/lib/financeiroExport";
 import { sortClientsByName } from "@/lib/clientLookup";
 import { sanitizeFinancialRecord, saveFinancialRecord } from "@/lib/financialRecordPayload";
-import { formatMoney, recordPaidAmount, recordRemainingAmount, totalRemainingToReceive } from "@/lib/financeiroAmounts";
+import { formatMoney, recordPaidAmount, recordPendingBalance, totalPendingBalance } from "@/lib/financeiroAmounts";
 
 const emptyFilters = { type: "Todos", status: "Todos", clientId: "Todos", dateFrom: "", dateTo: "", search: "" };
 
@@ -219,14 +219,16 @@ export default function AdminFinanceiro() {
                     <th className="text-left px-4 py-3">Tipo</th>
                     <th className="text-left px-4 py-3">Valor</th>
                     <th className="text-left px-4 py-3 hidden sm:table-cell">Recebido</th>
-                    <th className="text-left px-4 py-3">Restante</th>
+                    <th className="text-left px-4 py-3">Saldo Pendente</th>
                     <th className="text-left px-4 py-3 hidden md:table-cell">Vencimento</th>
                     <th className="text-left px-4 py-3">Status</th>
                     <th className="text-right px-4 py-3">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredRecords.map(r => (
+                  {filteredRecords.map(r => {
+                    const pending = recordPendingBalance(r);
+                    return (
                     <tr key={r.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3 font-medium text-slate-900">
                         <span className="inline-flex items-center gap-1.5 min-w-0">
@@ -247,8 +249,8 @@ export default function AdminFinanceiro() {
                       <td className="px-4 py-3 text-slate-500 hidden sm:table-cell">
                         {r.type === "Receita" ? `R$ ${formatMoney(recordPaidAmount(r))}` : "—"}
                       </td>
-                      <td className="px-4 py-3 font-medium text-sky-700">
-                        {r.type === "Receita" ? `R$ ${formatMoney(recordRemainingAmount(r))}` : "—"}
+                      <td className="px-4 py-3 font-medium text-amber-700">
+                        {pending > 0 ? `R$ ${formatMoney(pending)}` : "—"}
                       </td>
                       <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{r.due_date ? new Date(r.due_date + "T00:00:00").toLocaleDateString("pt-BR") : "—"}</td>
                       <td className="px-4 py-3">
@@ -259,13 +261,14 @@ export default function AdminFinanceiro() {
                         <button onClick={() => handleDelete(r)} title="Excluir" className="p-1.5 text-slate-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-            <div className="flex items-center justify-between gap-4 px-4 py-3 bg-sky-50 border-t border-sky-100">
-              <span className="text-sm font-medium text-slate-700">Total restante a receber</span>
-              <span className="text-sm font-bold text-sky-800">R$ {formatMoney(totalRemainingToReceive(filteredRecords))}</span>
+            <div className="flex items-center justify-between gap-4 px-4 py-3 bg-amber-50 border-t border-amber-100">
+              <span className="text-sm font-medium text-slate-700">Saldo pendente</span>
+              <span className="text-sm font-bold text-amber-800">R$ {formatMoney(totalPendingBalance(filteredRecords))}</span>
             </div>
           </div>
         )}
