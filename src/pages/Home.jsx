@@ -1,88 +1,94 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, ArrowRight } from "lucide-react";
 import QuickLinksMobile from "@/components/home/QuickLinksMobile";
-import { Button } from "@/components/ui/button";
+import HeroDashboardMock from "@/components/home/HeroDashboardMock";
+import StatsBar from "@/components/home/StatsBar";
 import Sobre from "@/pages/Sobre";
 import Servicos from "@/pages/Servicos";
 import Beneficios from "@/pages/Beneficios";
 import Contato from "@/pages/Contato";
-import procedLogo from "@/assets/proced-logo.png";
 
 const WHATSAPP_LINK = "https://wa.me/5563992544417";
-const HERO_ILLUSTRATION = procedLogo;
 
 export default function Home() {
   useEffect(() => {
-    if (window.location.hash) {
-      const el = document.querySelector(window.location.hash);
-      if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
+    const hash = window.location.hash || "";
+    if (!hash || hash.startsWith("#error") || hash.includes("access_token") || hash.includes("error_code")) {
+      return;
     }
+    const el = document.querySelector(hash);
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
   }, []);
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-blue-700">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section className="relative overflow-hidden bg-surface dot-grid pt-8 pb-20 sm:pb-28">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.65 }}
             >
-              <h1 className="font-heading font-black text-4xl sm:text-5xl lg:text-6xl text-white leading-[1.1] tracking-tight mb-6">
-                Soluções contábeis inteligentes para sua empresa{" "}
-                <span className="text-teal-400">crescer com segurança.</span>
+              <span className="inline-flex items-center gap-2 text-xs font-bold tracking-wide text-teal-700 bg-brand-soft px-3.5 py-1.5 rounded-full mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                CONTABILIDADE DO FUTURO, HOJE
+              </span>
+
+              <h1 className="font-heading font-extrabold text-4xl sm:text-5xl lg:text-[3.4rem] text-navy leading-[1.12] tracking-tight mb-5">
+                Contabilidade <span className="text-brand">inteligente</span> para empresas que querem{" "}
+                <span className="text-brand">crescer</span>
               </h1>
 
-              <p className="text-base sm:text-lg text-blue-100/90 leading-relaxed mb-8 max-w-xl">
-                Consultoria Contábil, Fiscal, Tributária e Pessoal para empresas e MEIs.
+              <p className="text-base sm:text-lg text-slate-500 leading-relaxed mb-8 max-w-xl">
+                Combinamos <span className="font-semibold text-navy">tecnologia</span>,{" "}
+                <span className="font-semibold text-navy">automação</span> e atendimento consultivo para manter sua
+                empresa regularizada — e pagar menos impostos dentro da lei.
               </p>
 
-              <div className="flex flex-row flex-wrap gap-4">
-                <a href={WHATSAPP_LINK} target="_blank" rel="noopener">
-                  <Button size="lg" className="bg-teal-500 hover:bg-teal-600 text-white px-6 sm:px-8 h-13 text-sm sm:text-base shadow-lg shadow-teal-900/30">
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Falar com especialista
-                  </Button>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href={WHATSAPP_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-brand text-white font-semibold text-sm shadow-lg shadow-blue-900/15 hover:brightness-110 transition"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Falar com especialista
                 </a>
-                <Link to="/servicos">
-                  <Button size="lg" variant="outline" className="border-white/40 text-white bg-transparent hover:bg-white/10 px-6 sm:px-8 h-13 text-sm sm:text-base">
-                    Abrir empresa
-                  </Button>
+                <Link
+                  to="/#servicos"
+                  className="inline-flex items-center gap-2 h-12 px-6 rounded-full border border-slate-200 bg-white text-navy font-semibold text-sm hover:bg-slate-50 transition"
+                >
+                  Ver serviços <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="hidden lg:block"
-            >
-              <img src={HERO_ILLUSTRATION} alt="Proced Contabilidade" className="w-full max-w-md mx-auto rounded-2xl shadow-2xl shadow-black/30" />
-            </motion.div>
+            <div className="lg:pl-4 hidden sm:block">
+              <HeroDashboardMock />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Quick links - mobile only */}
+      <StatsBar />
+
       <QuickLinksMobile />
 
-      {/* All pages as infinite scroll sections */}
-      <div id="sobre" className="scroll-mt-16">
-        <Sobre />
+      <div id="sobre" className="scroll-mt-24">
+        <Sobre embedded />
       </div>
-      <div id="servicos" className="scroll-mt-16">
-        <Servicos />
+      <div id="como-funciona" className="scroll-mt-24">
+        <Beneficios embedded />
       </div>
-      <div id="beneficios" className="scroll-mt-16">
-        <Beneficios />
+      <div id="servicos" className="scroll-mt-24">
+        <Servicos embedded />
       </div>
-      <div id="contato" className="scroll-mt-16">
-        <Contato />
+      <div id="contato" className="scroll-mt-24">
+        <Contato embedded />
       </div>
     </div>
   );

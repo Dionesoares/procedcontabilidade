@@ -15,4 +15,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // Match the local URL used in Supabase Auth redirects (Site URL / Redirect URLs).
+  server: {
+    port: 3000,
+    strictPort: true,
+  },
 });

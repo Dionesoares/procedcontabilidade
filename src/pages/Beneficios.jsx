@@ -1,84 +1,99 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { TrendingDown, Zap, HeadphonesIcon, ShieldCheck, PiggyBank, FileCheck, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MessageSquare, Rocket, Link2, Bot, LineChart } from "lucide-react";
 
-const benefits = [
-  { icon: TrendingDown, title: "Redução de impostos", desc: "Estratégias legais para pagar menos impostos e aumentar a lucratividade." },
-  { icon: Zap, title: "Atendimento rápido", desc: "Respostas ágeis e suporte quando você mais precisa." },
-  { icon: HeadphonesIcon, title: "Suporte especializado", desc: "Equipe de contadores especializados à sua disposição." },
-  { icon: ShieldCheck, title: "Empresa sempre regularizada", desc: "Mantenha suas obrigações em dia e evite problemas com o fisco." },
-  { icon: PiggyBank, title: "Planejamento financeiro", desc: "Orientação para uma gestão financeira eficiente e sustentável." },
+const steps = [
+  {
+    n: 1,
+    color: "bg-blue-600",
+    soft: "bg-blue-50 text-blue-700",
+    icon: MessageSquare,
+    pill: "Análise completa",
+    title: "Conversa Inicial",
+    desc: "Entendemos o momento atual da sua empresa, os riscos, as oportunidades e o regime tributário mais adequado.",
+  },
+  {
+    n: 2,
+    color: "bg-teal-500",
+    soft: "bg-teal-50 text-teal-700",
+    icon: Rocket,
+    pill: "Migração sem dor",
+    title: "Implantação",
+    desc: "Migramos toda a contabilidade de forma segura e sem burocracia. Você não precisa fazer nada.",
+  },
+  {
+    n: 3,
+    color: "bg-sky-500",
+    soft: "bg-sky-50 text-sky-700",
+    icon: Link2,
+    pill: "Conectado",
+    title: "Integração Digital",
+    desc: "Conectamos sua contabilidade com seus sistemas, bancos e plataformas em um ecossistema integrado.",
+  },
+  {
+    n: 4,
+    color: "bg-amber-500",
+    soft: "bg-amber-50 text-amber-700",
+    icon: Bot,
+    pill: "Zero retrabalho",
+    title: "Automação",
+    desc: "Obrigações fiscais, folha, relatórios — processos manuais se tornam automáticos. Zero retrabalho.",
+  },
+  {
+    n: 5,
+    color: "bg-indigo-600",
+    soft: "bg-indigo-50 text-indigo-700",
+    icon: LineChart,
+    pill: "Resultados reais",
+    title: "Crescimento",
+    desc: "Com a casa em ordem, focamos em estratégia. Planejamento tributário, gestão de custos e expansão.",
+  },
 ];
 
-export default function Beneficios() {
+export default function Beneficios({ embedded = false }) {
   return (
-    <div>
-      {/* Hero */}
-      <section className="py-24 bg-gradient-to-br from-slate-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl">
-            <p className="text-blue-600 font-semibold text-sm uppercase tracking-wider mb-3">Benefícios</p>
-            <h1 className="font-heading font-bold text-4xl sm:text-5xl text-slate-900 mb-4 leading-tight">
-              Por que escolher a Proced Contabilidade?
-            </h1>
-            <p className="text-lg text-slate-500">
-              Descubra as vantagens de contar com uma contabilidade moderna e estratégica.
-            </p>
-          </motion.div>
+    <section className={`${embedded ? "" : "pt-8"} scroll-mt-24 py-20 sm:py-24 bg-surface`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="inline-flex text-[11px] font-bold tracking-wider text-navy bg-white border border-slate-200 px-3 py-1 rounded-full mb-4">
+            COMO FUNCIONA
+          </span>
+          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-navy tracking-tight mb-3">
+            Cinco passos para <span className="text-brand">transformar</span> sua empresa
+          </h2>
+          <p className="text-slate-500">Um processo simples, eficiente e com resultado desde o primeiro dia.</p>
         </div>
-      </section>
 
-      {/* Benefits */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {benefits.map((b, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-slate-50 rounded-2xl p-7 border border-slate-100 hover:border-blue-100 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
-                  <b.icon className="w-6 h-6 text-blue-600" />
+        <div className="relative grid sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-4">
+          <div className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-px bg-slate-200" />
+          {steps.map((step, i) => (
+            <motion.div
+              key={step.n}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className="relative text-center lg:text-left"
+            >
+              <div className="relative inline-flex mb-4">
+                <div className={`w-16 h-16 rounded-2xl ${step.soft} flex items-center justify-center`}>
+                  <step.icon className="w-7 h-7" />
                 </div>
-                <h3 className="font-heading font-semibold text-lg text-slate-900 mb-2">{b.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{b.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* MEI Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-6">
-                <FileCheck className="w-8 h-8 text-blue-200" />
+                <span
+                  className={`absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full ${step.color} text-white text-xs font-bold flex items-center justify-center`}
+                >
+                  {step.n}
+                </span>
               </div>
-              <p className="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-3">MEI</p>
-              <h2 className="font-heading font-bold text-3xl sm:text-4xl mb-4">
-                Mantenha seu MEI regularizado
-              </h2>
-              <p className="text-blue-100 text-lg mb-8">
-                Evite juros e multas e mantenha sua empresa sempre em dia com o governo.
-              </p>
-              <Link to="/falar-conosco">
-                <Button size="lg" className="bg-white text-blue-800 hover:bg-blue-50 px-8 h-13 text-base font-semibold">
-                  Regularizar meu MEI
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
+              <span className="inline-flex text-[11px] font-semibold text-teal-700 bg-brand-soft px-2.5 py-0.5 rounded-full mb-2">
+                {step.pill}
+              </span>
+              <h3 className="font-heading font-bold text-navy mb-1.5">{step.title}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
             </motion.div>
-          </div>
+          ))}
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }

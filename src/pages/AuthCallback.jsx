@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/api/supabaseClient";
+import { parseAuthCallbackParams, authErrorMessage, clearAuthParamsFromUrl } from "@/lib/authUrl";
 
 // Landing page for Supabase email confirmation links (signup + invite).
 // supabase-js auto-detects the access token in the URL hash and establishes
@@ -8,9 +9,28 @@ import { supabase } from "@/api/supabaseClient";
 // pending contador invite and route the user to the right dashboard.
 export default function AuthCallback() {
   const [status, setStatus] = useState("loading");
+  const [errorText, setErrorText] = useState("");
 
   useEffect(() => {
     const finish = async () => {
+      const params = parseAuthCallbackParams();
+      const message = authErrorMessage(params);
+      if (message) {
+        setErrorText(message);
+        setStatus("error");
+        clearAuthParamsFromUrl();
+        return;
+      }
+
+      if (params.code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(params.code);
+        if (error) {
+          setErrorText(error.message || "Link inválido ou expirado.");
+          setStatus("error");
+          return;
+        }
+      }
+
       // Give supabase-js a brief moment to parse the URL hash into a session.
       let session = null;
       for (let attempt = 0; attempt < 10 && !session; attempt++) {
@@ -20,9 +40,12 @@ export default function AuthCallback() {
       }
 
       if (!session) {
+        setErrorText("Link inválido ou expirado.");
         setStatus("error");
         return;
       }
+
+      clearAuthParamsFromUrl();
 
       try {
         const res = await fetch("/api/apply-contador-invite", {
@@ -44,9 +67,10 @@ export default function AuthCallback() {
   if (status === "error") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-        <div className="text-center max-w-sm">
-          <p className="text-slate-600 mb-4">Link inválido ou expirado.</p>
-          <Link to="/login" className="text-blue-600 hover:underline text-sm">Voltar ao login</Link>
+        <div className="text-center max-w-sm space-y-3">
+          <p className="text-slate-600">{errorText || "Link inválido ou expirado."}</p>
+          <Link to="/forgot-password" className="block text-blue-600 hover:underline text-sm">Solicitar novo link</Link>
+          <Link to="/login" className="block text-slate-500 hover:underline text-sm">Voltar ao login</Link>
         </div>
       </div>
     );

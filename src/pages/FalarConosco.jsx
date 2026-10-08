@@ -39,15 +39,15 @@ export default function FalarConosco() {
 
   return (
     <div>
-      <section className="py-24 bg-gradient-to-br from-slate-50 to-white min-h-[80vh]">
+      <section className="py-24 bg-surface min-h-[80vh]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-            <div className="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mx-auto mb-5">
-              <MessageSquare className="w-8 h-8 text-blue-600" />
+            <div className="w-16 h-16 rounded-2xl bg-brand-soft flex items-center justify-center mx-auto mb-5">
+              <MessageSquare className="w-8 h-8 text-brand" />
             </div>
-            <h1 className="font-heading font-bold text-4xl text-slate-900 mb-3">Falar com Especialista</h1>
+            <h1 className="font-heading font-extrabold text-4xl text-navy mb-3 tracking-tight">Falar com Especialista</h1>
             <p className="text-slate-500 text-lg">Preencha o formulário e entraremos em contato rapidamente.</p>
-            <a href={`https://wa.me/5563992544417?text=${encodeURIComponent("Olá! Gostaria de falar com o contador.")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-5 bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-2.5 rounded-lg transition-colors">
+            <a href={`https://wa.me/5563992544417?text=${encodeURIComponent("Olá! Gostaria de falar com o contador.")}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-5 h-11 px-5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition-colors">
               <MessageCircle className="w-5 h-5" /> Falar no WhatsApp
             </a>
           </motion.div>
@@ -88,7 +88,7 @@ export default function FalarConosco() {
               <label className="text-sm font-medium text-slate-700 mb-1.5 block">Mensagem</label>
               <Textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={4} placeholder="Conte-nos sobre sua necessidade..." />
             </div>
-            <Button type="submit" disabled={loading} className="w-full bg-blue-700 hover:bg-blue-800 h-12 text-base">
+            <Button type="submit" disabled={loading} className="w-full rounded-full bg-brand hover:brightness-110 h-12 text-base text-white">
               {loading ? "Enviando..." : "Enviar Solicitação"}
               <Send className="w-4 h-4 ml-2" />
             </Button>

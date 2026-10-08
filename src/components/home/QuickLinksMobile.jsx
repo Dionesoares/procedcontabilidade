@@ -1,13 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Info, Briefcase, Award, Mail, MessageCircle, Home as HomeIcon } from "lucide-react";
+import { Info, Briefcase, Workflow, Mail, MessageCircle, Home as HomeIcon } from "lucide-react";
 
 const pages = [
   { label: "Início", path: "/", icon: HomeIcon },
-  { label: "Sobre", path: "/sobre", icon: Info },
-  { label: "Serviços", path: "/servicos", icon: Briefcase },
-  { label: "Benefícios", path: "/beneficios", icon: Award },
-  { label: "Contato", path: "/contato", icon: Mail },
+  { label: "Sobre", path: "/#sobre", icon: Info },
+  { label: "Serviços", path: "/#servicos", icon: Briefcase },
+  { label: "Como funciona", path: "/#como-funciona", icon: Workflow },
+  { label: "Contato", path: "/#contato", icon: Mail },
   { label: "Falar Conosco", path: "/falar-conosco", icon: MessageCircle },
 ];
 
@@ -21,10 +21,10 @@ export default function QuickLinksMobile() {
             <Link
               key={p.path}
               to={p.path}
-              className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors"
+              className="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 hover:border-blue-200 hover:text-brand transition-colors"
             >
               <p.icon className="w-5 h-5" />
-              <span className="text-xs font-medium text-center">{p.label}</span>
+              <span className="text-xs font-medium text-center leading-tight">{p.label}</span>
             </Link>
           ))}
         </div>

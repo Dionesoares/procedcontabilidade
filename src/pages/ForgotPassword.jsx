@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Calculator, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/api/auth";
 
 export default function ForgotPassword() {
+  const [searchParams] = useSearchParams();
+  const reason = searchParams.get("reason") || "";
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -16,15 +18,18 @@ export default function ForgotPassword() {
     setLoading(true);
     setError("");
     try {
-      await auth.resetPasswordRequest(email);
+      await auth.resetPasswordRequest(email.trim());
       setSent(true);
     } catch (err) {
       // Supabase's resetPasswordForEmail never reveals whether the email
       // exists (for security), so any error here is a real failure —
       // e.g. rate limiting — and should be shown instead of hidden.
+      const msg = (err?.message || "").toLowerCase();
       setError(
-        err?.message?.includes("rate limit") || err?.status === 429
+        msg.includes("rate limit") || err?.status === 429
           ? "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente."
+          : msg.includes("redirect") || msg.includes("url")
+          ? "URL de redirecionamento não permitida no Supabase. Cadastre /reset-password nas Redirect URLs do projeto."
           : "Não foi possível enviar o email agora. Tente novamente em alguns minutos."
       );
     } finally {
@@ -55,6 +60,9 @@ export default function ForgotPassword() {
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+          {reason && !sent && (
+            <div className="bg-amber-50 text-amber-800 text-sm rounded-lg p-3 mb-4">{reason}</div>
+          )}
           {error && <div className="bg-red-50 text-red-600 text-sm rounded-lg p-3 mb-4">{error}</div>}
 
           {sent ? (
@@ -64,6 +72,9 @@ export default function ForgotPassword() {
               </div>
               <p className="text-slate-600 text-sm">
                 Se existir uma conta com o email <strong>{email}</strong>, você receberá um link para criar uma nova senha em poucos minutos. Não esqueça de verificar a caixa de spam.
+              </p>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                Abra o link neste mesmo navegador e o mais rápido possível — links antigos ou reenviados várias vezes deixam de funcionar.
               </p>
             </div>
           ) : (

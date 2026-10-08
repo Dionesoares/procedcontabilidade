@@ -5,10 +5,16 @@ import { supabase } from "@/api/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calculator } from "lucide-react";
+import {
+  parseAuthCallbackParams,
+  authErrorMessage,
+  clearAuthParamsFromUrl,
+} from "@/lib/authUrl";
 
 export default function ResetPassword() {
   const [checking, setChecking] = useState(true);
   const [hasRecoverySession, setHasRecoverySession] = useState(false);
+  const [linkError, setLinkError] = useState("");
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,28 +23,68 @@ export default function ResetPassword() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    // Supabase's recovery link redirects here with tokens in the URL hash;
-    // supabase-js parses them asynchronously on load, so retry briefly
-    // instead of relying on a single immediate check (avoids a race where
-    // we'd wrongly show "invalid link" while the SDK is still processing it).
     let cancelled = false;
 
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") setHasRecoverySession(true);
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+        setHasRecoverySession(true);
+        setLinkError("");
+      }
     });
 
-    const check = async () => {
-      for (let attempt = 0; attempt < 10 && !cancelled; attempt++) {
+    const establishSession = async () => {
+      const params = parseAuthCallbackParams();
+      const message = authErrorMessage(params);
+      if (message) {
+        if (!cancelled) {
+          setLinkError(message);
+          setHasRecoverySession(false);
+          setChecking(false);
+          clearAuthParamsFromUrl();
+        }
+        return;
+      }
+
+      try {
+        // PKCE flow: ?code=...
+        if (params.code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(params.code);
+          if (exchangeError) throw exchangeError;
+        } else if (params.accessToken && params.refreshToken) {
+          // Implicit / hash token flow
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: params.accessToken,
+            refresh_token: params.refreshToken,
+          });
+          if (sessionError) throw sessionError;
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setLinkError(
+            err?.message?.toLowerCase().includes("expired")
+              ? "O link de recuperação expirou ou já foi usado. Solicite um novo link."
+              : "Não foi possível validar o link de recuperação. Solicite um novo link."
+          );
+          setChecking(false);
+          clearAuthParamsFromUrl();
+        }
+        return;
+      }
+
+      for (let attempt = 0; attempt < 12 && !cancelled; attempt++) {
         const { data } = await supabase.auth.getSession();
         if (data?.session) {
           setHasRecoverySession(true);
+          clearAuthParamsFromUrl();
           break;
         }
-        await new Promise((r) => setTimeout(r, 300));
+        await new Promise((r) => setTimeout(r, 250));
       }
+
       if (!cancelled) setChecking(false);
     };
-    check();
+
+    establishSession();
 
     return () => {
       cancelled = true;
@@ -63,7 +109,12 @@ export default function ResetPassword() {
       setDone(true);
       setTimeout(() => { window.location.href = "/login"; }, 2000);
     } catch (err) {
-      setError(err?.message || "Não foi possível redefinir a senha. Tente novamente.");
+      const msg = (err?.message || "").toLowerCase();
+      setError(
+        msg.includes("same password") || msg.includes("different from the old")
+          ? "Escolha uma senha diferente da atual."
+          : err?.message || "Não foi possível redefinir a senha. Tente novamente."
+      );
     } finally {
       setLoading(false);
     }
@@ -76,6 +127,8 @@ export default function ResetPassword() {
       </div>
     );
   }
+
+  const showForm = hasRecoverySession && !linkError;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/20 to-white px-4">
@@ -90,11 +143,11 @@ export default function ResetPassword() {
             </span>
           </Link>
           <h1 className="font-heading font-bold text-2xl text-slate-900 mb-1">
-            {!hasRecoverySession ? "Link inválido" : done ? "Senha redefinida!" : "Nova Senha"}
+            {!showForm ? "Link inválido ou expirado" : done ? "Senha redefinida!" : "Nova Senha"}
           </h1>
           <p className="text-slate-500 text-sm">
-            {!hasRecoverySession
-              ? "O link de recuperação está incompleto ou expirou."
+            {!showForm
+              ? (linkError || "O link de recuperação está incompleto ou expirou.")
               : done
               ? "Você já pode entrar com sua nova senha."
               : "Escolha uma nova senha para acessar sua conta."}
@@ -102,10 +155,15 @@ export default function ResetPassword() {
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-          {!hasRecoverySession ? (
+          {!showForm ? (
             <div className="text-center space-y-4">
+              {linkError && (
+                <div className="bg-amber-50 text-amber-800 text-sm rounded-lg p-3 text-left">
+                  {linkError}
+                </div>
+              )}
               <p className="text-slate-600 text-sm">
-                Solicite um novo link de recuperação de senha.
+                Peça um novo link e abra o email neste mesmo navegador, em até alguns minutos.
               </p>
               <Link to="/forgot-password">
                 <Button className="w-full bg-blue-700 hover:bg-blue-800 h-11">Solicitar novo link</Button>

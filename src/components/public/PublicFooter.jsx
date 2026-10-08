@@ -6,20 +6,18 @@ const WHATSAPP_LINK = "https://wa.me/5563992544417";
 
 export default function PublicFooter() {
   return (
-    <footer className="bg-slate-900 text-slate-300">
+    <footer className="bg-navy-deep text-slate-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
           <div className="col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <span
-                className="font-heading font-black text-white"
-                style={{ textShadow: "1px 1px 0px rgba(96, 165, 250, 0.35), 2px 2px 0px rgba(96, 165, 250, 0.18)" }}
-              >
-                Proced<span className="text-blue-400">Contabilidade</span>
+            <div className="flex items-center gap-2.5 mb-4">
+              <span className="w-9 h-9 rounded-xl bg-brand flex items-center justify-center text-white font-heading font-bold text-sm">
+                PC
               </span>
+              <span className="font-heading font-extrabold text-white text-lg">Proced Contabilidade</span>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Soluções contábeis inteligentes para sua empresa crescer com segurança.
+              Contabilidade inteligente para empresas que querem crescer com segurança, tecnologia e atendimento real.
             </p>
           </div>
 
@@ -28,11 +26,12 @@ export default function PublicFooter() {
             <div className="space-y-2.5">
               {[
                 { label: "Início", path: "/" },
-                { label: "Sobre", path: "/sobre" },
-                { label: "Serviços", path: "/servicos" },
-                { label: "Benefícios", path: "/beneficios" },
+                { label: "Sobre", path: "/#sobre" },
+                { label: "Serviços", path: "/#servicos" },
+                { label: "Como funciona", path: "/#como-funciona" },
+                { label: "Contato", path: "/#contato" },
               ].map((l) => (
-                <Link key={l.path} to={l.path} className="block text-sm text-slate-400 hover:text-blue-400 transition-colors">
+                <Link key={l.path} to={l.path} className="block text-sm text-slate-400 hover:text-brand transition-colors">
                   {l.label}
                 </Link>
               ))}
@@ -53,22 +52,27 @@ export default function PublicFooter() {
             <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Contato</h4>
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <Mail className="w-4 h-4 text-blue-500 shrink-0" />
+                <Mail className="w-4 h-4 text-brand shrink-0" />
                 <span>procedcontab@gmail.com</span>
               </div>
-              <a href={WHATSAPP_LINK} target="_blank" rel="noopener" className="flex items-center gap-2 text-sm text-slate-400 hover:text-blue-400">
-                <MessageCircle className="w-4 h-4 text-blue-500 shrink-0" />
+              <a
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-slate-400 hover:text-brand"
+              >
+                <MessageCircle className="w-4 h-4 text-brand shrink-0" />
                 <span>(63) 99254-4417 - WhatsApp</span>
               </a>
               <div className="flex items-start gap-2 text-sm text-slate-400">
-                <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-brand shrink-0 mt-0.5" />
                 <span>Rua Porto Nacional Qd 28 Lt 15, Orla Oeste - Luzimangues / Porto Nacional CEP. 77.502-000</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-800 mt-12 pt-8 text-center text-sm text-slate-500">
+        <div className="border-t border-white/10 mt-12 pt-8 text-center text-sm text-slate-500">
           © {new Date().getFullYear()} Proced Contabilidade. Todos os direitos reservados.
         </div>
       </div>

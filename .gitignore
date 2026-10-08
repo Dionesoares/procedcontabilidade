@@ -35,3 +35,4 @@ migration-data/
 
 .vercel
 .env*
+supabase/.temp/

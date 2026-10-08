@@ -28,10 +28,15 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --font-heading: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --radius: 0.9rem;
+    --navy: 214 64% 16%;
+    --navy-deep: 216 58% 12%;
+    --brand: 221 83% 40%;
+    --brand-soft: 214 95% 93%;
+    --surface: 210 40% 98%;
+    --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -93,5 +98,36 @@
   html, #root {
     max-width: 100%;
     overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .bg-surface {
+    background-color: hsl(var(--surface));
+  }
+  .bg-navy {
+    background-color: hsl(var(--navy));
+  }
+  .bg-navy-deep {
+    background-color: hsl(var(--navy-deep));
+  }
+  .text-navy {
+    color: hsl(var(--navy));
+  }
+  .text-brand {
+    color: hsl(var(--brand));
+  }
+  .bg-brand {
+    background-color: hsl(var(--brand));
+  }
+  .bg-brand-soft {
+    background-color: hsl(var(--brand-soft));
+  }
+  .border-brand {
+    border-color: hsl(var(--brand));
+  }
+  .dot-grid {
+    background-image: radial-gradient(hsl(var(--navy) / 0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
   }
 }

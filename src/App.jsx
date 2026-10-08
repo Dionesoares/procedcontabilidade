@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
+import AuthCallbackRedirect from './components/AuthCallbackRedirect';
 
 import PublicLayout from '@/components/public/PublicLayout';
 import Home from '@/pages/Home';
@@ -67,6 +68,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
+          <AuthCallbackRedirect />
           <AuthenticatedApp />
         </Router>
         <Toaster />
