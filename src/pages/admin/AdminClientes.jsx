@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Client, Contract } from "@/api/entities";
 import { invokeFunction } from "@/api/functions";
 import { Plus, Search, Edit, Trash2, KeyRound, FileSignature } from "lucide-react";
@@ -12,6 +12,17 @@ import { Badge } from "@/components/ui/badge";
 import ContratoDialog from "@/components/clientes/ContratoDialog";
 
 const emptyForm = { name: "", email: "", phone: "", cpf_cnpj: "", company_name: "", company_type: "", address: "", notes: "", status: "Ativo" };
+
+function sortByRazaoSocial(list) {
+  return [...list].sort((a, b) => {
+    const ca = String(a?.company_name ?? "").trim();
+    const cb = String(b?.company_name ?? "").trim();
+    if (!ca && !cb) return 0;
+    if (!ca) return 1;
+    if (!cb) return -1;
+    return ca.localeCompare(cb, "pt-BR", { sensitivity: "base", numeric: true });
+  });
+}
 
 export default function AdminClientes() {
   const { toast } = useToast();
@@ -27,7 +38,14 @@ export default function AdminClientes() {
 
   const load = async () => {
     setLoading(true);
-    try { setClients(await Client.filter({}, "-created_date", 10000)); } catch {} finally { setLoading(false); }
+    try {
+      const rows = await Client.list();
+      setClients(sortByRazaoSocial(Array.isArray(rows) ? rows : []));
+    } catch {
+      setClients([]);
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => { load(); }, []);
 
@@ -104,13 +122,18 @@ export default function AdminClientes() {
     toast({ title: "WhatsApp aberto!", description: "Envie o link para o cliente criar a senha de acesso." });
   };
 
-  const filtered = clients
-    .filter(c =>
-      c.name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.email?.toLowerCase().includes(search.toLowerCase()) ||
-      c.cpf_cnpj?.includes(search)
-    )
-    .sort((a, b) => (a.name || "").localeCompare(b.name || "", "pt-BR", { sensitivity: "base" }));
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const matched = !q
+      ? clients
+      : clients.filter((c) =>
+          (c.company_name || "").toLowerCase().includes(q) ||
+          (c.name || "").toLowerCase().includes(q) ||
+          (c.email || "").toLowerCase().includes(q) ||
+          (c.cpf_cnpj || "").includes(search.trim())
+        );
+    return sortByRazaoSocial(matched);
+  }, [clients, search]);
 
   const statusColor = { Ativo: "bg-blue-100 text-blue-700", Inativo: "bg-slate-100 text-slate-600", Pendente: "bg-amber-100 text-amber-700" };
 

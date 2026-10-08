@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DescricaoSelect from "@/components/financeiro/DescricaoSelect";
+import { sortClientsByName } from "@/lib/clientLookup";
 
 const emptyForm = { client_id: "", description: "", amount: "", due_date: "", status: "Pendente" };
 
 export default function NovaCobrancaDialog({ open, onOpenChange, clients, onSave }) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const sortedClients = useMemo(() => sortClientsByName(clients || []), [clients]);
 
   useEffect(() => {
     if (open) setForm(emptyForm);
@@ -44,7 +46,7 @@ export default function NovaCobrancaDialog({ open, onOpenChange, clients, onSave
             <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v })}>
               <SelectTrigger><SelectValue placeholder="Selecione a empresa" /></SelectTrigger>
               <SelectContent>
-                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}
+                {sortedClients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

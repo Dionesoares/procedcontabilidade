@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Repeat, CircleDollarSign } from "lucide-react";
 import TipoSelect from "@/components/financeiro/TipoSelect";
 import DescricaoSelect from "@/components/financeiro/DescricaoSelect";
 import { formatMoney } from "@/lib/financeiroAmounts";
+import { sortClientsByName } from "@/lib/clientLookup";
 
 const emptyForm = {
   description: "",
@@ -34,6 +35,7 @@ const NO_CLIENT = "__none__";
 export default function FinanceiroFormDialog({ open, onOpenChange, record, onSave, clients = [] }) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const sortedClients = useMemo(() => sortClientsByName(clients), [clients]);
 
   useEffect(() => {
     if (open) {
@@ -120,7 +122,7 @@ export default function FinanceiroFormDialog({ open, onOpenChange, record, onSav
               <SelectTrigger><SelectValue placeholder="Nenhum (lançamento geral)" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={NO_CLIENT}>Nenhum (lançamento geral)</SelectItem>
-                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}
+                {sortedClients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

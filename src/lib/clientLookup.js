@@ -7,13 +7,17 @@ export function getClientDisplayName(client) {
   return client?.company_name || client?.name || "";
 }
 
-// Sorts clients alphabetically (pt-BR, accent/case-insensitive) by the same
-// label shown in the UI, so every "Empresa"/"Cliente" dropdown and list
-// stays consistent.
+// Sorts clients alphabetically (pt-BR, accent/case-insensitive) by razão
+// social (`company_name`) only. Clients without company_name go to the end.
 export function sortClientsByName(clients) {
-  return [...clients].sort((a, b) =>
-    getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR", { sensitivity: "base" })
-  );
+  return [...(clients || [])].sort((a, b) => {
+    const aCompany = (a?.company_name || "").trim();
+    const bCompany = (b?.company_name || "").trim();
+    if (!aCompany && !bCompany) return 0;
+    if (!aCompany) return 1;
+    if (!bCompany) return -1;
+    return aCompany.localeCompare(bCompany, "pt-BR", { sensitivity: "base", numeric: true });
+  });
 }
 
 // Finds the Client record linked to the logged-in user.

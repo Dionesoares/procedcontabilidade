@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SlidersHorizontal } from "lucide-react";
+import { sortClientsByName } from "@/lib/clientLookup";
 
 export default function FinanceiroFiltros({ filters, onChange, clients }) {
   const set = (key, value) => onChange({ ...filters, [key]: value });
+  const sortedClients = useMemo(() => sortClientsByName(clients || []), [clients]);
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-4">
@@ -43,7 +45,7 @@ export default function FinanceiroFiltros({ filters, onChange, clients }) {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="Todos">Todos</SelectItem>
-              {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}
+              {sortedClients.map((c) => <SelectItem key={c.id} value={c.id}>{c.company_name || c.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

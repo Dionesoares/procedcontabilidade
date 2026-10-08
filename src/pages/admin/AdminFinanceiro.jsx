@@ -61,7 +61,7 @@ export default function AdminFinanceiro() {
   };
   useEffect(() => {
     load();
-    Client.list().then((c) => setClients(sortClientsByName(c))).catch(() => {});
+    Client.list("company_name").then((c) => setClients(sortClientsByName(c))).catch(() => {});
   }, []);
 
   const filteredRecords = useMemo(() => {
